@@ -57,7 +57,10 @@
     .sym-zero { color: #888; }
     .die.on { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,0.4); transform: scale(1.06); }
     .die.item-on { border-color: var(--pink); box-shadow: 0 0 12px rgba(255,143,171,0.4); }
-    .die.rolling { animation: shake 0.45s ease-in-out; }
+    .die.rolling {
+      animation: shake 0.45s ease-in-out;
+      transition: none;
+    }
 
     @keyframes shake {
       0%, 100% { transform: rotate(0deg) translateY(0); }
@@ -296,7 +299,10 @@
           let cls = hi === i ? "on" : "";
           if (itemHi === i) cls += " item-on";
           if (S.board[i] !== undefined) paintDie(face, S.board[i], cls.trim());
-          else face.textContent = "?";
+          else {
+            face.className = "die" + (cls ? " " + cls : "");
+            face.textContent = "?";
+          }
           const nm = document.createElement("span");
           nm.className = "die-name";
           nm.textContent = t.name;
@@ -527,9 +533,14 @@
       $("btn-roll").disabled = true;
       $("log").textContent = "굴리는 중…";
 
-      $("row").querySelectorAll(".die").forEach((d) => d.classList.add("rolling"));
+      const rolling = $("row").querySelectorAll(".die");
+      rolling.forEach((d) => {
+        d.classList.remove("rolling");
+        void d.offsetWidth;
+        d.classList.add("rolling");
+      });
       await sleep(ROLL_MS);
-      $("row").querySelectorAll(".die").forEach((d) => d.classList.remove("rolling"));
+      rolling.forEach((d) => d.classList.remove("rolling"));
 
       const faces = S.selected.map((u) => rollFace(getDie(u).typeId));
       S.board = faces;
