@@ -57,10 +57,14 @@
     .sym-zero { color: #888; }
     .die.on { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,0.4); transform: scale(1.06); }
     .die.item-on { border-color: var(--pink); box-shadow: 0 0 12px rgba(255,143,171,0.4); }
-    .die.shake { animation: shake 0.35s ease-in-out; }
+    .die.rolling { animation: shake 0.45s ease-in-out; }
 
     @keyframes shake {
-      0%,100%{transform:rotate(0)} 30%{transform:rotate(-7deg)} 70%{transform:rotate(5deg)}
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      20% { transform: rotate(-12deg) translateY(-4px); }
+      40% { transform: rotate(10deg) translateY(2px); }
+      60% { transform: rotate(-8deg) translateY(-2px); }
+      80% { transform: rotate(6deg) translateY(1px); }
     }
 
     .die-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
@@ -164,6 +168,7 @@
     const MAX_SEL = 5;
     const MAX_CHAIN = 30;
     const REROLL_COST = 2;
+    const ROLL_MS = 450;
     const STEP_BASE = 580;
     const STEP_MIN = 120;
     const CHAIN_CAP = 7500;
@@ -522,9 +527,9 @@
       $("btn-roll").disabled = true;
       $("log").textContent = "굴리는 중…";
 
-      $("row").querySelectorAll(".die").forEach((d) => d.classList.add("shake"));
-      await sleep(400);
-      $("row").querySelectorAll(".die").forEach((d) => d.classList.remove("shake"));
+      $("row").querySelectorAll(".die").forEach((d) => d.classList.add("rolling"));
+      await sleep(ROLL_MS);
+      $("row").querySelectorAll(".die").forEach((d) => d.classList.remove("rolling"));
 
       const faces = S.selected.map((u) => rollFace(getDie(u).typeId));
       S.board = faces;
