@@ -3,65 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>주사위 고양이</title>
+  <title>캣타워 다이스</title>
   <style>
     :root {
-      --bg: #1e1a24; --surface: #2a2433; --surface2: #352e42;
+      --bg: #1a1620; --surface: #262030; --surface2: #322a3d;
       --accent: #f4a261; --green: #6ecf8f; --pink: #ff8fab;
       --gold: #ffd166; --text: #f5eef8; --muted: #a89bb5;
-      --die: #faf6ff; --pip: #3d3550;
+      --die: #faf6ff; --tower: #3d3550;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh; padding: 1rem 1.2rem 2rem;
       font-family: "Segoe UI", system-ui, sans-serif;
       background: var(--bg);
-      background-image: radial-gradient(ellipse 70% 45% at 50% -8%, rgba(244,162,97,0.13), transparent);
+      background-image: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(244,162,97,0.12), transparent);
       color: var(--text);
     }
-    .app { max-width: 54rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
-    header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem; align-items: center; }
-    h1 { font-size: 1.25rem; }
-    .status { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.88rem; color: var(--muted); }
+    .app { max-width: 58rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.9rem; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: center; }
+    h1 { font-size: 1.2rem; }
+    .status { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.85rem; color: var(--muted); }
     .status strong { color: var(--gold); }
-    .panel { background: var(--surface); border-radius: 0.8rem; padding: 1rem; box-shadow: 0 6px 24px rgba(0,0,0,0.22); }
-    .panel h2 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.6rem; }
-    .hint { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+    .panel { background: var(--surface); border-radius: 0.75rem; padding: 0.9rem 1rem; box-shadow: 0 6px 22px rgba(0,0,0,0.2); }
+    .panel h2 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.5rem; }
+    .hint { font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
 
-    .item-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .item-chip {
-      background: var(--surface2); border-radius: 0.45rem; padding: 0.4rem 0.6rem;
-      font-size: 0.75rem; border: 2px solid transparent;
+    .main-grid { display: grid; grid-template-columns: 1fr minmax(12rem, 16rem) 1fr; gap: 0.75rem; align-items: start; }
+    @media (max-width: 720px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .roster { display: flex; flex-direction: column; gap: 0.45rem; min-height: 8rem; }
+    .roster.empty-hint { justify-content: center; color: var(--muted); font-size: 0.78rem; text-align: center; }
+
+    .cat-card {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.55rem;
+      background: var(--surface2); border-radius: 0.5rem; border: 2px solid transparent;
+      cursor: pointer; transition: 0.12s;
     }
-    .item-chip.active { border-color: var(--pink); box-shadow: 0 0 8px rgba(255,143,171,0.35); }
-    .item-chip .n { font-weight: 700; color: var(--pink); display: block; font-size: 0.78rem; }
-    .item-chip .d { color: var(--muted); font-size: 0.68rem; }
+    .cat-card:hover { border-color: rgba(244,162,97,0.35); }
+    .cat-card.picked { border-color: var(--accent); box-shadow: 0 0 10px rgba(244,162,97,0.25); }
+    .cat-card .ico { font-size: 1.4rem; line-height: 1; }
+    .cat-card .info { flex: 1; min-width: 0; }
+    .cat-card .n { font-weight: 700; font-size: 0.82rem; }
+    .cat-card .d { font-size: 0.65rem; color: var(--muted); line-height: 1.3; }
 
-    .dice-pool, .roll-row { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-    .die-btn { border: 2px solid transparent; background: none; cursor: pointer; padding: 0.2rem; border-radius: 0.55rem; }
-    .die-btn.selected { border-color: var(--accent); }
-    .die-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .tower { display: flex; flex-direction: column-reverse; gap: 0.4rem; }
+    .floor {
+      display: grid; grid-template-columns: 2.2rem 1fr auto;
+      align-items: center; gap: 0.5rem; padding: 0.45rem 0.55rem;
+      background: var(--surface2); border-radius: 0.55rem;
+      border: 2px solid var(--tower); min-height: 3.6rem;
+      position: relative; transition: 0.12s;
+    }
+    .floor.drop-target { border-color: var(--accent); background: rgba(244,162,97,0.08); }
+    .floor.active { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,0.25); }
+    .floor .flabel { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-align: center; }
+    .floor .flabel span { display: block; font-size: 0.58rem; color: var(--gold); }
+    .floor .slot {
+      display: flex; align-items: center; justify-content: center; min-height: 2.8rem;
+      border: 2px dashed rgba(168,155,181,0.35); border-radius: 0.45rem;
+      color: var(--muted); font-size: 0.72rem; cursor: pointer;
+    }
+    .floor .slot.has-cat { border-style: solid; border-color: transparent; }
 
     .die {
-      --sz: 3.35rem; width: var(--sz); height: var(--sz);
-      background: var(--die); border-radius: 0.55rem;
-      box-shadow: 0 3px 0 #d8d0e8, 0 5px 12px rgba(0,0,0,0.2);
+      --sz: 2.9rem; width: var(--sz); height: var(--sz);
+      background: var(--die); border-radius: 0.5rem;
+      box-shadow: 0 3px 0 #d8d0e8, 0 4px 10px rgba(0,0,0,0.18);
       display: grid; place-items: center; font-weight: 800;
-      font-size: calc(var(--sz) * 0.36); color: var(--pip);
-      border: 2px solid transparent; transition: 0.12s;
+      font-size: 0.62rem; color: #3d3550; text-align: center; line-height: 1.1;
+      padding: 0.15rem; border: 2px solid transparent;
     }
-    .sym-gold { color: #b8860a; }
-    .sym-chain { color: #4a90c4; }
-    .sym-copy { color: #9b59b6; }
-    .sym-boom { color: #e76f51; }
-    .sym-zero { color: #888; }
-    .die.on { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,0.4); transform: scale(1.06); }
-    .die.item-on { border-color: var(--pink); box-shadow: 0 0 12px rgba(255,143,171,0.4); }
-    .die.rolling {
-      animation: shake 0.45s ease-in-out;
-      transition: none;
-    }
-
+    .die.rolling { animation: shake 0.45s ease-in-out; transition: none; }
     @keyframes shake {
       0%, 100% { transform: rotate(0deg) translateY(0); }
       20% { transform: rotate(-12deg) translateY(-4px); }
@@ -69,603 +81,608 @@
       60% { transform: rotate(-8deg) translateY(-2px); }
       80% { transform: rotate(6deg) translateY(1px); }
     }
+    .die.on { border-color: var(--gold); transform: scale(1.05); }
+    .die.neg { color: #c44; }
 
-    .die-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
-    .die-name { font-size: 0.58rem; color: var(--muted); text-align: center; max-width: 3.6rem; }
-    .roll-slot { position: relative; min-width: 3.6rem; min-height: 4rem; display: flex; align-items: center; justify-content: center; }
-    .roll-slot.empty { border: 2px dashed var(--surface2); border-radius: 0.55rem; color: var(--muted); font-size: 0.65rem; }
+    .mult-tag { font-size: 0.65rem; color: var(--gold); font-weight: 700; white-space: nowrap; }
 
     .log {
-      min-height: 2.6rem; padding: 0.5rem; background: var(--surface2); border-radius: 0.45rem;
-      font-size: 0.85rem; color: var(--muted); text-align: center; line-height: 1.45;
+      min-height: 10rem; max-height: 14rem; overflow-y: auto;
+      padding: 0.5rem; background: var(--surface2); border-radius: 0.45rem;
+      font-size: 0.78rem; color: var(--muted); line-height: 1.5;
     }
     .log .g { color: var(--green); font-weight: 700; }
-    .log .c { color: var(--pink); font-weight: 600; }
-    .log .f { color: var(--gold); font-weight: 700; }
+    .log .f { color: var(--gold); font-weight: 600; }
+    .log .c { color: var(--pink); }
+    .log .bad { color: #e76f51; }
 
-    .actions { display: flex; flex-wrap: wrap; gap: 0.45rem; justify-content: center; margin-top: 0.4rem; }
-    button { font: inherit; font-weight: 600; font-size: 0.88rem; padding: 0.55rem 1rem; border: none; border-radius: 0.45rem; cursor: pointer; }
+    .pop-score {
+      position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
+      color: var(--green); font-weight: 800; font-size: 0.75rem;
+      animation: pop 0.55s ease-out forwards; pointer-events: none;
+    }
+    @keyframes pop { to { opacity: 0; transform: translateY(-70%); } }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
+    button {
+      font: inherit; font-weight: 600; font-size: 0.86rem;
+      padding: 0.5rem 0.95rem; border: none; border-radius: 0.45rem; cursor: pointer;
+    }
     button.go { background: var(--accent); color: #2a1808; }
     button.sub { background: var(--surface2); color: var(--text); }
     button:disabled { opacity: 0.4; cursor: not-allowed; }
-    button.buy { background: var(--green); color: #0f1a12; font-size: 0.74rem; padding: 0.35rem 0.55rem; width: 100%; }
+    button.buy { background: var(--green); color: #0f1a12; font-size: 0.72rem; padding: 0.35rem 0.5rem; width: 100%; }
 
-    .shop-h { font-size: 0.7rem; color: var(--muted); margin: 0.45rem 0 0.3rem; width: 100%; }
-    .shop-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .shop-grid { display: flex; flex-wrap: wrap; gap: 0.45rem; }
     .shop-box {
-      background: var(--surface2); border-radius: 0.5rem; padding: 0.55rem 0.7rem;
-      min-width: 7rem; max-width: 9rem; display: flex; flex-direction: column; gap: 0.25rem;
+      background: var(--surface2); border-radius: 0.45rem; padding: 0.5rem 0.65rem;
+      min-width: 6.5rem; max-width: 8.5rem; display: flex; flex-direction: column; gap: 0.2rem;
     }
-    .shop-box .t { font-weight: 700; font-size: 0.84rem; }
-    .shop-box .p { font-size: 0.72rem; color: var(--muted); line-height: 1.3; }
-    .shop-box .pr { color: var(--gold); font-weight: 600; font-size: 0.78rem; }
-
-    .pop-money {
-      position: absolute; left: 50%; top: 30%; transform: translateX(-50%);
-      color: var(--gold); font-weight: 800; font-size: 0.78rem;
-      animation: pop 0.55s ease-out forwards; pointer-events: none; z-index: 5;
-    }
-    .pop-item {
-      position: absolute; left: 50%; top: 0; transform: translate(-50%, -100%);
-      background: rgba(42,36,51,0.94); border: 2px solid var(--pink); border-radius: 0.4rem;
-      padding: 0.3rem 0.45rem; text-align: center; min-width: 5.2rem;
-      animation: item-rise 0.7s ease-out forwards; pointer-events: none; z-index: 8;
-    }
-    .pop-item .pn { font-size: 0.6rem; font-weight: 700; color: var(--pink); display: block; }
-    .pop-item .pm { font-size: 0.82rem; font-weight: 800; color: var(--green); }
-
-    @keyframes pop { to { opacity: 0; transform: translate(-50%, -1rem); } }
-    @keyframes item-rise {
-      0% { opacity: 0; transform: translate(-50%, -70%) scale(0.9); }
-      20% { opacity: 1; transform: translate(-50%, -105%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -140%) scale(1); }
-    }
+    .shop-box .t { font-weight: 700; font-size: 0.8rem; }
+    .shop-box .p { font-size: 0.68rem; color: var(--muted); line-height: 1.3; }
+    .shop-box .pr { color: var(--gold); font-size: 0.75rem; font-weight: 600; }
 
     .hidden { display: none !important; }
+    .banner { text-align: center; padding: 0.6rem; border-radius: 0.5rem; font-weight: 700; }
+    .banner.win { background: rgba(110,207,143,0.15); color: var(--green); }
+    .banner.lose { background: rgba(231,111,81,0.15); color: #e76f51; }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>🐱 주사위 고양이</h1>
+      <h1>🐱 캣타워 다이스</h1>
       <div class="status">
         <span>라운드 <strong id="round">1</strong></span>
-        <span><strong id="phase">선택</strong></span>
-        <span>💰 <strong id="coins">10</strong></span>
-        <span>선택 <strong id="sel-n">0</strong>/5</span>
+        <span>목표 <strong id="target">25</strong>점</span>
+        <span>이번 점수 <strong id="round-score">0</strong></span>
+        <span>총점 <strong id="total-score">0</strong></span>
+        <span>골드 <strong id="gold">15</strong>G</span>
+        <span id="phase-label">세팅</span>
       </div>
     </header>
 
-    <p class="hint panel" style="padding:0.55rem 0.8rem;margin:0">
-      주사위로 연쇄 → <strong>효과 아이템</strong>이 해당 칸에서 점수 · 상점에서 엔진 확장
+    <p class="hint panel" style="padding:0.65rem 0.9rem">
+      고양이를 골라 층에 배치한 뒤 <strong>한 번에 굴리기</strong>. 재미는 세팅한 엔진이 터지는 걸 보는 것!
     </p>
 
-    <section class="panel">
-      <h2>효과 아이템</h2>
-      <div class="item-list" id="items-owned"></div>
-    </section>
+    <div class="main-grid">
+      <section class="panel">
+        <h2>보유 고양이</h2>
+        <div class="roster" id="roster"></div>
+      </section>
 
-    <section class="panel" id="play">
-      <h2>보유 주사위 (클릭 · 최대 5)</h2>
-      <div class="dice-pool" id="pool"></div>
-      <h2 style="margin-top:0.75rem">굴릴 슬롯 <span style="font-weight:400;color:var(--muted)">(선택 순 = 왼→오)</span></h2>
-      <div class="roll-row" id="row"></div>
-      <div class="log" id="log">기본냥 3개 — 주사위를 고르세요.</div>
-      <div class="actions">
-        <button type="button" class="go" id="btn-roll">굴리기!</button>
-        <button type="button" class="sub hidden" id="btn-shop">상점 →</button>
-      </div>
-    </section>
+      <section class="panel">
+        <h2>캣타워</h2>
+        <div class="tower" id="tower"></div>
+        <div class="actions" style="margin-top:0.6rem">
+          <button type="button" class="go" id="btn-roll">한 번에 굴리기!</button>
+          <button type="button" class="sub hidden" id="btn-shop">상점</button>
+          <button type="button" class="sub hidden" id="btn-next">다음 라운드</button>
+        </div>
+      </section>
 
-    <section class="panel hidden" id="shop">
+      <section class="panel">
+        <h2>연출 로그</h2>
+        <div class="log" id="log">고양이를 층에 배치하세요.</div>
+      </section>
+    </div>
+
+    <section class="panel hidden" id="shop-panel">
       <h2>상점</h2>
-      <div id="shop-body"></div>
-      <div class="actions" style="margin-top:0.6rem">
-        <button type="button" class="sub" id="btn-reroll">진열 새로고침 (2원)</button>
-        <button type="button" class="go" id="btn-next">다음 라운드</button>
+      <div class="shop-grid" id="shop"></div>
+      <div class="actions" style="margin-top:0.5rem">
+        <button type="button" class="sub" id="btn-reroll">진열 새로고침 (3G)</button>
       </div>
     </section>
+
+    <div class="banner hidden" id="banner"></div>
   </div>
 
   <script>
-    const MAX_SEL = 5;
-    const MAX_CHAIN = 30;
-    const REROLL_COST = 2;
+    const FLOOR_MULT = [0, 1, 1.2, 1.5, 2, 3];
+    const ROUND_TARGETS = [25, 45, 70, 100, 140, 200];
     const ROLL_MS = 450;
-    const STEP_BASE = 580;
-    const STEP_MIN = 120;
-    const CHAIN_CAP = 7500;
+    const STEP_MS = 520;
 
-    const DICE = {
-      basic: { name: "기본냥", faces: [1,2,3,4,5,6], cost: 0, tip: "숫자만" },
-      golden: { name: "황금냥", faces: [1,2,3,4,"$",6], cost: 7, tip: "$ +1원" },
-      chain: { name: "연쇄냥", faces: [1,2,3,"↺",5,6], cost: 9, tip: "↺ 재굴림" },
-      copy: { name: "복사냥", faces: [1,2,"★","★",5,6], cost: 11, tip: "★ 재발동" },
-      gamble: { name: "도박냥", faces: [0,0,0,8,8,8], cost: 13, tip: "0 / 8" },
+    const FACE_SCORE = {
+      잠듦: 3, 하품: 2, 뒤척임: 1,
+      점프: 5, 착지: 2,
+      흥분: 6, 뒹굴: 3, 긁기: 4, 하악: 2,
+      식빵: 4,
+      성공: 8, 대성공: 15, 실패: -4, 폭망: -12,
     };
 
-    const ITEMS = {
-      can: { name: "통조림 창고", desc: "$ → +1", cost: 4 },
-      scratch: { name: "스크래쳐", desc: "재굴림 → +2", cost: 4 },
-      tower: { name: "캣타워", desc: "같은숫자×2+ → +3", cost: 5 },
-      fish: { name: "생선 바구니", desc: "짝수 → +1", cost: 3 },
-      overload: { name: "과부하 쿠션", desc: "8 → +5", cost: 6 },
+    const CATS = {
+      sleep: {
+        id: "sleep", name: "잠냥", ico: "😴",
+        faces: ["잠듦","잠듦","잠듦","하품","하품","뒤척임"],
+        pref: [1, 2], desc: "아래층 안정 · 같은 면 연속 배수",
+      },
+      jump: {
+        id: "jump", name: "점프냥", ico: "🐇",
+        faces: ["점프","점프","점프","점프","착지","착지"],
+        pref: [4, 5], desc: "위층 선호 · 점프 시 윗층 효과 복사",
+      },
+      nip: {
+        id: "nip", name: "캣닢냥", ico: "🌿",
+        faces: ["흥분","뒹굴","긁기","긁기","하악","뒹굴"],
+        pref: [2, 3], desc: "RNG 교란 · 하악+긁기 난동",
+      },
+      loaf: {
+        id: "loaf", name: "식빵냥", ico: "🍞",
+        faces: ["식빵","식빵","식빵","식빵","식빵","식빵"],
+        pref: [1, 5], desc: "안정 · 타워 전체 +2 · 식빵+잠듦 평온",
+      },
+      greedy: {
+        id: "greedy", name: "욕심냥", ico: "💎",
+        faces: ["성공","대성공","실패","폭망","폭망","폭망"],
+        pref: [5, 5], desc: "5층 고배수 · 대박/폭망",
+      },
     };
 
-    const SHOP_DICE = ["golden", "chain", "copy", "gamble"];
-    const SHOP_ITEMS = Object.keys(ITEMS);
+    const SHOP_CATS = ["jump", "greedy"];
+    const SHOP_REROLL = 3;
 
     let uid = 1;
-
     const S = {
+      phase: "setup",
       round: 1,
-      phase: "select",
-      coins: 10,
-      dice: [],
-      items: [],
-      selected: [],
-      board: [],
+      totalScore: 0,
+      roundScore: 0,
+      gold: 15,
+      cats: [],
+      tower: [null, null, null, null, null],
+      floorBonus: [0, 0, 0, 0, 0],
+      pickUid: null,
       busy: false,
-      shopPool: [],
+      shopOffers: [],
+      lastResults: [],
     };
 
     const $ = (id) => document.getElementById(id);
-
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    const lbl = (f) => String(f);
-    const dieType = (id) => DICE[id];
-    const getDie = (u) => S.dice.find((d) => d.uid === u);
-    const countItem = (id) => S.items.filter((x) => x === id).length;
-    const hasItem = (id) => countItem(id) > 0;
+    const catType = (id) => CATS[id];
+    const getCat = (u) => S.cats.find((c) => c.uid === u);
+    const targetForRound = () => ROUND_TARGETS[Math.min(S.round - 1, ROUND_TARGETS.length - 1)];
 
-    function stepMs(n, i) {
-      return Math.max(STEP_MIN, Math.min(STEP_BASE, CHAIN_CAP / Math.max(1, n)) * Math.pow(0.93, i));
-    }
-
-    function faceCls(f) {
-      if (f === "$") return "sym-gold";
-      if (f === "↺") return "sym-chain";
-      if (f === "★") return "sym-copy";
-      if (f === 8) return "sym-boom";
-      if (f === 0) return "sym-zero";
-      return "";
-    }
-
-    function paintDie(el, f, cls = "") {
-      el.textContent = lbl(f);
-      el.className = "die " + faceCls(f) + (cls ? " " + cls : "");
-    }
-
-    function addDie(typeId) {
-      S.dice.push({ uid: uid++, typeId });
+    function addCat(typeId) {
+      S.cats.push({ uid: uid++, typeId });
     }
 
     function rollFace(typeId) {
-      const faces = dieType(typeId).faces;
-      return faces[Math.floor(Math.random() * faces.length)];
+      const f = catType(typeId).faces;
+      return f[Math.floor(Math.random() * f.length)];
     }
 
-    function renderItems() {
-      const el = $("items-owned");
-      if (!S.items.length) {
-        el.innerHTML = '<span class="hint">없음 — 상점에서 구매</span>';
+    function prefBonus(floor, typeId) {
+      const p = catType(typeId).pref;
+      if (floor >= p[0] && floor <= p[1]) return 3;
+      return 0;
+    }
+
+    function floorMult(floor) {
+      return FLOOR_MULT[floor] + (S.floorBonus[floor - 1] || 0);
+    }
+
+    function initGame() {
+      S.cats = [];
+      S.tower = [null, null, null, null, null];
+      S.floorBonus = [0, 0, 0, 0, 0];
+      S.round = 1;
+      S.totalScore = 0;
+      S.roundScore = 0;
+      S.gold = 15;
+      S.phase = "setup";
+      addCat("sleep");
+      addCat("loaf");
+      addCat("nip");
+      renderAll();
+      logMsg("런 시작! 잠냥·식빵냥·캣닢냥을 층에 배치하세요.");
+    }
+
+    function logMsg(html) {
+      $("log").innerHTML = html;
+    }
+
+    function appendLog(html) {
+      $("log").innerHTML += `<br>${html}`;
+      $("log").scrollTop = $("log").scrollHeight;
+    }
+
+    function renderStatus() {
+      $("round").textContent = S.round;
+      $("target").textContent = targetForRound();
+      $("round-score").textContent = S.roundScore;
+      $("total-score").textContent = S.totalScore;
+      $("gold").textContent = S.gold;
+      const labels = { setup: "세팅", rolling: "굴림", shop: "상점", over: "종료" };
+      $("phase-label").textContent = labels[S.phase] || S.phase;
+    }
+
+    function renderRoster() {
+      const el = $("roster");
+      const bench = S.cats.filter((c) => !S.tower.includes(c.uid));
+      if (!bench.length) {
+        el.className = "roster empty-hint";
+        el.textContent = "모두 타워에 배치됨";
         return;
       }
-      const counts = {};
-      for (const id of S.items) counts[id] = (counts[id] || 0) + 1;
-      el.innerHTML = Object.entries(counts)
-        .map(([id, n]) => {
-          const it = ITEMS[id];
-          const stack = n > 1 ? ` ×${n}` : "";
-          return `<div class="item-chip" data-id="${id}"><span class="n">${it.name}${stack}</span><span class="d">${it.desc}</span></div>`;
-        })
-        .join("");
-    }
-
-    function flashItem(id) {
-      document.querySelectorAll(`.item-chip[data-id="${id}"]`).forEach((el) => {
-        el.classList.add("active");
-        setTimeout(() => el.classList.remove("active"), 500);
-      });
-    }
-
-    function renderPool() {
-      $("pool").innerHTML = "";
-      for (const d of S.dice) {
-        const t = dieType(d.typeId);
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "die-btn" + (S.selected.includes(d.uid) ? " selected" : "");
-        b.disabled = S.busy || S.phase !== "select";
-        b.innerHTML = `<div class="die-wrap"><div class="die" style="font-size:0.75rem">${t.name.slice(0,2)}</div><span class="die-name">${t.name}</span></div>`;
-        b.onclick = () => toggleSel(d.uid);
-        $("pool").appendChild(b);
+      el.className = "roster";
+      el.innerHTML = "";
+      for (const c of bench) {
+        const t = catType(c.typeId);
+        const card = document.createElement("div");
+        card.className = "cat-card" + (S.pickUid === c.uid ? " picked" : "");
+        card.innerHTML = `<span class="ico">${t.ico}</span><div class="info"><div class="n">${t.name}</div><div class="d">${t.desc}</div></div>`;
+        card.onclick = () => {
+          if (S.phase !== "setup" || S.busy) return;
+          S.pickUid = S.pickUid === c.uid ? null : c.uid;
+          renderRoster();
+          renderTower();
+        };
+        el.appendChild(card);
       }
     }
 
-    function renderRow(hi = -1, itemHi = -1) {
-      $("row").innerHTML = "";
-      for (let i = 0; i < MAX_SEL; i++) {
+    function renderTower(highlightFloor = -1) {
+      $("tower").innerHTML = "";
+      for (let f = 5; f >= 1; f--) {
+        const row = document.createElement("div");
+        row.className = "floor";
+        row.dataset.floor = f;
+        if (highlightFloor === f) row.classList.add("active");
+        if (S.pickUid && S.phase === "setup") row.classList.add("drop-target");
+
+        const uidOn = S.tower[f - 1];
+        const mult = floorMult(f).toFixed(1);
+
+        const label = document.createElement("div");
+        label.className = "flabel";
+        label.innerHTML = `${f}층<span>×${mult}</span>`;
+
         const slot = document.createElement("div");
-        slot.className = "roll-slot";
-        slot.dataset.slot = i;
-        if (i < S.selected.length) {
-          const d = getDie(S.selected[i]);
-          const t = dieType(d.typeId);
-          const wrap = document.createElement("div");
-          wrap.className = "die-wrap";
-          const face = document.createElement("div");
-          face.id = `f-${i}`;
-          let cls = hi === i ? "on" : "";
-          if (itemHi === i) cls += " item-on";
-          if (S.board[i] !== undefined) paintDie(face, S.board[i], cls.trim());
-          else {
-            face.className = "die" + (cls ? " " + cls : "");
-            face.textContent = "?";
+        slot.className = "slot" + (uidOn ? " has-cat" : "");
+
+        if (uidOn) {
+          const c = getCat(uidOn);
+          const t = catType(c.typeId);
+          const die = document.createElement("div");
+          die.className = "die";
+          die.dataset.uid = uidOn;
+          const res = S.lastResults.find((r) => r.floor === f);
+          if (res) {
+            die.textContent = res.face;
+            die.classList.add("on");
+            if (res.total < 0) die.classList.add("neg");
+          } else {
+            die.textContent = t.ico;
           }
-          const nm = document.createElement("span");
-          nm.className = "die-name";
-          nm.textContent = t.name;
-          wrap.append(face, nm);
-          slot.appendChild(wrap);
+          slot.appendChild(die);
         } else {
-          slot.classList.add("empty");
-          slot.textContent = "—";
-        }
-        $("row").appendChild(slot);
-      }
-    }
-
-    function toggleSel(u) {
-      if (S.phase !== "select" || S.busy) return;
-      const i = S.selected.indexOf(u);
-      if (i >= 0) S.selected.splice(i, 1);
-      else if (S.selected.length < MAX_SEL) S.selected.push(u);
-      $("sel-n").textContent = S.selected.length;
-      renderPool();
-      renderRow();
-      $("btn-roll").disabled = !S.selected.length;
-    }
-
-    function popMoney(slot, text) {
-      const s = $("row").querySelector(`[data-slot="${slot}"]`);
-      if (!s) return;
-      const p = document.createElement("span");
-      p.className = "pop-money";
-      p.textContent = text;
-      s.appendChild(p);
-      setTimeout(() => p.remove(), 550);
-    }
-
-    function popItem(slot, name, money) {
-      const s = $("row").querySelector(`[data-slot="${slot}"]`);
-      if (!s) return;
-      const p = document.createElement("div");
-      p.className = "pop-item";
-      p.innerHTML = `<span class="pn">${name}</span><span class="pm">+${money}원</span>`;
-      s.appendChild(p);
-      setTimeout(() => p.remove(), 720);
-    }
-
-    function addCoins(n) {
-      S.coins += n;
-      $("coins").textContent = S.coins;
-    }
-
-    /** @typedef {{ slot: number, dieUid: number, face: number|string }} Ev */
-
-    function mkCtx() {
-      return {
-        dollarSlots: [],
-        rerollSlots: [],
-        eightSlots: [],
-        diceMoney: 0,
-        resolved: [],
-      };
-    }
-
-    /** @param {Ev} ev @param {Ev[]} q @param ctx */
-    function resolve(ev, q, ctx) {
-      const f = ev.face;
-      let money = 0;
-      let log = "";
-      ctx.resolved.push(f);
-
-      if (f === "$") {
-        money = 1;
-        ctx.dollarSlots.push({ slot: ev.slot });
-        log = "$ +1원";
-      } else if (f === "↺") {
-        const others = S.selected.map((_, i) => i).filter((i) => i !== ev.slot);
-        if (others.length) {
-          const pick = others[Math.floor(Math.random() * others.length)];
-          const dieUid = S.selected[pick];
-          const face = rollFace(getDie(dieUid).typeId);
-          S.board[pick] = face;
-          ctx.rerollSlots.push({ slot: pick });
-          q.push({ slot: pick, dieUid, face });
-          log = `↺ → ${pick + 1}번 [${lbl(face)}]`;
-        } else log = "↺ (대상 없음)";
-      } else if (f === "★") {
-        const pool = [];
-        S.board.forEach((face, idx) => {
-          if (idx !== ev.slot && face !== "★") pool.push({ slot: ev.slot, dieUid: ev.dieUid, face });
-        });
-        ctx.resolved.forEach((face) => {
-          if (face !== "★") pool.push({ slot: ev.slot, dieUid: ev.dieUid, face });
-        });
-        if (pool.length) {
-          const pick = pool[Math.floor(Math.random() * pool.length)];
-          q.unshift({ ...pick });
-          log = `★ → [${lbl(pick.face)}] 재발동`;
-        } else log = "★ (없음)";
-      } else if (f === 8) {
-        ctx.eightSlots.push({ slot: ev.slot });
-        log = "8 (폭발 판정)";
-      } else if (f === 0) {
-        log = "0 꽝";
-      } else if (typeof f === "number") {
-        log = `${f} (아이템 채점)`;
-      } else {
-        log = lbl(f);
-      }
-
-      ctx.diceMoney += money;
-      return { money, log };
-    }
-
-    async function runChain(faces) {
-      S.board = [...faces];
-      renderRow();
-      const q = S.selected.map((uid, slot) => ({ slot, dieUid: uid, face: faces[slot] }));
-      const ctx = mkCtx();
-      let step = 0;
-
-      await sleep(320);
-
-      while (q.length && step < MAX_CHAIN) {
-        const ev = q.shift();
-        step++;
-        renderRow(ev.slot);
-        const el = $(`f-${ev.slot}`);
-        if (el) paintDie(el, ev.face, "on");
-
-        const die = getDie(ev.dieUid);
-        const { money, log } = resolve(ev, q, ctx);
-        if (money) {
-          addCoins(money);
-          popMoney(ev.slot, `+${money}`);
+          slot.textContent = S.pickUid ? "배치" : "비움";
         }
 
-        $("log").innerHTML = `<span class="f">[${lbl(ev.face)}]</span> ${dieType(die.typeId).name}<br>${log} <span style="color:var(--muted)">(${step})</span>`;
-        await sleep(stepMs(step + q.length, step));
-      }
+        slot.onclick = () => onFloorClick(f);
 
-      renderRow();
-      return ctx;
+        const tag = document.createElement("div");
+        tag.className = "mult-tag";
+        tag.id = `mult-${f}`;
+        const res = S.lastResults.find((r) => r.floor === f);
+        if (res) tag.textContent = (res.total >= 0 ? "+" : "") + res.total;
+
+        row.append(label, slot, tag);
+        $("tower").appendChild(row);
+      }
     }
 
-    /** @typedef {{ id: string, name: string, slot: number, money: number }} ItemEv */
+    function onFloorClick(floor) {
+      if (S.busy) return;
+      const idx = floor - 1;
+      if (S.phase === "setup") {
+        if (S.pickUid) {
+          if (S.tower[idx]) {
+            const old = S.tower[idx];
+            S.tower[idx] = S.pickUid;
+            S.pickUid = old;
+          } else {
+            S.tower[idx] = S.pickUid;
+            S.pickUid = null;
+          }
+        } else if (S.tower[idx]) {
+          S.pickUid = S.tower[idx];
+          S.tower[idx] = null;
+        }
+        renderRoster();
+        renderTower();
+        return;
+      }
+    }
 
-    function buildItemEvents(ctx) {
-      /** @type {ItemEv[]} */
-      const out = [];
-      const nCan = countItem("can");
-      const nScratch = countItem("scratch");
-      const nFish = countItem("fish");
-      const nTower = countItem("tower");
-      const nOverload = countItem("overload");
+    function placedCount() {
+      return S.tower.filter(Boolean).length;
+    }
 
-      if (nCan) {
-        for (const { slot } of ctx.dollarSlots) {
-          for (let i = 0; i < nCan; i++) {
-            out.push({ id: "can", name: ITEMS.can.name, slot, money: 1 });
+    function scoreFace(face, floor, typeId, ctx) {
+      let base = FACE_SCORE[face] ?? 0;
+      const notes = [];
+      let mult = floorMult(floor);
+
+      const pb = prefBonus(floor, typeId);
+      if (pb) {
+        base += pb;
+        notes.push(`선호층 +${pb}`);
+      }
+
+      if (typeId === "loaf" && ctx.loafOnTower) {
+        base += 2;
+        notes.push("식빵 버프 +2");
+      }
+
+      if (typeId === "greedy" && floor === 5) {
+        if (base > 0) {
+          base *= 2;
+          notes.push("5층 대박 ×2");
+        } else if (base < 0) {
+          base *= 2;
+          notes.push("5층 폭망 ×2");
+        }
+      }
+
+      if (typeId === "sleep" && (face === "잠듦" || face === "하품") && floor <= 2) {
+        base += 1;
+        notes.push("아래층 안정 +1");
+      }
+
+      let total = Math.round(base * mult);
+      return { base, mult, total, notes };
+    }
+
+    function buildResults(rolls) {
+      const ctx = { loafOnTower: S.tower.some((u) => u && getCat(u).typeId === "loaf") };
+      const results = [];
+
+      for (const { floor, uid, face } of rolls) {
+        const c = getCat(uid);
+        let r = scoreFace(face, floor, c.typeId, ctx);
+
+        if (c.typeId === "jump" && face === "점프" && floor < 5) {
+          const above = results.find((x) => x.floor === floor + 1);
+          if (above) {
+            const bonus = Math.round(above.total * 0.5);
+            r.total += bonus;
+            r.notes.push(`점프 복사 +${bonus}`);
           }
         }
+
+        results.push({ floor, uid, typeId: c.typeId, name: catType(c.typeId).name, face, ...r });
       }
-      if (nScratch) {
-        for (const { slot } of ctx.rerollSlots) {
-          for (let i = 0; i < nScratch; i++) {
-            out.push({ id: "scratch", name: ITEMS.scratch.name, slot, money: 2 });
-          }
+
+      for (let f = 1; f < 5; f++) {
+        const low = results.find((r) => r.floor === f);
+        const high = results.find((r) => r.floor === f + 1);
+        if (low && high && low.face === high.face) {
+          const bonus = Math.round((low.total + high.total) * 0.15);
+          low.total += bonus;
+          high.total += bonus;
+          low.notes.push(`세로 ${low.face} +${bonus}`);
+          high.notes.push(`세로 ${high.face} +${bonus}`);
         }
       }
-      if (nFish) {
-        S.board.forEach((f, slot) => {
-          if (typeof f === "number" && f > 0 && f % 2 === 0) {
-            for (let i = 0; i < nFish; i++) {
-              out.push({ id: "fish", name: ITEMS.fish.name, slot, money: 1 });
-            }
-          }
-        });
-      }
-      if (nTower) {
-        const groups = {};
-        S.board.forEach((f, slot) => {
-          if (typeof f !== "number" || f <= 0) return;
-          (groups[f] ||= []).push(slot);
-        });
-        for (const slots of Object.values(groups)) {
-          if (slots.length >= 2) {
-            for (let i = 0; i < nTower; i++) {
-              out.push({ id: "tower", name: ITEMS.tower.name, slot: slots[0], money: 3 });
-            }
-            break;
-          }
-        }
-      }
-      if (nOverload) {
-        for (const { slot } of ctx.eightSlots) {
-          for (let i = 0; i < nOverload; i++) {
-            out.push({ id: "overload", name: ITEMS.overload.name, slot, money: 5 });
+
+      const combos = [
+        { a: "식빵", b: "잠듦", name: "평온", bonus: 10 },
+        { a: "하악", b: "긁기", name: "난동", bonus: 14 },
+        { a: "식빵", b: "하품", name: "낮잠", bonus: 6 },
+      ];
+      for (let f = 1; f < 5; f++) {
+        const low = results.find((r) => r.floor === f);
+        const high = results.find((r) => r.floor === f + 1);
+        if (!low || !high) continue;
+        for (const co of combos) {
+          const match =
+            (low.face === co.a && high.face === co.b) ||
+            (low.face === co.b && high.face === co.a);
+          if (match) {
+            low.total += co.bonus;
+            high.total += co.bonus;
+            low.notes.push(`${co.name} +${co.bonus}`);
+            high.notes.push(`${co.name} +${co.bonus}`);
           }
         }
       }
 
-      return out;
-    }
-
-    async function runItems(ctx) {
-      const events = buildItemEvents(ctx);
-      if (!events.length) return 0;
-
-      $("log").innerHTML += `<br><span class="c">— 효과 아이템 —</span>`;
-      await sleep(300);
-
-      let sum = 0;
-      for (let i = 0; i < events.length; i++) {
-        const e = events[i];
-        sum += e.money;
-        addCoins(e.money);
-        flashItem(e.id);
-        renderRow(-1, e.slot);
-        popItem(e.slot, e.name, e.money);
-        $("log").innerHTML = `<span class="c">${e.name}</span> · ${e.slot + 1}번 주사위<br><span class="g">+${e.money}원</span> (${i + 1}/${events.length})`;
-        await sleep(stepMs(events.length, i));
-      }
-      renderRow();
-      return sum;
+      return results;
     }
 
     async function doRoll() {
-      if (S.busy || !S.selected.length) return;
-      S.busy = true;
-      $("btn-roll").disabled = true;
-      $("log").textContent = "굴리는 중…";
+      if (S.busy || S.phase !== "setup") return;
+      if (!placedCount()) {
+        logMsg("최소 1마리는 층에 배치하세요.");
+        return;
+      }
 
-      const rolling = $("row").querySelectorAll(".die");
-      rolling.forEach((d) => {
+      S.busy = true;
+      S.lastResults = [];
+      S.roundScore = 0;
+      $("btn-roll").disabled = true;
+      S.phase = "rolling";
+      renderStatus();
+      logMsg("굴리는 중…");
+
+      const floors = [];
+      for (let f = 1; f <= 5; f++) {
+        const u = S.tower[f - 1];
+        if (u) floors.push({ floor: f, uid: u });
+      }
+
+      const diceEls = $("tower").querySelectorAll(".die");
+      diceEls.forEach((d) => {
         d.classList.remove("rolling");
         void d.offsetWidth;
         d.classList.add("rolling");
+        d.textContent = "?";
       });
       await sleep(ROLL_MS);
-      rolling.forEach((d) => d.classList.remove("rolling"));
+      diceEls.forEach((d) => d.classList.remove("rolling"));
 
-      const faces = S.selected.map((u) => rollFace(getDie(u).typeId));
-      S.board = faces;
-      renderRow();
-      faces.forEach((f, i) => {
-        const el = $(`f-${i}`);
-        if (el) paintDie(el, f);
-      });
+      const rolls = floors.map(({ floor, uid }) => ({
+        floor,
+        uid,
+        face: rollFace(getCat(uid).typeId),
+      }));
 
-      await sleep(260);
-      const ctx = await runChain(faces);
-      const itemMoney = await runItems(ctx);
-      const total = ctx.diceMoney + itemMoney;
+      let results = buildResults(rolls);
 
-      $("log").innerHTML += `<br><span class="g">이번 굴림 +${total}원</span> (주사위 ${ctx.diceMoney} + 아이템 ${itemMoney})`;
+      if (S.tower.some((u) => u && getCat(u).typeId === "nip")) {
+        const others = rolls.filter(() => true);
+        if (others.length > 1) {
+          const pick = others[Math.floor(Math.random() * others.length)];
+          pick.face = rollFace(getCat(pick.uid).typeId);
+          appendLog(`<span class="c">캣닢냥</span>이 ${pick.floor}층을 다시 흔듦 → <span class="f">${pick.face}</span>`);
+          results = buildResults(rolls);
+        }
+      }
 
-      S.busy = false;
-      S.phase = "done";
-      $("phase").textContent = "완료";
+      S.lastResults = results;
+      renderTower();
+
+      let sum = 0;
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        renderTower(r.floor);
+        renderTower(r.floor);
+
+        const noteStr = r.notes.length ? ` <span style="color:var(--muted)">(${r.notes.join(", ")})</span>` : "";
+        appendLog(
+          `<span class="f">${r.floor}층 ${r.name}</span> [${r.face}] → <span class="g">${r.total >= 0 ? "+" : ""}${r.total}</span>${noteStr}`
+        );
+        sum += r.total;
+        await sleep(STEP_MS);
+      }
+
+      S.roundScore = sum;
+      S.totalScore += sum;
+      S.gold += Math.max(0, Math.floor(sum / 4));
+
+      const tgt = targetForRound();
+      appendLog(`<br>이번 라운드 <span class="g">${sum}</span>점 (목표 ${tgt}) · 골드 +${Math.max(0, Math.floor(sum / 4))}`);
+
+      renderStatus();
+      renderTower();
+
+      if (sum < tgt) {
+        S.phase = "over";
+        $("banner").className = "banner lose";
+        $("banner").textContent = `런 종료 — 목표 ${tgt}점 미달 (${sum}점)`;
+        $("banner").classList.remove("hidden");
+        $("btn-roll").disabled = true;
+        S.busy = false;
+        return;
+      }
+
+      S.phase = "shop";
       $("btn-shop").classList.remove("hidden");
-      renderPool();
+      $("btn-next").classList.remove("hidden");
+      pickShop();
+      logMsg(`목표 달성! 상점으로 이동하세요. (${sum}/${tgt})`);
+      S.busy = false;
     }
 
-    function pickShopPool() {
-      const pool = [];
-      for (const id of SHOP_DICE) pool.push({ kind: "dice", id, ...dieType(id), cost: dieType(id).cost });
-      for (const id of SHOP_ITEMS) {
-        if (Math.random() < 0.55) pool.push({ kind: "item", id, ...ITEMS[id], cost: ITEMS[id].cost });
+    function pickShop() {
+      S.shopOffers = [];
+      const avail = SHOP_CATS.filter((id) => !S.cats.some((c) => c.typeId === id));
+      if (avail.length) {
+        const id = avail[Math.floor(Math.random() * avail.length)];
+        S.shopOffers.push({ kind: "cat", id, cost: id === "greedy" ? 15 : 12 });
       }
-      S.shopPool = [];
-      const n = 5 + Math.floor(Math.random() * 2);
-      for (let i = 0; i < n && pool.length; i++) {
-        const j = Math.floor(Math.random() * pool.length);
-        S.shopPool.push(pool.splice(j, 1)[0]);
-      }
+      const f = 1 + Math.floor(Math.random() * 5);
+      S.shopOffers.push({ kind: "floor", floor: f, cost: 8 });
+      renderShop();
     }
 
     function renderShop() {
-      $("shop-body").innerHTML = "";
-      if (!S.shopPool.length) pickShopPool();
-
-      const h = document.createElement("p");
-      h.className = "shop-h";
-      h.textContent = "진열";
-      $("shop-body").appendChild(h);
-
-      const grid = document.createElement("div");
-      grid.className = "shop-grid";
-
-      for (const o of S.shopPool) {
+      $("shop-panel").classList.remove("hidden");
+      $("shop").innerHTML = "";
+      for (const o of S.shopOffers) {
         const box = document.createElement("div");
         box.className = "shop-box";
-        const faces = o.faces ? o.faces.map(lbl).join(" ") : "";
-        const can = S.coins >= o.cost;
-        box.innerHTML = `
-          <div class="t">${o.name}</div>
-          <div class="p">${o.desc || o.tip || ""}</div>
-          ${faces ? `<div class="p">${faces}</div>` : ""}
-          <div class="pr">${o.cost}원</div>
-          <button type="button" class="buy" ${can ? "" : "disabled"}>구매</button>
-        `;
-        if (can) {
-          box.querySelector(".buy").onclick = () => {
-            if (S.coins < o.cost) return;
-            S.coins -= o.cost;
-            $("coins").textContent = S.coins;
-            if (o.kind === "dice") addDie(o.id);
-            else S.items.push(o.id);
-            renderItems();
-            renderPool();
-            renderShop();
-          };
+        if (o.kind === "cat") {
+          const t = catType(o.id);
+          box.innerHTML = `<div class="t">${t.ico} ${t.name}</div><div class="p">${t.desc}</div><div class="pr">${o.cost}G</div>`;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "buy";
+          btn.textContent = "구매";
+          btn.disabled = S.gold < o.cost;
+          btn.onclick = () => buyOffer(o);
+          box.appendChild(btn);
+        } else {
+          box.innerHTML = `<div class="t">${o.floor}층 강화</div><div class="p">배수 +0.2</div><div class="pr">${o.cost}G</div>`;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "buy";
+          btn.textContent = "구매";
+          btn.disabled = S.gold < o.cost;
+          btn.onclick = () => buyOffer(o);
+          box.appendChild(btn);
         }
-        grid.appendChild(box);
+        $("shop").appendChild(box);
       }
-      $("shop-body").appendChild(grid);
     }
 
-    function openShop() {
-      S.phase = "shop";
-      $("phase").textContent = "상점";
-      $("play").classList.add("hidden");
-      $("shop").classList.remove("hidden");
-      pickShopPool();
+    function buyOffer(o) {
+      if (S.gold < o.cost) return;
+      S.gold -= o.cost;
+      if (o.kind === "cat") addCat(o.id);
+      else S.floorBonus[o.floor - 1] += 0.2;
+      S.shopOffers = S.shopOffers.filter((x) => x !== o);
       renderShop();
+      renderRoster();
+      renderStatus();
     }
 
     function nextRound() {
       S.round++;
-      S.phase = "select";
-      S.selected = [];
-      S.board = [];
-      $("round").textContent = S.round;
-      $("phase").textContent = "선택";
-      $("sel-n").textContent = "0";
+      S.roundScore = 0;
+      S.lastResults = [];
+      S.phase = "setup";
+      S.pickUid = null;
+      $("shop-panel").classList.add("hidden");
       $("btn-shop").classList.add("hidden");
-      $("shop").classList.add("hidden");
-      $("play").classList.remove("hidden");
-      $("log").textContent = "주사위를 고르세요.";
-      $("btn-roll").disabled = true;
-      renderPool();
-      renderRow();
+      $("btn-next").classList.add("hidden");
+      $("btn-roll").disabled = false;
+      if (S.round > ROUND_TARGETS.length) {
+        S.phase = "over";
+        $("banner").className = "banner win";
+        $("banner").textContent = `런 클리어! 총점 ${S.totalScore}`;
+        $("banner").classList.remove("hidden");
+        return;
+      }
+      renderAll();
+      logMsg(`라운드 ${S.round} — 목표 ${targetForRound()}점. 다시 세팅하세요.`);
     }
 
-    function init() {
-      addDie("basic");
-      addDie("basic");
-      addDie("basic");
-      renderItems();
-      renderPool();
-      renderRow();
+    function renderAll() {
+      renderStatus();
+      renderRoster();
+      renderTower();
     }
 
     $("btn-roll").onclick = doRoll;
-    $("btn-shop").onclick = openShop;
+    $("btn-shop").onclick = () => {
+      $("shop-panel").classList.remove("hidden");
+      if (!S.shopOffers.length) pickShop();
+    };
     $("btn-next").onclick = nextRound;
     $("btn-reroll").onclick = () => {
-      if (S.coins < REROLL_COST) return;
-      S.coins -= REROLL_COST;
-      $("coins").textContent = S.coins;
-      pickShopPool();
-      renderShop();
+      if (S.gold < SHOP_REROLL) return;
+      S.gold -= SHOP_REROLL;
+      pickShop();
+      renderStatus();
     };
 
-    init();
+    initGame();
   </script>
 </body>
 </html>
