@@ -70,9 +70,10 @@
       background: var(--die); border-radius: 0.5rem;
       box-shadow: 0 3px 0 #d8d0e8, 0 4px 10px rgba(0,0,0,0.18);
       display: grid; place-items: center; font-weight: 800;
-      font-size: 0.62rem; color: #3d3550; text-align: center; line-height: 1.1;
-      padding: 0.15rem; border: 2px solid transparent;
+      color: #3d3550; border: 2px solid transparent;
     }
+    .die .pip { font-size: 1.55rem; line-height: 1; }
+    .die .ico-sm { font-size: 1.1rem; line-height: 1; }
     .die.rolling { animation: shake 0.45s ease-in-out; transition: none; }
     @keyframes shake {
       0%, 100% { transform: rotate(0deg) translateY(0); }
@@ -143,7 +144,7 @@
     </header>
 
     <p class="hint panel" style="padding:0.65rem 0.9rem">
-      고양이를 골라 층에 배치한 뒤 <strong>한 번에 굴리기</strong>. 재미는 세팅한 엔진이 터지는 걸 보는 것!
+      고양이마다 <strong>1~6 주사위</strong> 눈이 다릅니다. 층에 배치 → <strong>한 번에 굴리기</strong> → 나온 <strong>숫자</strong>로 점수·시너지가 터집니다.
     </p>
 
     <div class="main-grid">
@@ -185,39 +186,32 @@
     const ROLL_MS = 450;
     const STEP_MS = 520;
 
-    const FACE_SCORE = {
-      잠듦: 3, 하품: 2, 뒤척임: 1,
-      점프: 5, 착지: 2,
-      흥분: 6, 뒹굴: 3, 긁기: 4, 하악: 2,
-      식빵: 4,
-      성공: 8, 대성공: 15, 실패: -4, 폭망: -12,
-    };
-
+  /** 고양이마다 나올 1~6 눈 가중치 (주사위 = 숫자) */
     const CATS = {
       sleep: {
         id: "sleep", name: "잠냥", ico: "😴",
-        faces: ["잠듦","잠듦","잠듦","하품","하품","뒤척임"],
-        pref: [1, 2], desc: "아래층 안정 · 같은 면 연속 배수",
+        faces: [1, 2, 2, 3, 3, 3],
+        desc: "낮은 눈 많음 · 1~2층에서 4+ 나오면 +1",
       },
       jump: {
         id: "jump", name: "점프냥", ico: "🐇",
-        faces: ["점프","점프","점프","점프","착지","착지"],
-        pref: [4, 5], desc: "위층 선호 · 점프 시 윗층 효과 복사",
+        faces: [2, 2, 5, 5, 5, 5],
+        desc: "5 많음 · 5 나오면 바로 윗층 점수 일부 복사",
       },
       nip: {
         id: "nip", name: "캣닢냥", ico: "🌿",
-        faces: ["흥분","뒹굴","긁기","긁기","하악","뒹굴"],
-        pref: [2, 3], desc: "RNG 교란 · 하악+긁기 난동",
+        faces: [1, 2, 3, 4, 5, 6],
+        desc: "모든 눈 균등 · 굴린 뒤 한 층 재굴림",
       },
       loaf: {
         id: "loaf", name: "식빵냥", ico: "🍞",
-        faces: ["식빵","식빵","식빵","식빵","식빵","식빵"],
-        pref: [1, 5], desc: "안정 · 타워 전체 +2 · 식빵+잠듦 평온",
+        faces: [4, 4, 4, 4, 4, 4],
+        desc: "항상 4 · 타워에 있으면 다른 고양이 눈 +1",
       },
       greedy: {
         id: "greedy", name: "욕심냥", ico: "💎",
-        faces: ["성공","대성공","실패","폭망","폭망","폭망"],
-        pref: [5, 5], desc: "5층 고배수 · 대박/폭망",
+        faces: [1, 1, 2, 2, 6, 6],
+        desc: "1·2 꽝 / 6 대박 · 5층에서 극단값 2배",
       },
     };
 
@@ -250,15 +244,14 @@
       S.cats.push({ uid: uid++, typeId });
     }
 
-    function rollFace(typeId) {
+    function rollN(typeId) {
       const f = catType(typeId).faces;
       return f[Math.floor(Math.random() * f.length)];
     }
 
-    function prefBonus(floor, typeId) {
-      const p = catType(typeId).pref;
-      if (floor >= p[0] && floor <= p[1]) return 3;
-      return 0;
+    function paintDieNum(el, n, extraCls = "") {
+      el.className = "die" + (extraCls ? " " + extraCls : "");
+      el.innerHTML = `<span class="pip">${n}</span>`;
     }
 
     function floorMult(floor) {
@@ -314,7 +307,8 @@
         const t = catType(c.typeId);
         const card = document.createElement("div");
         card.className = "cat-card" + (S.pickUid === c.uid ? " picked" : "");
-        card.innerHTML = `<span class="ico">${t.ico}</span><div class="info"><div class="n">${t.name}</div><div class="d">${t.desc}</div></div>`;
+        const faces = t.faces.join(" ");
+        card.innerHTML = `<span class="ico">${t.ico}</span><div class="info"><div class="n">${t.name}</div><div class="d">${t.desc}</div><div class="d">🎲 ${faces}</div></div>`;
         card.onclick = () => {
           if (S.phase !== "setup" || S.busy) return;
           S.pickUid = S.pickUid === c.uid ? null : c.uid;
@@ -352,11 +346,10 @@
           die.dataset.uid = uidOn;
           const res = S.lastResults.find((r) => r.floor === f);
           if (res) {
-            die.textContent = res.face;
-            die.classList.add("on");
-            if (res.total < 0) die.classList.add("neg");
+            paintDieNum(die, res.n, "on" + (res.total < 0 ? " neg" : ""));
           } else {
-            die.textContent = t.ico;
+            die.className = "die";
+            die.innerHTML = `<span class="ico-sm">${t.ico}</span>`;
           }
           slot.appendChild(die);
         } else {
@@ -403,92 +396,87 @@
       return S.tower.filter(Boolean).length;
     }
 
-    function scoreFace(face, floor, typeId, ctx) {
-      let base = FACE_SCORE[face] ?? 0;
+    function scoreRoll(n, floor, typeId, ctx) {
+      let base = n;
       const notes = [];
-      let mult = floorMult(floor);
+      const mult = floorMult(floor);
 
-      const pb = prefBonus(floor, typeId);
-      if (pb) {
-        base += pb;
-        notes.push(`선호층 +${pb}`);
+      if (ctx.loafOnTower && typeId !== "loaf") {
+        base += 1;
+        notes.push("식빵냥 +1");
       }
 
-      if (typeId === "loaf" && ctx.loafOnTower) {
-        base += 2;
-        notes.push("식빵 버프 +2");
+      if (typeId === "sleep" && floor <= 2 && n >= 4) {
+        base += 1;
+        notes.push("아래층 고눈 +1");
       }
 
-      if (typeId === "greedy" && floor === 5) {
-        if (base > 0) {
+      if (typeId === "greedy") {
+        if (n === 6) {
+          base = 10;
+          notes.push("대박");
+        } else if (n <= 2) {
+          base = -3;
+          notes.push("꽝");
+        }
+        if (floor === 5 && (n === 6 || n <= 2)) {
           base *= 2;
-          notes.push("5층 대박 ×2");
-        } else if (base < 0) {
-          base *= 2;
-          notes.push("5층 폭망 ×2");
+          notes.push("5층 ×2");
         }
       }
 
-      if (typeId === "sleep" && (face === "잠듦" || face === "하품") && floor <= 2) {
-        base += 1;
-        notes.push("아래층 안정 +1");
-      }
-
-      let total = Math.round(base * mult);
-      return { base, mult, total, notes };
+      const total = Math.round(base * mult);
+      return { base, mult, total, notes, n };
     }
 
     function buildResults(rolls) {
       const ctx = { loafOnTower: S.tower.some((u) => u && getCat(u).typeId === "loaf") };
       const results = [];
 
-      for (const { floor, uid, face } of rolls) {
+      for (const { floor, uid, n } of rolls) {
         const c = getCat(uid);
-        let r = scoreFace(face, floor, c.typeId, ctx);
+        let r = scoreRoll(n, floor, c.typeId, ctx);
 
-        if (c.typeId === "jump" && face === "점프" && floor < 5) {
+        if (c.typeId === "jump" && n >= 5 && floor < 5) {
           const above = results.find((x) => x.floor === floor + 1);
           if (above) {
             const bonus = Math.round(above.total * 0.5);
             r.total += bonus;
-            r.notes.push(`점프 복사 +${bonus}`);
+            r.notes.push(`점프(5+) +${bonus}`);
           }
         }
 
-        results.push({ floor, uid, typeId: c.typeId, name: catType(c.typeId).name, face, ...r });
+        results.push({ floor, uid, typeId: c.typeId, name: catType(c.typeId).name, n, ...r });
       }
 
-      for (let f = 1; f < 5; f++) {
-        const low = results.find((r) => r.floor === f);
-        const high = results.find((r) => r.floor === f + 1);
-        if (low && high && low.face === high.face) {
-          const bonus = Math.round((low.total + high.total) * 0.15);
-          low.total += bonus;
-          high.total += bonus;
-          low.notes.push(`세로 ${low.face} +${bonus}`);
-          high.notes.push(`세로 ${high.face} +${bonus}`);
-        }
-      }
-
-      const combos = [
-        { a: "식빵", b: "잠듦", name: "평온", bonus: 10 },
-        { a: "하악", b: "긁기", name: "난동", bonus: 14 },
-        { a: "식빵", b: "하품", name: "낮잠", bonus: 6 },
-      ];
       for (let f = 1; f < 5; f++) {
         const low = results.find((r) => r.floor === f);
         const high = results.find((r) => r.floor === f + 1);
         if (!low || !high) continue;
-        for (const co of combos) {
-          const match =
-            (low.face === co.a && high.face === co.b) ||
-            (low.face === co.b && high.face === co.a);
-          if (match) {
-            low.total += co.bonus;
-            high.total += co.bonus;
-            low.notes.push(`${co.name} +${co.bonus}`);
-            high.notes.push(`${co.name} +${co.bonus}`);
-          }
+
+        if (low.n === high.n) {
+          const bonus = Math.round((low.total + high.total) * 0.2);
+          low.total += bonus;
+          high.total += bonus;
+          low.notes.push(`더블 ${low.n} +${bonus}`);
+          high.notes.push(`더블 ${high.n} +${bonus}`);
+        }
+
+        const sum = low.n + high.n;
+        if (sum >= 10) {
+          const bonus = 8;
+          low.total += bonus;
+          high.total += bonus;
+          low.notes.push(`합${sum} +${bonus}`);
+          high.notes.push(`합${sum} +${bonus}`);
+        }
+
+        if (Math.abs(low.n - high.n) === 1) {
+          const bonus = 5;
+          low.total += bonus;
+          high.total += bonus;
+          low.notes.push(`연번 +${bonus}`);
+          high.notes.push(`연번 +${bonus}`);
         }
       }
 
@@ -521,7 +509,8 @@
         d.classList.remove("rolling");
         void d.offsetWidth;
         d.classList.add("rolling");
-        d.textContent = "?";
+        d.className = "die rolling";
+        d.innerHTML = `<span class="pip">?</span>`;
       });
       await sleep(ROLL_MS);
       diceEls.forEach((d) => d.classList.remove("rolling"));
@@ -529,17 +518,16 @@
       const rolls = floors.map(({ floor, uid }) => ({
         floor,
         uid,
-        face: rollFace(getCat(uid).typeId),
+        n: rollN(getCat(uid).typeId),
       }));
 
       let results = buildResults(rolls);
 
       if (S.tower.some((u) => u && getCat(u).typeId === "nip")) {
-        const others = rolls.filter(() => true);
-        if (others.length > 1) {
-          const pick = others[Math.floor(Math.random() * others.length)];
-          pick.face = rollFace(getCat(pick.uid).typeId);
-          appendLog(`<span class="c">캣닢냥</span>이 ${pick.floor}층을 다시 흔듦 → <span class="f">${pick.face}</span>`);
+        if (rolls.length > 1) {
+          const pick = rolls[Math.floor(Math.random() * rolls.length)];
+          pick.n = rollN(getCat(pick.uid).typeId);
+          appendLog(`<span class="c">캣닢냥</span> · ${pick.floor}층 재굴림 → <span class="f">🎲 ${pick.n}</span>`);
           results = buildResults(rolls);
         }
       }
@@ -551,11 +539,10 @@
       for (let i = 0; i < results.length; i++) {
         const r = results[i];
         renderTower(r.floor);
-        renderTower(r.floor);
 
         const noteStr = r.notes.length ? ` <span style="color:var(--muted)">(${r.notes.join(", ")})</span>` : "";
         appendLog(
-          `<span class="f">${r.floor}층 ${r.name}</span> [${r.face}] → <span class="g">${r.total >= 0 ? "+" : ""}${r.total}</span>${noteStr}`
+          `<span class="f">${r.floor}층 ${r.name}</span> 🎲 <strong>${r.n}</strong> → <span class="g">${r.total >= 0 ? "+" : ""}${r.total}점</span>${noteStr}`
         );
         sum += r.total;
         await sleep(STEP_MS);
