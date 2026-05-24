@@ -10,7 +10,7 @@
       --accent: #7eb8ff; --green: #6ecf8f; --gold: #ffd166;
       --pink: #ff8fab; --text: #f0ecf5; --muted: #9a8fad;
       --die: #faf6ff; --hand-bg: rgba(126,184,255,0.06);
-      --rolled-bg: rgba(255,209,102,0.06);
+      --field-bg: rgba(255,209,102,0.06);
       --lock: #ffd166;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,7 +53,7 @@
       border: 2px dashed rgba(154,143,173,0.25);
     }
     .zone.hand { background: var(--hand-bg); border-color: rgba(126,184,255,0.25); }
-    .zone.rolled { background: var(--rolled-bg); border-color: rgba(255,209,102,0.25); }
+    .zone.field { background: var(--field-bg); border-color: rgba(255,209,102,0.25); }
     .zone-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); margin-bottom: 0.5rem; }
     .zone-label em { font-style: normal; font-weight: 400; opacity: 0.85; }
     .dice-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; min-height: 3.2rem; }
@@ -147,7 +147,7 @@
     <header>
       <div>
         <h1>액션 주사위 엔진</h1>
-        <p class="sub">v0.1 프로토 — 5액션 · 핸드/굴림 · 족보 아이템</p>
+        <p class="sub">v0.1 프로토 — 5액션 · 핸드/필드 · 족보 아이템</p>
       </div>
       <div class="stats" id="stats"></div>
     </header>
@@ -171,9 +171,9 @@
     </div>
 
     <div class="panel">
-      <div class="zone rolled">
-        <div class="zone-label">굴림 <em>— 눈 확정 · 잠금·리롤·점수</em></div>
-        <div class="dice-row" id="rolledZone"></div>
+      <div class="zone field">
+        <div class="zone-label">필드 <em>— 던진 주사위 · 잠금·리롤·점수 · 턴 종료 시 리셋</em></div>
+        <div class="dice-row" id="fieldZone"></div>
       </div>
     </div>
 
@@ -215,7 +215,7 @@
     ];
 
     const TURN_GOALS = [
-      { id: "roll3", label: "굴림 3개 이상", bonus: 6, check: (ctx) => ctx.values.length >= 3 },
+      { id: "roll3", label: "필드 3개 이상", bonus: 6, check: (ctx) => ctx.values.length >= 3 },
       { id: "has6", label: "6이 1개 이상", bonus: 4, check: (ctx) => ctx.values.includes(6) },
       { id: "even2", label: "짝수 2개 이상", bonus: 5, check: (ctx) => ctx.values.filter(v => v % 2 === 0).length >= 2 },
       { id: "sum18", label: "합계 18 이상", bonus: 8, check: (ctx) => ctx.rawSum >= 18 },
@@ -233,7 +233,7 @@
       turnsLeft: TURNS_PER_STAGE,
       actionsLeft: ACTIONS_PER_TURN,
       hand: [],
-      rolled: [],
+      field: [],
       items: [],
       stageRule: null,
       turnGoal: null,
@@ -242,7 +242,7 @@
     };
 
     function d6() { return 1 + Math.floor(Math.random() * 6); }
-    function totalDice() { return state.hand.length + state.rolled.length; }
+    function totalDice() { return state.hand.length + state.field.length; }
     function mkDie() { return { id: ++dieId }; }
 
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -296,20 +296,20 @@
     }
 
     function computeScore() {
-      const rolled = state.rolled;
-      const values = rolled.map(d => d.value);
-      const rawSum = rolled.reduce((s, d) => s + dieValue(d), 0);
+      const fieldDice = state.field;
+      const values = fieldDice.map(d => d.value);
+      const rawSum = fieldDice.reduce((s, d) => s + dieValue(d), 0);
 
       let sum = rawSum;
       let stageExtra = 0;
       const rule = state.stageRule;
 
       if (rule.id === "evens") {
-        sum = rolled.reduce((s, d) => s + (d.value % 2 === 0 ? dieValue(d) : 0), 0);
+        sum = fieldDice.reduce((s, d) => s + (d.value % 2 === 0 ? dieValue(d) : 0), 0);
       } else if (rule.id === "high5") {
-        sum = rolled.reduce((s, d) => s + (d.value >= 5 ? dieValue(d) : 0), 0);
+        sum = fieldDice.reduce((s, d) => s + (d.value >= 5 ? dieValue(d) : 0), 0);
       } else if (rule.id === "oddBonus") {
-        stageExtra = rolled.filter(d => d.value % 2 === 1).length * 2;
+        stageExtra = fieldDice.filter(d => d.value % 2 === 1).length * 2;
       } else if (rule.id === "lowSum") {
         if (rawSum <= 15) stageExtra += 6;
       }
@@ -339,7 +339,7 @@
 
     function startStage() {
       state.hand = [];
-      state.rolled = [];
+      state.field = [];
       state.stageScore = 0;
       state.gameOver = false;
       for (let i = 0; i < START_HAND; i++) state.hand.push(mkDie());
@@ -374,6 +374,9 @@
       if (sc.handScore) detail += ` +족보 ${sc.handScore}${sc.handsHit.length ? " (" + sc.handsHit.join(", ") + ")" : ""}`;
       if (sc.goalBonus) detail += ` +목표 ${sc.goalBonus}`;
       addLog(`<span class="line-score">+${sc.total}점</span> (${detail}) → 누적 ${state.stageScore}`);
+
+      state.field = [];
+      addLog(`<span style="color:var(--muted)">필드 리셋</span>`);
 
       state.turnsLeft--;
       state.actionsLeft = 0;
@@ -426,7 +429,7 @@
       Object.assign(state, {
         stage: 1, stageGoal: 100, stageScore: 0,
         turnsLeft: TURNS_PER_STAGE, actionsLeft: ACTIONS_PER_TURN,
-        hand: [], rolled: [], items: [],
+        hand: [], field: [], items: [],
         log: [], gameOver: false,
       });
       addLog(`<span class="line-turn">── 새 런 시작 ──</span>`);
@@ -452,7 +455,7 @@
       const die = state.hand.splice(idx, 1)[0];
       die.value = d6();
       die.locked = false;
-      state.rolled.push(die);
+      state.field.push(die);
       spendAction();
       mode = null;
       selected = null;
@@ -461,7 +464,7 @@
     }
 
     function doReroll(dieId) {
-      const die = state.rolled.find(d => d.id === dieId);
+      const die = state.field.find(d => d.id === dieId);
       if (!die || die.locked) return;
       die.value = d6();
       spendAction();
@@ -472,7 +475,7 @@
     }
 
     function doLock(dieId) {
-      const die = state.rolled.find(d => d.id === dieId);
+      const die = state.field.find(d => d.id === dieId);
       if (!die || die.locked) return;
       die.locked = true;
       spendAction();
@@ -501,8 +504,8 @@
     function onDieClick(zone, id) {
       if (state.gameOver) return;
       if (mode === "roll" && zone === "hand") { doRoll(id); return; }
-      if (mode === "reroll" && zone === "rolled") { doReroll(id); return; }
-      if (mode === "lock" && zone === "rolled") { doLock(id); return; }
+      if (mode === "reroll" && zone === "field") { doReroll(id); return; }
+      if (mode === "lock" && zone === "field") { doLock(id); return; }
       selected = selected?.id === id && selected?.zone === zone ? null : { zone, id };
       render();
     }
@@ -526,7 +529,7 @@
     }
 
     function render() {
-      const est = state.rolled.length && !state.gameOver ? computeScore().total : null;
+      const est = state.field.length && !state.gameOver ? computeScore().total : null;
       document.getElementById("stats").innerHTML = `
         <span>스테이지 <strong>${state.stage}</strong></span>
         <span>누적 <strong>${state.stageScore}</strong> / ${state.stageGoal}</span>
@@ -554,20 +557,20 @@
       }
 
       renderZone("handZone", state.hand, "hand", d => !d.value && d.value !== 0);
-      renderZone("rolledZone", state.rolled, "rolled", () => false);
+      renderZone("fieldZone", state.field, "field", () => false);
 
       const hints = {
         draw: "주사위를 뽑습니다",
-        roll: "핸드 주사위 클릭 → 굴림",
-        reroll: "굴림 주사위 클릭 (잠금 제외)",
-        lock: "굴림 주사위 클릭 → 잠금",
+        roll: "핸드 주사위 클릭 → 필드",
+        reroll: "필드 주사위 클릭 (잠금 제외)",
+        lock: "필드 주사위 클릭 → 잠금",
       };
       document.getElementById("actionHint").textContent = mode ? `· ${hints[mode]}` : "";
 
       const canDraw = state.actionsLeft > 0 && totalDice() < MAX_DICE && !state.gameOver;
       const hasHand = state.hand.length > 0;
-      const hasReroll = state.rolled.some(d => !d.locked);
-      const hasLock = state.rolled.some(d => !d.locked);
+      const hasReroll = state.field.some(d => !d.locked);
+      const hasLock = state.field.some(d => !d.locked);
 
       document.getElementById("actions").innerHTML = `
         <button class="btn" ${canDraw ? "" : "disabled"} onclick="doDraw()">드로우 (−1)</button>
@@ -587,7 +590,7 @@
     function renderZone(elId, dice, zone, isUnrolled) {
       const el = document.getElementById(elId);
       if (!dice.length) {
-        el.innerHTML = `<span class="empty-slot">${zone === "hand" ? "미굴림 없음 — 드로우하세요" : "굴림 없음 — 핸드에서 굴리세요"}</span>`;
+        el.innerHTML = `<span class="empty-slot">${zone === "hand" ? "미굴림 없음 — 드로우하세요" : "필드 비음 — 핸드에서 굴리세요"}</span>`;
         return;
       }
       el.innerHTML = dice.map(d => {
