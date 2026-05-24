@@ -3,673 +3,603 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>캣타워 다이스</title>
+  <title>액션 주사위 엔진 — 프로토 v0.1</title>
   <style>
     :root {
-      --bg: #1a1620; --surface: #262030; --surface2: #322a3d;
-      --accent: #f4a261; --green: #6ecf8f; --pink: #ff8fab;
-      --gold: #ffd166; --text: #f5eef8; --muted: #a89bb5;
-      --die: #faf6ff; --tower: #3d3550;
+      --bg: #14121a; --surface: #1e1b26; --surface2: #2a2535;
+      --accent: #7eb8ff; --green: #6ecf8f; --gold: #ffd166;
+      --pink: #ff8fab; --text: #f0ecf5; --muted: #9a8fad;
+      --die: #faf6ff; --hand-bg: rgba(126,184,255,0.06);
+      --rolled-bg: rgba(255,209,102,0.06);
+      --lock: #ffd166;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh; padding: 1rem 1.2rem 2rem;
       font-family: "Segoe UI", system-ui, sans-serif;
       background: var(--bg);
-      background-image: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(244,162,97,0.12), transparent);
+      background-image: radial-gradient(ellipse 70% 45% at 50% -10%, rgba(126,184,255,0.14), transparent);
       color: var(--text);
     }
-    .app { max-width: 58rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.9rem; }
-    header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: center; }
-    h1 { font-size: 1.2rem; }
-    .status { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.85rem; color: var(--muted); }
-    .status strong { color: var(--gold); }
-    .panel { background: var(--surface); border-radius: 0.75rem; padding: 0.9rem 1rem; box-shadow: 0 6px 22px rgba(0,0,0,0.2); }
-    .panel h2 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.5rem; }
-    .hint { font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+    .app { max-width: 52rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: flex-start; }
+    h1 { font-size: 1.15rem; font-weight: 700; }
+    .sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+    .stats { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; font-size: 0.82rem; color: var(--muted); }
+    .stats strong { color: var(--gold); }
+    .stats .danger strong { color: var(--pink); }
 
-    .main-grid { display: grid; grid-template-columns: 1fr minmax(12rem, 16rem) 1fr; gap: 0.75rem; align-items: start; }
-    @media (max-width: 720px) { .main-grid { grid-template-columns: 1fr; } }
-
-    .roster { display: flex; flex-direction: column; gap: 0.45rem; min-height: 8rem; }
-    .roster.empty-hint { justify-content: center; color: var(--muted); font-size: 0.78rem; text-align: center; }
-
-    .cat-card {
-      display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.55rem;
-      background: var(--surface2); border-radius: 0.5rem; border: 2px solid transparent;
-      cursor: pointer; transition: 0.12s;
+    .panel {
+      background: var(--surface); border-radius: 0.75rem;
+      padding: 0.85rem 1rem; box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.04);
     }
-    .cat-card:hover { border-color: rgba(244,162,97,0.35); }
-    .cat-card.picked { border-color: var(--accent); box-shadow: 0 0 10px rgba(244,162,97,0.25); }
-    .cat-card .ico { font-size: 1.4rem; line-height: 1; }
-    .cat-card .info { flex: 1; min-width: 0; }
-    .cat-card .n { font-weight: 700; font-size: 0.82rem; }
-    .cat-card .d { font-size: 0.65rem; color: var(--muted); line-height: 1.3; }
+    .panel h2 {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); margin-bottom: 0.45rem;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 
-    .tower { display: flex; flex-direction: column-reverse; gap: 0.4rem; }
-    .floor {
-      display: grid; grid-template-columns: 2.2rem 1fr auto;
-      align-items: center; gap: 0.5rem; padding: 0.45rem 0.55rem;
-      background: var(--surface2); border-radius: 0.55rem;
-      border: 2px solid var(--tower); min-height: 3.6rem;
-      position: relative; transition: 0.12s;
+    .banner {
+      padding: 0.55rem 0.75rem; border-radius: 0.5rem;
+      background: var(--surface2); font-size: 0.82rem; line-height: 1.4;
     }
-    .floor.drop-target { border-color: var(--accent); background: rgba(244,162,97,0.08); }
-    .floor.active { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,0.25); }
-    .floor .flabel { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-align: center; }
-    .floor .flabel span { display: block; font-size: 0.58rem; color: var(--gold); }
-    .floor .slot {
-      display: flex; align-items: center; justify-content: center; min-height: 2.8rem;
-      border: 2px dashed rgba(168,155,181,0.35); border-radius: 0.45rem;
-      color: var(--muted); font-size: 0.72rem; cursor: pointer;
+    .banner.stage { border-left: 3px solid var(--pink); }
+    .banner.goal { border-left: 3px solid var(--accent); }
+    .banner span { color: var(--gold); font-weight: 600; }
+
+    .zone {
+      border-radius: 0.65rem; padding: 0.75rem; min-height: 5.5rem;
+      border: 2px dashed rgba(154,143,173,0.25);
     }
-    .floor .slot.has-cat { border-style: solid; border-color: transparent; }
+    .zone.hand { background: var(--hand-bg); border-color: rgba(126,184,255,0.25); }
+    .zone.rolled { background: var(--rolled-bg); border-color: rgba(255,209,102,0.25); }
+    .zone-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); margin-bottom: 0.5rem; }
+    .zone-label em { font-style: normal; font-weight: 400; opacity: 0.85; }
+    .dice-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; min-height: 3.2rem; }
+    .empty-slot { font-size: 0.75rem; color: var(--muted); }
 
     .die {
-      --sz: 2.9rem; width: var(--sz); height: var(--sz);
-      background: var(--die); border-radius: 0.5rem;
-      box-shadow: 0 3px 0 #d8d0e8, 0 4px 10px rgba(0,0,0,0.18);
-      display: grid; place-items: center; font-weight: 800;
-      color: #3d3550; border: 2px solid transparent;
+      --sz: 3rem; width: var(--sz); height: var(--sz);
+      background: var(--die); border-radius: 0.55rem;
+      box-shadow: 0 3px 0 #d4cce4, 0 4px 12px rgba(0,0,0,0.2);
+      display: grid; place-items: center; font-weight: 800; font-size: 1.45rem;
+      color: #2d2640; border: 2px solid transparent; cursor: pointer;
+      transition: 0.12s; user-select: none; position: relative;
     }
-    .die .pip { font-size: 1.55rem; line-height: 1; }
-    .die .ico-sm { font-size: 1.1rem; line-height: 1; }
-    .die.rolling { animation: shake 0.45s ease-in-out; transition: none; }
+    .die:hover { transform: translateY(-2px); }
+    .die.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(126,184,255,0.35); }
+    .die.locked::after {
+      content: "🔒"; position: absolute; top: -0.35rem; right: -0.35rem;
+      font-size: 0.65rem; line-height: 1;
+    }
+    .die.unrolled {
+      background: linear-gradient(145deg, #eee8f8, #ddd4ef);
+      color: var(--muted); font-size: 1rem;
+    }
+    .die.unrolled::before { content: "?"; font-size: 1.2rem; }
+    .die.rolling { animation: shake 0.4s ease-in-out; }
     @keyframes shake {
-      0%, 100% { transform: rotate(0deg) translateY(0); }
-      20% { transform: rotate(-12deg) translateY(-4px); }
-      40% { transform: rotate(10deg) translateY(2px); }
-      60% { transform: rotate(-8deg) translateY(-2px); }
-      80% { transform: rotate(6deg) translateY(1px); }
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg) translateY(-3px); }
+      75% { transform: rotate(10deg) translateY(-3px); }
     }
-    .die.on { border-color: var(--gold); transform: scale(1.05); }
-    .die.neg { color: #c44; }
 
-    .mult-tag { font-size: 0.65rem; color: var(--gold); font-weight: 700; white-space: nowrap; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .btn {
+      padding: 0.5rem 0.75rem; border: none; border-radius: 0.45rem;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      background: var(--surface2); color: var(--text);
+      border: 1px solid rgba(255,255,255,0.06); transition: 0.12s;
+    }
+    .btn:hover:not(:disabled) { background: #353040; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn.active { background: rgba(126,184,255,0.2); border-color: var(--accent); color: var(--accent); }
+    .btn.primary { background: var(--accent); color: #0f1520; border-color: transparent; }
+    .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+    .btn.end { background: rgba(110,207,143,0.15); border-color: var(--green); color: var(--green); }
+
+    .items { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .chip {
+      font-size: 0.72rem; padding: 0.25rem 0.5rem; border-radius: 999px;
+      background: var(--surface2); color: var(--muted);
+    }
+    .chip.owned { background: rgba(255,209,102,0.12); color: var(--gold); border: 1px solid rgba(255,209,102,0.25); }
 
     .log {
-      min-height: 10rem; max-height: 14rem; overflow-y: auto;
-      padding: 0.5rem; background: var(--surface2); border-radius: 0.45rem;
-      font-size: 0.78rem; color: var(--muted); line-height: 1.5;
+      max-height: 9rem; overflow-y: auto; font-size: 0.76rem;
+      line-height: 1.5; color: var(--muted);
     }
-    .log .g { color: var(--green); font-weight: 700; }
-    .log .f { color: var(--gold); font-weight: 600; }
-    .log .c { color: var(--pink); }
-    .log .bad { color: #e76f51; }
+    .log .line-score { color: var(--green); font-weight: 600; }
+    .log .line-turn { color: var(--accent); margin-top: 0.35rem; }
 
-    .pop-score {
-      position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
-      color: var(--green); font-weight: 800; font-size: 0.75rem;
-      animation: pop 0.55s ease-out forwards; pointer-events: none;
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      display: grid; place-items: center; z-index: 100; padding: 1rem;
     }
-    @keyframes pop { to { opacity: 0; transform: translateY(-70%); } }
-
-    .actions { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
-    button {
-      font: inherit; font-weight: 600; font-size: 0.86rem;
-      padding: 0.5rem 0.95rem; border: none; border-radius: 0.45rem; cursor: pointer;
+    .overlay.hidden { display: none; }
+    .modal {
+      background: var(--surface); border-radius: 0.85rem; padding: 1.25rem;
+      max-width: 24rem; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
-    button.go { background: var(--accent); color: #2a1808; }
-    button.sub { background: var(--surface2); color: var(--text); }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    button.buy { background: var(--green); color: #0f1a12; font-size: 0.72rem; padding: 0.35rem 0.5rem; width: 100%; }
-
-    .shop-grid { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-    .shop-box {
-      background: var(--surface2); border-radius: 0.45rem; padding: 0.5rem 0.65rem;
-      min-width: 6.5rem; max-width: 8.5rem; display: flex; flex-direction: column; gap: 0.2rem;
+    .modal h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .modal p { font-size: 0.82rem; color: var(--muted); line-height: 1.45; margin-bottom: 0.75rem; }
+    .pick-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .pick-btn {
+      text-align: left; padding: 0.65rem 0.75rem; border-radius: 0.5rem;
+      background: var(--surface2); border: 2px solid transparent;
+      color: var(--text); cursor: pointer; font-size: 0.82rem;
     }
-    .shop-box .t { font-weight: 700; font-size: 0.8rem; }
-    .shop-box .p { font-size: 0.68rem; color: var(--muted); line-height: 1.3; }
-    .shop-box .pr { color: var(--gold); font-size: 0.75rem; font-weight: 600; }
+    .pick-btn:hover { border-color: var(--accent); }
+    .pick-btn strong { display: block; color: var(--gold); margin-bottom: 0.15rem; }
 
-    .hidden { display: none !important; }
-    .banner { text-align: center; padding: 0.6rem; border-radius: 0.5rem; font-weight: 700; }
-    .banner.win { background: rgba(110,207,143,0.15); color: var(--green); }
-    .banner.lose { background: rgba(231,111,81,0.15); color: #e76f51; }
+    .toast {
+      position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
+      background: var(--surface2); padding: 0.5rem 1rem; border-radius: 999px;
+      font-size: 0.78rem; color: var(--text); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 50; opacity: 0; pointer-events: none; transition: 0.25s;
+    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>🐱 캣타워 다이스</h1>
-      <div class="status">
-        <span>라운드 <strong id="round">1</strong></span>
-        <span>목표 <strong id="target">25</strong>점</span>
-        <span>이번 점수 <strong id="round-score">0</strong></span>
-        <span>총점 <strong id="total-score">0</strong></span>
-        <span>골드 <strong id="gold">15</strong>G</span>
-        <span id="phase-label">세팅</span>
+      <div>
+        <h1>액션 주사위 엔진</h1>
+        <p class="sub">v0.1 프로토 — 5액션 · 핸드/굴림 · 족보 아이템</p>
       </div>
+      <div class="stats" id="stats"></div>
     </header>
 
-    <p class="hint panel" style="padding:0.65rem 0.9rem">
-      고양이마다 <strong>1~6 주사위</strong> 눈이 다릅니다. 층에 배치 → <strong>한 번에 굴리기</strong> → 나온 <strong>숫자</strong>로 점수·시너지가 터집니다.
-    </p>
-
-    <div class="main-grid">
-      <section class="panel">
-        <h2>보유 고양이</h2>
-        <div class="roster" id="roster"></div>
-      </section>
-
-      <section class="panel">
-        <h2>캣타워</h2>
-        <div class="tower" id="tower"></div>
-        <div class="actions" style="margin-top:0.6rem">
-          <button type="button" class="go" id="btn-roll">한 번에 굴리기!</button>
-          <button type="button" class="sub hidden" id="btn-shop">상점</button>
-          <button type="button" class="sub hidden" id="btn-next">다음 라운드</button>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>연출 로그</h2>
-        <div class="log" id="log">고양이를 층에 배치하세요.</div>
-      </section>
+    <div class="banner stage" id="stageRule"></div>
+    <div class="panel">
+      <h2>턴 목표</h2>
+      <div class="banner goal" id="turnGoal"></div>
     </div>
 
-    <section class="panel hidden" id="shop-panel">
-      <h2>상점</h2>
-      <div class="shop-grid" id="shop"></div>
-      <div class="actions" style="margin-top:0.5rem">
-        <button type="button" class="sub" id="btn-reroll">진열 새로고침 (3G)</button>
-      </div>
-    </section>
+    <div class="panel">
+      <h2>아이템</h2>
+      <div class="items" id="items"></div>
+    </div>
 
-    <div class="banner hidden" id="banner"></div>
+    <div class="panel">
+      <div class="zone hand">
+        <div class="zone-label">핸드 <em>— 미굴림 · 드로우 목적지</em></div>
+        <div class="dice-row" id="handZone"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="zone rolled">
+        <div class="zone-label">굴림 <em>— 눈 확정 · 잠금·리롤·점수</em></div>
+        <div class="dice-row" id="rolledZone"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>액션 <span id="actionHint" style="font-weight:400;text-transform:none;letter-spacing:0"></span></h2>
+      <div class="actions" id="actions"></div>
+    </div>
+
+    <div class="panel">
+      <h2>로그</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="modal" id="modal"></div>
   </div>
 
   <script>
-    const FLOOR_MULT = [0, 1, 1.2, 1.5, 2, 3];
-    const ROUND_TARGETS = [25, 45, 70, 100, 140, 200];
-    const ROLL_MS = 450;
-    const STEP_MS = 520;
+    const MAX_DICE = 5;
+    const ACTIONS_PER_TURN = 5;
+    const START_HAND = 2;
+    const TURNS_PER_STAGE = 5;
 
-  /** 고양이마다 나올 1~6 눈 가중치 (주사위 = 숫자) */
-    const CATS = {
-      sleep: {
-        id: "sleep", name: "잠냥", ico: "😴",
-        faces: [1, 2, 2, 3, 3, 3],
-        desc: "낮은 눈 많음 · 1~2층에서 4+ 나오면 +1",
-      },
-      jump: {
-        id: "jump", name: "점프냥", ico: "🐇",
-        faces: [2, 2, 5, 5, 5, 5],
-        desc: "5 많음 · 5 나오면 바로 윗층 점수 일부 복사",
-      },
-      nip: {
-        id: "nip", name: "캣닢냥", ico: "🌿",
-        faces: [1, 2, 3, 4, 5, 6],
-        desc: "모든 눈 균등 · 굴린 뒤 한 층 재굴림",
-      },
-      loaf: {
-        id: "loaf", name: "식빵냥", ico: "🍞",
-        faces: [4, 4, 4, 4, 4, 4],
-        desc: "항상 4 · 타워에 있으면 다른 고양이 눈 +1",
-      },
-      greedy: {
-        id: "greedy", name: "욕심냥", ico: "💎",
-        faces: [1, 1, 2, 2, 6, 6],
-        desc: "1·2 꽝 / 6 대박 · 5층에서 극단값 2배",
-      },
+    const ITEMS = {
+      pair: { id: "pair", name: "짝 맞추기 판", hand: "페어", score: 6 },
+      triple: { id: "triple", name: "세 줄표", hand: "트리플", score: 12 },
+      straight: { id: "straight", name: "계단 조각", hand: "스트레이트", score: 10 },
     };
 
-    const SHOP_CATS = ["jump", "greedy"];
-    const SHOP_REROLL = 3;
+    const STAGE_RULES = [
+      { id: "none", label: "규칙 없음", desc: "스테이지 규칙 없음 — 합계 그대로" },
+      { id: "evens", label: "짝수만", desc: "홀수 눈은 합계에서 0" },
+      { id: "high5", label: "5 이상만", desc: "4 이하 눈은 합계에서 0" },
+      { id: "oddBonus", label: "홀수 보너스", desc: "홀수 눈 1개당 +2 (합계와 별도)" },
+      { id: "lowSum", label: "저합 스테이지", desc: "턴 합계 15 이하일 때 +6" },
+    ];
 
-    let uid = 1;
-    const S = {
-      phase: "setup",
-      round: 1,
-      totalScore: 0,
-      roundScore: 0,
-      gold: 15,
-      cats: [],
-      tower: [null, null, null, null, null],
-      floorBonus: [0, 0, 0, 0, 0],
-      pickUid: null,
-      busy: false,
-      shopOffers: [],
-      lastResults: [],
+    const TURN_GOALS = [
+      { id: "roll3", label: "굴림 3개 이상", bonus: 6, check: (ctx) => ctx.values.length >= 3 },
+      { id: "has6", label: "6이 1개 이상", bonus: 4, check: (ctx) => ctx.values.includes(6) },
+      { id: "even2", label: "짝수 2개 이상", bonus: 5, check: (ctx) => ctx.values.filter(v => v % 2 === 0).length >= 2 },
+      { id: "sum18", label: "합계 18 이상", bonus: 8, check: (ctx) => ctx.rawSum >= 18 },
+      { id: "pair", label: "페어 1개 이상", bonus: 4, needsItem: "pair", check: (ctx) => hasPair(ctx.values) },
+    ];
+
+    let dieId = 0;
+    let mode = null;
+    let selected = null;
+
+    const state = {
+      stage: 1,
+      stageGoal: 100,
+      stageScore: 0,
+      turnsLeft: TURNS_PER_STAGE,
+      actionsLeft: ACTIONS_PER_TURN,
+      hand: [],
+      rolled: [],
+      items: [],
+      stageRule: null,
+      turnGoal: null,
+      log: [],
+      gameOver: false,
     };
 
-    const $ = (id) => document.getElementById(id);
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    const catType = (id) => CATS[id];
-    const getCat = (u) => S.cats.find((c) => c.uid === u);
-    const targetForRound = () => ROUND_TARGETS[Math.min(S.round - 1, ROUND_TARGETS.length - 1)];
+    function d6() { return 1 + Math.floor(Math.random() * 6); }
+    function totalDice() { return state.hand.length + state.rolled.length; }
+    function mkDie() { return { id: ++dieId }; }
 
-    function addCat(typeId) {
-      S.cats.push({ uid: uid++, typeId });
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2200);
     }
 
-    function rollN(typeId) {
-      const f = catType(typeId).faces;
-      return f[Math.floor(Math.random() * f.length)];
+    function addLog(html) {
+      state.log.unshift(html);
+      if (state.log.length > 40) state.log.pop();
     }
 
-    function paintDieNum(el, n, extraCls = "") {
-      el.className = "die" + (extraCls ? " " + extraCls : "");
-      el.innerHTML = `<span class="pip">${n}</span>`;
+    function hasPair(values) {
+      const c = counts(values);
+      return Object.values(c).some(n => n >= 2);
     }
 
-    function floorMult(floor) {
-      return FLOOR_MULT[floor] + (S.floorBonus[floor - 1] || 0);
+    function counts(values) {
+      const m = {};
+      for (const v of values) m[v] = (m[v] || 0) + 1;
+      return m;
     }
 
-    function initGame() {
-      S.cats = [];
-      S.tower = [null, null, null, null, null];
-      S.floorBonus = [0, 0, 0, 0, 0];
-      S.round = 1;
-      S.totalScore = 0;
-      S.roundScore = 0;
-      S.gold = 15;
-      S.phase = "setup";
-      addCat("sleep");
-      addCat("loaf");
-      addCat("nip");
-      renderAll();
-      logMsg("런 시작! 잠냥·식빵냥·캣닢냥을 층에 배치하세요.");
+    function longestStraight(values) {
+      const uniq = [...new Set(values)].sort((a, b) => a - b);
+      if (uniq.length < 3) return 0;
+      let best = 1, run = 1;
+      for (let i = 1; i < uniq.length; i++) {
+        if (uniq[i] === uniq[i - 1] + 1) { run++; best = Math.max(best, run); }
+        else run = 1;
+      }
+      return best;
     }
 
-    function logMsg(html) {
-      $("log").innerHTML = html;
+    function detectHands(values) {
+      const c = counts(values);
+      const freqs = Object.values(c);
+      const result = [];
+      if (freqs.some(n => n >= 2)) result.push("pair");
+      if (freqs.some(n => n >= 3)) result.push("triple");
+      if (longestStraight(values) >= 3) result.push("straight");
+      return result;
     }
 
-    function appendLog(html) {
-      $("log").innerHTML += `<br>${html}`;
-      $("log").scrollTop = $("log").scrollHeight;
+    function dieValue(d) {
+      return d.locked ? d.value * 2 : d.value;
     }
 
-    function renderStatus() {
-      $("round").textContent = S.round;
-      $("target").textContent = targetForRound();
-      $("round-score").textContent = S.roundScore;
-      $("total-score").textContent = S.totalScore;
-      $("gold").textContent = S.gold;
-      const labels = { setup: "세팅", rolling: "굴림", shop: "상점", over: "종료" };
-      $("phase-label").textContent = labels[S.phase] || S.phase;
+    function computeScore() {
+      const rolled = state.rolled;
+      const values = rolled.map(d => d.value);
+      const rawSum = rolled.reduce((s, d) => s + dieValue(d), 0);
+
+      let sum = rawSum;
+      let stageExtra = 0;
+      const rule = state.stageRule;
+
+      if (rule.id === "evens") {
+        sum = rolled.reduce((s, d) => s + (d.value % 2 === 0 ? dieValue(d) : 0), 0);
+      } else if (rule.id === "high5") {
+        sum = rolled.reduce((s, d) => s + (d.value >= 5 ? dieValue(d) : 0), 0);
+      } else if (rule.id === "oddBonus") {
+        stageExtra = rolled.filter(d => d.value % 2 === 1).length * 2;
+      } else if (rule.id === "lowSum") {
+        if (rawSum <= 15) stageExtra += 6;
+      }
+
+      let handScore = 0;
+      const handsHit = [];
+      const detected = detectHands(values);
+      for (const h of detected) {
+        if (state.items.includes(h)) {
+          handScore += ITEMS[h].score;
+          handsHit.push(ITEMS[h].hand);
+        }
+      }
+
+      const ctx = { values, rawSum, sum };
+      let goalBonus = 0;
+      if (state.turnGoal) {
+        const g = state.turnGoal;
+        if ((!g.needsItem || state.items.includes(g.needsItem)) && g.check(ctx)) {
+          goalBonus = g.bonus;
+        }
+      }
+
+      const total = sum + stageExtra + handScore + goalBonus;
+      return { values, rawSum, sum, stageExtra, handScore, handsHit, goalBonus, total, rule };
     }
 
-    function renderRoster() {
-      const el = $("roster");
-      const bench = S.cats.filter((c) => !S.tower.includes(c.uid));
-      if (!bench.length) {
-        el.className = "roster empty-hint";
-        el.textContent = "모두 타워에 배치됨";
+    function startStage() {
+      state.hand = [];
+      state.rolled = [];
+      state.stageScore = 0;
+      state.gameOver = false;
+      for (let i = 0; i < START_HAND; i++) state.hand.push(mkDie());
+      state.turnsLeft = TURNS_PER_STAGE;
+      state.stageGoal = 100 + (state.stage - 1) * 30;
+      if (state.stage === 1) state.stageRule = STAGE_RULES[0];
+      else state.stageRule = pick(STAGE_RULES.filter(r => r.id !== "none"));
+      startTurn(true);
+      addLog(`<span class="line-turn">── 스테이지 ${state.stage} 시작 (목표 ${state.stageGoal}) · ${state.stageRule.label} ──</span>`);
+    }
+
+    function startTurn(isStageStart) {
+      state.actionsLeft = ACTIONS_PER_TURN;
+      mode = null;
+      selected = null;
+      const pool = TURN_GOALS.filter(g => !g.needsItem || state.items.includes(g.needsItem));
+      state.turnGoal = pick(pool.length ? pool : TURN_GOALS.slice(0, 4));
+      if (!isStageStart) {
+        addLog(`<span class="line-turn">── 턴 시작 (남은 턴 ${state.turnsLeft}) ──</span>`);
+      }
+      render();
+    }
+
+    function endTurn() {
+      if (state.gameOver) return;
+      const sc = computeScore();
+      state.stageScore += sc.total;
+
+      let detail = `합 ${sc.rawSum}`;
+      if (sc.sum !== sc.rawSum) detail += ` → 규칙 후 ${sc.sum}`;
+      if (sc.stageExtra) detail += ` +규칙보너스 ${sc.stageExtra}`;
+      if (sc.handScore) detail += ` +족보 ${sc.handScore}${sc.handsHit.length ? " (" + sc.handsHit.join(", ") + ")" : ""}`;
+      if (sc.goalBonus) detail += ` +목표 ${sc.goalBonus}`;
+      addLog(`<span class="line-score">+${sc.total}점</span> (${detail}) → 누적 ${state.stageScore}`);
+
+      state.turnsLeft--;
+      state.actionsLeft = 0;
+
+      if (state.stageScore >= state.stageGoal) {
+        render();
+        showStageClear();
         return;
       }
-      el.className = "roster";
-      el.innerHTML = "";
-      for (const c of bench) {
-        const t = catType(c.typeId);
-        const card = document.createElement("div");
-        card.className = "cat-card" + (S.pickUid === c.uid ? " picked" : "");
-        const faces = t.faces.join(" ");
-        card.innerHTML = `<span class="ico">${t.ico}</span><div class="info"><div class="n">${t.name}</div><div class="d">${t.desc}</div><div class="d">🎲 ${faces}</div></div>`;
-        card.onclick = () => {
-          if (S.phase !== "setup" || S.busy) return;
-          S.pickUid = S.pickUid === c.uid ? null : c.uid;
-          renderRoster();
-          renderTower();
-        };
-        el.appendChild(card);
-      }
-    }
-
-    function renderTower(highlightFloor = -1) {
-      $("tower").innerHTML = "";
-      for (let f = 5; f >= 1; f--) {
-        const row = document.createElement("div");
-        row.className = "floor";
-        row.dataset.floor = f;
-        if (highlightFloor === f) row.classList.add("active");
-        if (S.pickUid && S.phase === "setup") row.classList.add("drop-target");
-
-        const uidOn = S.tower[f - 1];
-        const mult = floorMult(f).toFixed(1);
-
-        const label = document.createElement("div");
-        label.className = "flabel";
-        label.innerHTML = `${f}층<span>×${mult}</span>`;
-
-        const slot = document.createElement("div");
-        slot.className = "slot" + (uidOn ? " has-cat" : "");
-
-        if (uidOn) {
-          const c = getCat(uidOn);
-          const t = catType(c.typeId);
-          const die = document.createElement("div");
-          die.className = "die";
-          die.dataset.uid = uidOn;
-          const res = S.lastResults.find((r) => r.floor === f);
-          if (res) {
-            paintDieNum(die, res.n, "on" + (res.total < 0 ? " neg" : ""));
-          } else {
-            die.className = "die";
-            die.innerHTML = `<span class="ico-sm">${t.ico}</span>`;
-          }
-          slot.appendChild(die);
-        } else {
-          slot.textContent = S.pickUid ? "배치" : "비움";
-        }
-
-        slot.onclick = () => onFloorClick(f);
-
-        const tag = document.createElement("div");
-        tag.className = "mult-tag";
-        tag.id = `mult-${f}`;
-        const res = S.lastResults.find((r) => r.floor === f);
-        if (res) tag.textContent = (res.total >= 0 ? "+" : "") + res.total;
-
-        row.append(label, slot, tag);
-        $("tower").appendChild(row);
-      }
-    }
-
-    function onFloorClick(floor) {
-      if (S.busy) return;
-      const idx = floor - 1;
-      if (S.phase === "setup") {
-        if (S.pickUid) {
-          if (S.tower[idx]) {
-            const old = S.tower[idx];
-            S.tower[idx] = S.pickUid;
-            S.pickUid = old;
-          } else {
-            S.tower[idx] = S.pickUid;
-            S.pickUid = null;
-          }
-        } else if (S.tower[idx]) {
-          S.pickUid = S.tower[idx];
-          S.tower[idx] = null;
-        }
-        renderRoster();
-        renderTower();
+      if (state.turnsLeft <= 0) {
+        state.gameOver = true;
+        render();
+        showModal("스테이지 실패", `<p>목표 ${state.stageGoal}점에 ${state.stageScore}점. 턴을 모두 썼습니다.</p>`, [
+          { label: "다시 시작", action: resetRun },
+        ]);
         return;
       }
+      startTurn(false);
     }
 
-    function placedCount() {
-      return S.tower.filter(Boolean).length;
-    }
-
-    function scoreRoll(n, floor, typeId, ctx) {
-      let base = n;
-      const notes = [];
-      const mult = floorMult(floor);
-
-      if (ctx.loafOnTower && typeId !== "loaf") {
-        base += 1;
-        notes.push("식빵냥 +1");
-      }
-
-      if (typeId === "sleep" && floor <= 2 && n >= 4) {
-        base += 1;
-        notes.push("아래층 고눈 +1");
-      }
-
-      if (typeId === "greedy") {
-        if (n === 6) {
-          base = 10;
-          notes.push("대박");
-        } else if (n <= 2) {
-          base = -3;
-          notes.push("꽝");
-        }
-        if (floor === 5 && (n === 6 || n <= 2)) {
-          base *= 2;
-          notes.push("5층 ×2");
-        }
-      }
-
-      const total = Math.round(base * mult);
-      return { base, mult, total, notes, n };
-    }
-
-    function buildResults(rolls) {
-      const ctx = { loafOnTower: S.tower.some((u) => u && getCat(u).typeId === "loaf") };
-      const results = [];
-
-      for (const { floor, uid, n } of rolls) {
-        const c = getCat(uid);
-        let r = scoreRoll(n, floor, c.typeId, ctx);
-
-        if (c.typeId === "jump" && n >= 5 && floor < 5) {
-          const above = results.find((x) => x.floor === floor + 1);
-          if (above) {
-            const bonus = Math.round(above.total * 0.5);
-            r.total += bonus;
-            r.notes.push(`점프(5+) +${bonus}`);
-          }
-        }
-
-        results.push({ floor, uid, typeId: c.typeId, name: catType(c.typeId).name, n, ...r });
-      }
-
-      for (let f = 1; f < 5; f++) {
-        const low = results.find((r) => r.floor === f);
-        const high = results.find((r) => r.floor === f + 1);
-        if (!low || !high) continue;
-
-        if (low.n === high.n) {
-          const bonus = Math.round((low.total + high.total) * 0.2);
-          low.total += bonus;
-          high.total += bonus;
-          low.notes.push(`더블 ${low.n} +${bonus}`);
-          high.notes.push(`더블 ${high.n} +${bonus}`);
-        }
-
-        const sum = low.n + high.n;
-        if (sum >= 10) {
-          const bonus = 8;
-          low.total += bonus;
-          high.total += bonus;
-          low.notes.push(`합${sum} +${bonus}`);
-          high.notes.push(`합${sum} +${bonus}`);
-        }
-
-        if (Math.abs(low.n - high.n) === 1) {
-          const bonus = 5;
-          low.total += bonus;
-          high.total += bonus;
-          low.notes.push(`연번 +${bonus}`);
-          high.notes.push(`연번 +${bonus}`);
-        }
-      }
-
-      return results;
-    }
-
-    async function doRoll() {
-      if (S.busy || S.phase !== "setup") return;
-      if (!placedCount()) {
-        logMsg("최소 1마리는 층에 배치하세요.");
+    function showStageClear() {
+      const unowned = Object.keys(ITEMS).filter(k => !state.items.includes(k));
+      if (unowned.length === 0) {
+        showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성. 모든 족보 아이템을 모았습니다. 다음 스테이지로!</p>`, [
+          { label: "다음 스테이지", action: () => { hideModal(); state.stage++; startStage(); } },
+        ]);
         return;
       }
-
-      S.busy = true;
-      S.lastResults = [];
-      S.roundScore = 0;
-      $("btn-roll").disabled = true;
-      S.phase = "rolling";
-      renderStatus();
-      logMsg("굴리는 중…");
-
-      const floors = [];
-      for (let f = 1; f <= 5; f++) {
-        const u = S.tower[f - 1];
-        if (u) floors.push({ floor: f, uid: u });
+      const choices = [];
+      const pool = [...unowned].sort(() => Math.random() - 0.5).slice(0, 3);
+      for (const id of pool) {
+        const it = ITEMS[id];
+        choices.push({
+          label: `<strong>${it.name}</strong> — ${it.hand} +${it.score}점 활성화`,
+          action: () => {
+            state.items.push(id);
+            hideModal();
+            addLog(`아이템 획득: <span style="color:var(--gold)">${it.name}</span>`);
+            state.stage++;
+            startStage();
+          },
+        });
       }
+      showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성! 아이템 1개를 고르세요.</p>`, choices);
+    }
 
-      const diceEls = $("tower").querySelectorAll(".die");
-      diceEls.forEach((d) => {
-        d.classList.remove("rolling");
-        void d.offsetWidth;
-        d.classList.add("rolling");
-        d.className = "die rolling";
-        d.innerHTML = `<span class="pip">?</span>`;
+    function resetRun() {
+      hideModal();
+      dieId = 0;
+      Object.assign(state, {
+        stage: 1, stageGoal: 100, stageScore: 0,
+        turnsLeft: TURNS_PER_STAGE, actionsLeft: ACTIONS_PER_TURN,
+        hand: [], rolled: [], items: [],
+        log: [], gameOver: false,
       });
-      await sleep(ROLL_MS);
-      diceEls.forEach((d) => d.classList.remove("rolling"));
+      addLog(`<span class="line-turn">── 새 런 시작 ──</span>`);
+      startStage();
+    }
 
-      const rolls = floors.map(({ floor, uid }) => ({
-        floor,
-        uid,
-        n: rollN(getCat(uid).typeId),
-      }));
+    function spendAction() {
+      state.actionsLeft--;
+      if (state.actionsLeft <= 0) toast("액션 소진 — 턴 종료하세요");
+    }
 
-      let results = buildResults(rolls);
+    function doDraw() {
+      if (state.actionsLeft <= 0 || totalDice() >= MAX_DICE) return;
+      state.hand.push(mkDie());
+      spendAction();
+      mode = null;
+      render();
+    }
 
-      if (S.tower.some((u) => u && getCat(u).typeId === "nip")) {
-        if (rolls.length > 1) {
-          const pick = rolls[Math.floor(Math.random() * rolls.length)];
-          pick.n = rollN(getCat(pick.uid).typeId);
-          appendLog(`<span class="c">캣닢냥</span> · ${pick.floor}층 재굴림 → <span class="f">🎲 ${pick.n}</span>`);
-          results = buildResults(rolls);
+    function doRoll(dieId) {
+      const idx = state.hand.findIndex(d => d.id === dieId);
+      if (idx < 0) return;
+      const die = state.hand.splice(idx, 1)[0];
+      die.value = d6();
+      die.locked = false;
+      state.rolled.push(die);
+      spendAction();
+      mode = null;
+      selected = null;
+      animateDie(die.id);
+      render();
+    }
+
+    function doReroll(dieId) {
+      const die = state.rolled.find(d => d.id === dieId);
+      if (!die || die.locked) return;
+      die.value = d6();
+      spendAction();
+      mode = null;
+      selected = null;
+      animateDie(die.id);
+      render();
+    }
+
+    function doLock(dieId) {
+      const die = state.rolled.find(d => d.id === dieId);
+      if (!die || die.locked) return;
+      die.locked = true;
+      spendAction();
+      mode = null;
+      selected = null;
+      render();
+    }
+
+    function animateDie(id) {
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (el) {
+          el.classList.add("rolling");
+          setTimeout(() => el.classList.remove("rolling"), 400);
         }
+      });
+    }
+
+    function setMode(m) {
+      if (state.gameOver || state.actionsLeft <= 0) return;
+      mode = mode === m ? null : m;
+      selected = null;
+      render();
+    }
+
+    function onDieClick(zone, id) {
+      if (state.gameOver) return;
+      if (mode === "roll" && zone === "hand") { doRoll(id); return; }
+      if (mode === "reroll" && zone === "rolled") { doReroll(id); return; }
+      if (mode === "lock" && zone === "rolled") { doLock(id); return; }
+      selected = selected?.id === id && selected?.zone === zone ? null : { zone, id };
+      render();
+    }
+
+    function showModal(title, body, buttons) {
+      const modal = document.getElementById("modal");
+      modal.innerHTML = `<h3>${title}</h3>${body}<div class="pick-list"></div>`;
+      const list = modal.querySelector(".pick-list");
+      for (const b of buttons) {
+        const btn = document.createElement("button");
+        btn.className = "pick-btn";
+        btn.innerHTML = b.label;
+        btn.onclick = b.action;
+        list.appendChild(btn);
+      }
+      document.getElementById("overlay").classList.remove("hidden");
+    }
+
+    function hideModal() {
+      document.getElementById("overlay").classList.add("hidden");
+    }
+
+    function render() {
+      const est = state.rolled.length && !state.gameOver ? computeScore().total : null;
+      document.getElementById("stats").innerHTML = `
+        <span>스테이지 <strong>${state.stage}</strong></span>
+        <span>누적 <strong>${state.stageScore}</strong> / ${state.stageGoal}</span>
+        <span>남은 턴 <strong>${state.turnsLeft}</strong></span>
+        <span class="${state.actionsLeft === 0 ? "danger" : ""}">액션 <strong>${state.actionsLeft}</strong> / ${ACTIONS_PER_TURN}</span>
+        <span>주사위 <strong>${totalDice()}</strong> / ${MAX_DICE}</span>
+        ${est !== null ? `<span>턴 종료 시 <strong>+${est}</strong> 예상</span>` : ""}
+      `;
+
+      document.getElementById("stageRule").innerHTML =
+        `<strong>스테이지 규칙</strong> · <span>${state.stageRule.label}</span> — ${state.stageRule.desc}`;
+
+      const tg = state.turnGoal;
+      document.getElementById("turnGoal").innerHTML =
+        tg ? `<span>${tg.label}</span> → 보너스 +${tg.bonus}` : "";
+
+      const itemsEl = document.getElementById("items");
+      if (!state.items.length) {
+        itemsEl.innerHTML = `<span class="chip">없음 — 족보 0점 (합계·목표·잠금만)</span>`;
+      } else {
+        itemsEl.innerHTML = state.items.map(id => {
+          const it = ITEMS[id];
+          return `<span class="chip owned">${it.name} (${it.hand} +${it.score})</span>`;
+        }).join("");
       }
 
-      S.lastResults = results;
-      renderTower();
+      renderZone("handZone", state.hand, "hand", d => !d.value && d.value !== 0);
+      renderZone("rolledZone", state.rolled, "rolled", () => false);
 
-      let sum = 0;
-      for (let i = 0; i < results.length; i++) {
-        const r = results[i];
-        renderTower(r.floor);
+      const hints = {
+        draw: "주사위를 뽑습니다",
+        roll: "핸드 주사위 클릭 → 굴림",
+        reroll: "굴림 주사위 클릭 (잠금 제외)",
+        lock: "굴림 주사위 클릭 → 잠금",
+      };
+      document.getElementById("actionHint").textContent = mode ? `· ${hints[mode]}` : "";
 
-        const noteStr = r.notes.length ? ` <span style="color:var(--muted)">(${r.notes.join(", ")})</span>` : "";
-        appendLog(
-          `<span class="f">${r.floor}층 ${r.name}</span> 🎲 <strong>${r.n}</strong> → <span class="g">${r.total >= 0 ? "+" : ""}${r.total}점</span>${noteStr}`
-        );
-        sum += r.total;
-        await sleep(STEP_MS);
-      }
+      const canDraw = state.actionsLeft > 0 && totalDice() < MAX_DICE && !state.gameOver;
+      const hasHand = state.hand.length > 0;
+      const hasReroll = state.rolled.some(d => !d.locked);
+      const hasLock = state.rolled.some(d => !d.locked);
 
-      S.roundScore = sum;
-      S.totalScore += sum;
-      S.gold += Math.max(0, Math.floor(sum / 4));
+      document.getElementById("actions").innerHTML = `
+        <button class="btn" ${canDraw ? "" : "disabled"} onclick="doDraw()">드로우 (−1)</button>
+        <button class="btn ${mode === "roll" ? "active" : ""}" ${state.actionsLeft > 0 && hasHand && !state.gameOver ? "" : "disabled"}
+          onclick="setMode('roll')">굴리기 (−1)</button>
+        <button class="btn ${mode === "reroll" ? "active" : ""}" ${state.actionsLeft > 0 && hasReroll && !state.gameOver ? "" : "disabled"}
+          onclick="setMode('reroll')">리롤 (−1)</button>
+        <button class="btn ${mode === "lock" ? "active" : ""}" ${state.actionsLeft > 0 && hasLock && !state.gameOver ? "" : "disabled"}
+          onclick="setMode('lock')">잠금 (−1)</button>
+        <button class="btn end primary" ${state.gameOver ? "disabled" : ""} onclick="endTurn()">턴 종료 (0)</button>
+        <button class="btn" onclick="resetRun()">새 런</button>
+      `;
 
-      const tgt = targetForRound();
-      appendLog(`<br>이번 라운드 <span class="g">${sum}</span>점 (목표 ${tgt}) · 골드 +${Math.max(0, Math.floor(sum / 4))}`);
+      document.getElementById("log").innerHTML = state.log.join("<br>") || "턴 종료 시 점수 breakdown이 여기 표시됩니다.";
+    }
 
-      renderStatus();
-      renderTower();
-
-      if (sum < tgt) {
-        S.phase = "over";
-        $("banner").className = "banner lose";
-        $("banner").textContent = `런 종료 — 목표 ${tgt}점 미달 (${sum}점)`;
-        $("banner").classList.remove("hidden");
-        $("btn-roll").disabled = true;
-        S.busy = false;
+    function renderZone(elId, dice, zone, isUnrolled) {
+      const el = document.getElementById(elId);
+      if (!dice.length) {
+        el.innerHTML = `<span class="empty-slot">${zone === "hand" ? "미굴림 없음 — 드로우하세요" : "굴림 없음 — 핸드에서 굴리세요"}</span>`;
         return;
       }
-
-      S.phase = "shop";
-      $("btn-shop").classList.remove("hidden");
-      $("btn-next").classList.remove("hidden");
-      pickShop();
-      logMsg(`목표 달성! 상점으로 이동하세요. (${sum}/${tgt})`);
-      S.busy = false;
+      el.innerHTML = dice.map(d => {
+        const unrolled = zone === "hand";
+        const sel = selected?.id === d.id && selected?.zone === zone;
+        const cls = ["die", unrolled ? "unrolled" : "", d.locked ? "locked" : "", sel ? "selected" : ""].filter(Boolean).join(" ");
+        const label = unrolled ? "" : d.value;
+        return `<div class="${cls}" data-id="${d.id}" onclick="onDieClick('${zone}', ${d.id})">${label}</div>`;
+      }).join("");
     }
 
-    function pickShop() {
-      S.shopOffers = [];
-      const avail = SHOP_CATS.filter((id) => !S.cats.some((c) => c.typeId === id));
-      if (avail.length) {
-        const id = avail[Math.floor(Math.random() * avail.length)];
-        S.shopOffers.push({ kind: "cat", id, cost: id === "greedy" ? 15 : 12 });
-      }
-      const f = 1 + Math.floor(Math.random() * 5);
-      S.shopOffers.push({ kind: "floor", floor: f, cost: 8 });
-      renderShop();
-    }
-
-    function renderShop() {
-      $("shop-panel").classList.remove("hidden");
-      $("shop").innerHTML = "";
-      for (const o of S.shopOffers) {
-        const box = document.createElement("div");
-        box.className = "shop-box";
-        if (o.kind === "cat") {
-          const t = catType(o.id);
-          box.innerHTML = `<div class="t">${t.ico} ${t.name}</div><div class="p">${t.desc}</div><div class="pr">${o.cost}G</div>`;
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "buy";
-          btn.textContent = "구매";
-          btn.disabled = S.gold < o.cost;
-          btn.onclick = () => buyOffer(o);
-          box.appendChild(btn);
-        } else {
-          box.innerHTML = `<div class="t">${o.floor}층 강화</div><div class="p">배수 +0.2</div><div class="pr">${o.cost}G</div>`;
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "buy";
-          btn.textContent = "구매";
-          btn.disabled = S.gold < o.cost;
-          btn.onclick = () => buyOffer(o);
-          box.appendChild(btn);
-        }
-        $("shop").appendChild(box);
-      }
-    }
-
-    function buyOffer(o) {
-      if (S.gold < o.cost) return;
-      S.gold -= o.cost;
-      if (o.kind === "cat") addCat(o.id);
-      else S.floorBonus[o.floor - 1] += 0.2;
-      S.shopOffers = S.shopOffers.filter((x) => x !== o);
-      renderShop();
-      renderRoster();
-      renderStatus();
-    }
-
-    function nextRound() {
-      S.round++;
-      S.roundScore = 0;
-      S.lastResults = [];
-      S.phase = "setup";
-      S.pickUid = null;
-      $("shop-panel").classList.add("hidden");
-      $("btn-shop").classList.add("hidden");
-      $("btn-next").classList.add("hidden");
-      $("btn-roll").disabled = false;
-      if (S.round > ROUND_TARGETS.length) {
-        S.phase = "over";
-        $("banner").className = "banner win";
-        $("banner").textContent = `런 클리어! 총점 ${S.totalScore}`;
-        $("banner").classList.remove("hidden");
-        return;
-      }
-      renderAll();
-      logMsg(`라운드 ${S.round} — 목표 ${targetForRound()}점. 다시 세팅하세요.`);
-    }
-
-    function renderAll() {
-      renderStatus();
-      renderRoster();
-      renderTower();
-    }
-
-    $("btn-roll").onclick = doRoll;
-    $("btn-shop").onclick = () => {
-      $("shop-panel").classList.remove("hidden");
-      if (!S.shopOffers.length) pickShop();
-    };
-    $("btn-next").onclick = nextRound;
-    $("btn-reroll").onclick = () => {
-      if (S.gold < SHOP_REROLL) return;
-      S.gold -= SHOP_REROLL;
-      pickShop();
-      renderStatus();
-    };
-
-    initGame();
+    resetRun();
   </script>
 </body>
 </html>

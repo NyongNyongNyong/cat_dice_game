@@ -36,7 +36,8 @@ http://localhost:8765/
 
 ## 문서
 
-- [컨셉 초안](docs/cat-tower-concept.md)
+- [액션 주사위 엔진 — 게임 스펙](docs/spec-action-engine-roguelike.md) *(현재 방향)*
+- [캣타워 다이스 컨셉](docs/cat-tower-concept.md)
 - [이전 B안 프로토타입 기획](docs/plan-b.md)
 
 ## 저장소
