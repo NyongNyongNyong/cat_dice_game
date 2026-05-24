@@ -165,7 +165,7 @@
 
     <div class="panel">
       <div class="zone hand">
-        <div class="zone-label">핸드 <em>— 미굴림 · 드로우 목적지</em></div>
+        <div class="zone-label">핸드 <em>— 클릭하면 필드로 굴림 (−1액션)</em></div>
         <div class="dice-row" id="handZone"></div>
       </div>
     </div>
@@ -423,6 +423,14 @@
       showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성! 아이템 1개를 고르세요.</p>`, choices);
     }
 
+    function grantStartingItem() {
+      const id = pick(Object.keys(ITEMS));
+      state.items = [id];
+      const it = ITEMS[id];
+      addLog(`<span class="line-turn">시작 아이템: <span style="color:var(--gold)">${it.name}</span> (${it.hand} +${it.score})</span>`);
+      toast(`시작 아이템: ${it.name}`);
+    }
+
     function resetRun() {
       hideModal();
       dieId = 0;
@@ -433,6 +441,7 @@
         log: [], gameOver: false,
       });
       addLog(`<span class="line-turn">── 새 런 시작 ──</span>`);
+      grantStartingItem();
       startStage();
     }
 
@@ -450,6 +459,7 @@
     }
 
     function doRoll(dieId) {
+      if (state.gameOver || state.actionsLeft <= 0) return;
       const idx = state.hand.findIndex(d => d.id === dieId);
       if (idx < 0) return;
       const die = state.hand.splice(idx, 1)[0];
@@ -503,11 +513,13 @@
 
     function onDieClick(zone, id) {
       if (state.gameOver) return;
-      if (mode === "roll" && zone === "hand") { doRoll(id); return; }
+      if (zone === "hand") {
+        if (state.actionsLeft <= 0) { toast("액션 없음 — 턴 종료하세요"); return; }
+        doRoll(id);
+        return;
+      }
       if (mode === "reroll" && zone === "field") { doReroll(id); return; }
       if (mode === "lock" && zone === "field") { doLock(id); return; }
-      selected = selected?.id === id && selected?.zone === zone ? null : { zone, id };
-      render();
     }
 
     function showModal(title, body, buttons) {
@@ -561,7 +573,7 @@
 
       const hints = {
         draw: "주사위를 뽑습니다",
-        roll: "핸드 주사위 클릭 → 필드",
+        roll: "핸드 주사위 클릭 = 굴리기",
         reroll: "필드 주사위 클릭 (잠금 제외)",
         lock: "필드 주사위 클릭 → 잠금",
       };
