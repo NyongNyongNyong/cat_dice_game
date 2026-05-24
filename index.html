@@ -147,7 +147,7 @@
     <header>
       <div>
         <h1>액션 주사위 엔진</h1>
-        <p class="sub">v0.1 프로토 — 5액션 · 핸드/필드 · 족보 아이템</p>
+        <p class="sub">v0.8 — 던지기 · 필드 리셋 · 족보 아이템</p>
       </div>
       <div class="stats" id="stats"></div>
     </header>
@@ -164,15 +164,8 @@
     </div>
 
     <div class="panel">
-      <div class="zone hand">
-        <div class="zone-label">핸드 <em>— 클릭하면 필드로 굴림 (−1액션)</em></div>
-        <div class="dice-row" id="handZone"></div>
-      </div>
-    </div>
-
-    <div class="panel">
       <div class="zone field">
-        <div class="zone-label">필드 <em>— 던진 주사위 · 잠금·리롤·점수 · 턴 종료 시 리셋</em></div>
+        <div class="zone-label">필드 <em>— 던지기로 채움 · 턴 종료 시 전부 리셋</em></div>
         <div class="dice-row" id="fieldZone"></div>
       </div>
     </div>
@@ -197,13 +190,15 @@
   <script>
     const MAX_DICE = 5;
     const ACTIONS_PER_TURN = 5;
-    const START_HAND = 2;
     const TURNS_PER_STAGE = 5;
+    const STAGE_GOAL_BASE = 40;
+    const STAGE_GOAL_STEP = 15;
 
     const ITEMS = {
       pair: { id: "pair", name: "짝 맞추기 판", hand: "페어", score: 6 },
       triple: { id: "triple", name: "세 줄표", hand: "트리플", score: 12 },
       straight: { id: "straight", name: "계단 조각", hand: "스트레이트", score: 10 },
+      glue: { id: "glue", name: "낡은 접착제", hand: "이월", score: 0 },
     };
 
     const STAGE_RULES = [
@@ -224,26 +219,24 @@
 
     let dieId = 0;
     let mode = null;
-    let selected = null;
 
     const state = {
       stage: 1,
-      stageGoal: 100,
+      stageGoal: STAGE_GOAL_BASE,
       stageScore: 0,
       turnsLeft: TURNS_PER_STAGE,
       actionsLeft: ACTIONS_PER_TURN,
-      hand: [],
       field: [],
       items: [],
       stageRule: null,
       turnGoal: null,
       log: [],
       gameOver: false,
+      carryToField: null,
     };
 
     function d6() { return 1 + Math.floor(Math.random() * 6); }
-    function totalDice() { return state.hand.length + state.field.length; }
-    function mkDie() { return { id: ++dieId }; }
+    function fieldCount() { return state.field.length; }
 
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -338,13 +331,16 @@
     }
 
     function startStage() {
-      state.hand = [];
       state.field = [];
+      if (state.carryToField) {
+        state.field.push(state.carryToField);
+        state.carryToField = null;
+        addLog(`<span style="color:var(--gold)">아이템: 잠긴 주사위 필드 이월</span>`);
+      }
       state.stageScore = 0;
       state.gameOver = false;
-      for (let i = 0; i < START_HAND; i++) state.hand.push(mkDie());
       state.turnsLeft = TURNS_PER_STAGE;
-      state.stageGoal = 100 + (state.stage - 1) * 30;
+      state.stageGoal = STAGE_GOAL_BASE + (state.stage - 1) * STAGE_GOAL_STEP;
       if (state.stage === 1) state.stageRule = STAGE_RULES[0];
       else state.stageRule = pick(STAGE_RULES.filter(r => r.id !== "none"));
       startTurn(true);
@@ -354,7 +350,6 @@
     function startTurn(isStageStart) {
       state.actionsLeft = ACTIONS_PER_TURN;
       mode = null;
-      selected = null;
       const pool = TURN_GOALS.filter(g => !g.needsItem || state.items.includes(g.needsItem));
       state.turnGoal = pick(pool.length ? pool : TURN_GOALS.slice(0, 4));
       if (!isStageStart) {
@@ -382,6 +377,12 @@
       state.actionsLeft = 0;
 
       if (state.stageScore >= state.stageGoal) {
+        if (state.items.includes("glue")) {
+          const locked = state.field.filter(d => d.locked);
+          if (locked.length) {
+            state.carryToField = { ...locked[0], id: ++dieId };
+          }
+        }
         render();
         showStageClear();
         return;
@@ -398,7 +399,7 @@
     }
 
     function showStageClear() {
-      const unowned = Object.keys(ITEMS).filter(k => !state.items.includes(k));
+      const unowned = Object.keys(ITEMS).filter(k => k !== "glue" && !state.items.includes(k));
       if (unowned.length === 0) {
         showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성. 모든 족보 아이템을 모았습니다. 다음 스테이지로!</p>`, [
           { label: "다음 스테이지", action: () => { hideModal(); state.stage++; startStage(); } },
@@ -410,7 +411,9 @@
       for (const id of pool) {
         const it = ITEMS[id];
         choices.push({
-          label: `<strong>${it.name}</strong> — ${it.hand} +${it.score}점 활성화`,
+          label: it.id === "glue"
+            ? `<strong>${it.name}</strong> — 스테이지 클리어 시 잠긴 주사위 1개 다음 스테이지 필드 이월`
+            : `<strong>${it.name}</strong> — ${it.hand} +${it.score}점 활성화`,
           action: () => {
             state.items.push(id);
             hideModal();
@@ -424,7 +427,8 @@
     }
 
     function grantStartingItem() {
-      const id = pick(Object.keys(ITEMS));
+      const pool = Object.keys(ITEMS).filter(k => k !== "glue");
+      const id = pick(pool);
       state.items = [id];
       const it = ITEMS[id];
       addLog(`<span class="line-turn">시작 아이템: <span style="color:var(--gold)">${it.name}</span> (${it.hand} +${it.score})</span>`);
@@ -435,10 +439,10 @@
       hideModal();
       dieId = 0;
       Object.assign(state, {
-        stage: 1, stageGoal: 100, stageScore: 0,
+        stage: 1, stageGoal: STAGE_GOAL_BASE, stageScore: 0,
         turnsLeft: TURNS_PER_STAGE, actionsLeft: ACTIONS_PER_TURN,
-        hand: [], field: [], items: [],
-        log: [], gameOver: false,
+        field: [], items: [],
+        log: [], gameOver: false, carryToField: null,
       });
       addLog(`<span class="line-turn">── 새 런 시작 ──</span>`);
       grantStartingItem();
@@ -450,47 +454,38 @@
       if (state.actionsLeft <= 0) toast("액션 소진 — 턴 종료하세요");
     }
 
-    function doDraw() {
-      if (state.actionsLeft <= 0 || totalDice() >= MAX_DICE) return;
-      state.hand.push(mkDie());
-      spendAction();
-      mode = null;
-      render();
-    }
-
-    function doRoll(dieId) {
+    function doThrow() {
       if (state.gameOver || state.actionsLeft <= 0) return;
-      const idx = state.hand.findIndex(d => d.id === dieId);
-      if (idx < 0) return;
-      const die = state.hand.splice(idx, 1)[0];
-      die.value = d6();
-      die.locked = false;
+      if (fieldCount() >= MAX_DICE) {
+        toast("필드가 가득 참 (최대 5)");
+        return;
+      }
+      const die = { id: ++dieId, value: d6(), locked: false };
       state.field.push(die);
       spendAction();
       mode = null;
-      selected = null;
       animateDie(die.id);
       render();
     }
 
     function doReroll(dieId) {
+      if (state.gameOver || state.actionsLeft <= 0) return;
       const die = state.field.find(d => d.id === dieId);
       if (!die || die.locked) return;
       die.value = d6();
       spendAction();
       mode = null;
-      selected = null;
       animateDie(die.id);
       render();
     }
 
     function doLock(dieId) {
+      if (state.gameOver || state.actionsLeft <= 0) return;
       const die = state.field.find(d => d.id === dieId);
       if (!die || die.locked) return;
       die.locked = true;
       spendAction();
       mode = null;
-      selected = null;
       render();
     }
 
@@ -507,19 +502,13 @@
     function setMode(m) {
       if (state.gameOver || state.actionsLeft <= 0) return;
       mode = mode === m ? null : m;
-      selected = null;
       render();
     }
 
-    function onDieClick(zone, id) {
+    function onDieClick(id) {
       if (state.gameOver) return;
-      if (zone === "hand") {
-        if (state.actionsLeft <= 0) { toast("액션 없음 — 턴 종료하세요"); return; }
-        doRoll(id);
-        return;
-      }
-      if (mode === "reroll" && zone === "field") { doReroll(id); return; }
-      if (mode === "lock" && zone === "field") { doLock(id); return; }
+      if (mode === "reroll") { doReroll(id); return; }
+      if (mode === "lock") { doLock(id); return; }
     }
 
     function showModal(title, body, buttons) {
@@ -547,7 +536,7 @@
         <span>누적 <strong>${state.stageScore}</strong> / ${state.stageGoal}</span>
         <span>남은 턴 <strong>${state.turnsLeft}</strong></span>
         <span class="${state.actionsLeft === 0 ? "danger" : ""}">액션 <strong>${state.actionsLeft}</strong> / ${ACTIONS_PER_TURN}</span>
-        <span>주사위 <strong>${totalDice()}</strong> / ${MAX_DICE}</span>
+        <span>필드 <strong>${fieldCount()}</strong> / ${MAX_DICE}</span>
         ${est !== null ? `<span>턴 종료 시 <strong>+${est}</strong> 예상</span>` : ""}
       `;
 
@@ -560,57 +549,50 @@
 
       const itemsEl = document.getElementById("items");
       if (!state.items.length) {
-        itemsEl.innerHTML = `<span class="chip">없음 — 족보 0점 (합계·목표·잠금만)</span>`;
+        itemsEl.innerHTML = `<span class="chip">없음 — 족보 0점</span>`;
       } else {
         itemsEl.innerHTML = state.items.map(id => {
           const it = ITEMS[id];
+          if (id === "glue") return `<span class="chip owned">${it.name} (스테이지 이월)</span>`;
           return `<span class="chip owned">${it.name} (${it.hand} +${it.score})</span>`;
         }).join("");
       }
 
-      renderZone("handZone", state.hand, "hand", d => !d.value && d.value !== 0);
-      renderZone("fieldZone", state.field, "field", () => false);
+      renderField();
 
       const hints = {
-        draw: "주사위를 뽑습니다",
-        roll: "핸드 주사위 클릭 = 굴리기",
+        throw: "주머니에서 굴려 필드에 1개",
         reroll: "필드 주사위 클릭 (잠금 제외)",
-        lock: "필드 주사위 클릭 → 잠금",
+        lock: "필드 주사위 클릭 → 잠금 (이번 턴만)",
       };
       document.getElementById("actionHint").textContent = mode ? `· ${hints[mode]}` : "";
 
-      const canDraw = state.actionsLeft > 0 && totalDice() < MAX_DICE && !state.gameOver;
-      const hasHand = state.hand.length > 0;
+      const canThrow = state.actionsLeft > 0 && fieldCount() < MAX_DICE && !state.gameOver;
       const hasReroll = state.field.some(d => !d.locked);
       const hasLock = state.field.some(d => !d.locked);
 
       document.getElementById("actions").innerHTML = `
-        <button class="btn" ${canDraw ? "" : "disabled"} onclick="doDraw()">드로우 (−1)</button>
-        <button class="btn ${mode === "roll" ? "active" : ""}" ${state.actionsLeft > 0 && hasHand && !state.gameOver ? "" : "disabled"}
-          onclick="setMode('roll')">굴리기 (−1)</button>
+        <button class="btn primary" ${canThrow ? "" : "disabled"} onclick="doThrow()">던지기 (−1)</button>
         <button class="btn ${mode === "reroll" ? "active" : ""}" ${state.actionsLeft > 0 && hasReroll && !state.gameOver ? "" : "disabled"}
           onclick="setMode('reroll')">리롤 (−1)</button>
         <button class="btn ${mode === "lock" ? "active" : ""}" ${state.actionsLeft > 0 && hasLock && !state.gameOver ? "" : "disabled"}
           onclick="setMode('lock')">잠금 (−1)</button>
-        <button class="btn end primary" ${state.gameOver ? "disabled" : ""} onclick="endTurn()">턴 종료 (0)</button>
+        <button class="btn end" ${state.gameOver ? "disabled" : ""} onclick="endTurn()">턴 종료 (0)</button>
         <button class="btn" onclick="resetRun()">새 런</button>
       `;
 
       document.getElementById("log").innerHTML = state.log.join("<br>") || "턴 종료 시 점수 breakdown이 여기 표시됩니다.";
     }
 
-    function renderZone(elId, dice, zone, isUnrolled) {
-      const el = document.getElementById(elId);
-      if (!dice.length) {
-        el.innerHTML = `<span class="empty-slot">${zone === "hand" ? "미굴림 없음 — 드로우하세요" : "필드 비음 — 핸드에서 굴리세요"}</span>`;
+    function renderField() {
+      const el = document.getElementById("fieldZone");
+      if (!state.field.length) {
+        el.innerHTML = `<span class="empty-slot">필드 비음 — 던지기로 주사위를 놓으세요</span>`;
         return;
       }
-      el.innerHTML = dice.map(d => {
-        const unrolled = zone === "hand";
-        const sel = selected?.id === d.id && selected?.zone === zone;
-        const cls = ["die", unrolled ? "unrolled" : "", d.locked ? "locked" : "", sel ? "selected" : ""].filter(Boolean).join(" ");
-        const label = unrolled ? "" : d.value;
-        return `<div class="${cls}" data-id="${d.id}" onclick="onDieClick('${zone}', ${d.id})">${label}</div>`;
+      el.innerHTML = state.field.map(d => {
+        const cls = ["die", d.locked ? "locked" : ""].filter(Boolean).join(" ");
+        return `<div class="${cls}" data-id="${d.id}" onclick="onDieClick(${d.id})">${d.value}</div>`;
       }).join("");
     }
 
