@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dice Ascent Prototype</title>
+  <style>
+    :root {
+      --bg: #101018;
+      --panel: #1a1b28;
+      --panel-2: #242638;
+      --card: #f6efe2;
+      --ink: #27202a;
+      --muted: #9da0b8;
+      --text: #f5f4ff;
+      --accent: #8fd3ff;
+      --gold: #ffd36e;
+      --green: #77d896;
+      --red: #ff7a7a;
+      --purple: #c8a7ff;
+      --line: rgba(255,255,255,0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(143,211,255,0.16), transparent 34rem),
+        linear-gradient(180deg, #101018, #0b0b12);
+    }
+
+    button {
+      font: inherit;
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 16px;
+    }
+
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .stat {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--muted);
+      border: 1px solid var(--line);
+      font-size: 0.82rem;
+    }
+
+    .stat strong { color: var(--gold); }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(26,27,40,0.9);
+      padding: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.24);
+    }
+
+    .panel + .panel { margin-top: 12px; }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .encounter-card {
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0)),
+        var(--card);
+      border-radius: 18px;
+      padding: 18px;
+      min-height: 460px;
+      box-shadow: 0 12px 0 #d8c8a7, 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    .encounter-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .encounter-type {
+      display: inline-flex;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #332640;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .encounter-title {
+      margin: 8px 0 4px;
+      font-size: 1.45rem;
+      letter-spacing: -0.04em;
+    }
+
+    .encounter-flavor {
+      margin: 0;
+      color: #6f6472;
+      font-size: 0.88rem;
+    }
+
+    .danger {
+      min-width: 86px;
+      text-align: right;
+      color: #8b2635;
+      font-weight: 800;
+    }
+
+    .requirements {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .choice-card {
+      padding: 13px;
+      border: 2px solid #d6c8aa;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.44);
+      cursor: pointer;
+      transition: 0.12s ease;
+    }
+
+    .choice-card:hover {
+      transform: translateY(-1px);
+      border-color: #8d77b0;
+    }
+
+    .choice-card.selected {
+      border-color: #6354a0;
+      background: rgba(99,84,160,0.13);
+    }
+
+    .choice-card.high {
+      border-color: #c66a5f;
+    }
+
+    .choice-card.safe {
+      border-color: #6c9f78;
+    }
+
+    .choice-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      font-weight: 900;
+    }
+
+    .choice-tag {
+      white-space: nowrap;
+      color: #6f6472;
+      font-size: 0.74rem;
+    }
+
+    .choice-desc {
+      margin-top: 4px;
+      color: #6f6472;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .choice-reward {
+      margin-top: 7px;
+      color: #6a4e12;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .req {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 12px;
+      border: 2px solid #d6c8aa;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.44);
+      transition: 0.12s ease;
+    }
+
+    .req:hover {
+      transform: translateY(-1px);
+      border-color: #8d77b0;
+    }
+
+    .req.satisfied {
+      border-color: #58a36e;
+      background: rgba(119,216,150,0.18);
+    }
+
+    .req.selected-target {
+      outline: 3px solid rgba(99,84,160,0.28);
+    }
+
+    .req-label {
+      font-weight: 900;
+      font-size: 1rem;
+    }
+
+    .req-detail {
+      margin-top: 2px;
+      color: #6f6472;
+      font-size: 0.78rem;
+    }
+
+    .penalty {
+      color: #9b3346;
+      font-weight: 800;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .assigned {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      min-height: 34px;
+      align-items: center;
+    }
+
+    .empty-slot {
+      color: #988b8d;
+      font-size: 0.78rem;
+    }
+
+    .die {
+      --face-color: var(--accent);
+      width: 58px;
+      min-height: 58px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      border-radius: 13px;
+      background: #fbf8ff;
+      color: #252236;
+      border: 3px solid transparent;
+      box-shadow: 0 4px 0 #c8c3d7, 0 9px 20px rgba(0,0,0,0.16);
+      user-select: none;
+    }
+
+    .die .value {
+      line-height: 1;
+      font-size: 1.55rem;
+      font-weight: 950;
+    }
+
+    .die .name {
+      max-width: 50px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #6f6a80;
+      font-size: 0.58rem;
+      font-weight: 800;
+    }
+
+    .die .stat-mark {
+      color: var(--face-color);
+      font-size: 0.62rem;
+      font-weight: 950;
+    }
+
+    .die.clickable {
+      cursor: pointer;
+      transition: 0.12s ease;
+    }
+
+    .die.clickable:hover {
+      transform: translateY(-2px);
+    }
+
+    .die.selected {
+      border-color: var(--gold);
+      box-shadow: 0 4px 0 #d2a948, 0 0 0 5px rgba(255,211,110,0.18);
+    }
+
+    .die.locked {
+      background: #fff8d8;
+      border-color: var(--gold);
+    }
+
+    .die.assigned-die {
+      width: 52px;
+      min-height: 52px;
+      border-color: rgba(39,32,42,0.15);
+      box-shadow: 0 3px 0 #c8c3d7;
+    }
+
+    .die::before {
+      content: "";
+      width: 70%;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--face-color);
+    }
+
+    .dice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 68px;
+      align-items: center;
+    }
+
+    .pool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    .pool-card {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-2);
+      cursor: pointer;
+      transition: 0.12s ease;
+    }
+
+    .pool-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(143,211,255,0.45);
+    }
+
+    .pool-card.selected {
+      border-color: var(--gold);
+      background: rgba(255,211,110,0.1);
+    }
+
+    .pool-card.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .pool-name {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .faces {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .face-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .face-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+
+    .face-chip.upgradable {
+      cursor: pointer;
+      border: 1px solid rgba(255,211,110,0.45);
+      background: rgba(255,211,110,0.12);
+    }
+
+    .face-chip.maxed {
+      opacity: 0.48;
+    }
+
+    .face-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--face-color);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-weight: 800;
+      font-size: 0.86rem;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #0e1720;
+      border-color: transparent;
+    }
+
+    .btn.green {
+      background: rgba(119,216,150,0.14);
+      border-color: rgba(119,216,150,0.55);
+      color: var(--green);
+    }
+
+    .btn.red {
+      background: rgba(255,122,122,0.12);
+      border-color: rgba(255,122,122,0.5);
+      color: var(--red);
+    }
+
+    .reward-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .reward {
+      text-align: left;
+      padding: 12px;
+      border-radius: 13px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .reward strong {
+      display: block;
+      color: var(--gold);
+      margin-bottom: 5px;
+    }
+
+    .log {
+      max-height: 240px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .log-entry {
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .log-entry strong {
+      color: var(--text);
+    }
+
+    .phase-note {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(143,211,255,0.1);
+      border: 1px solid rgba(143,211,255,0.18);
+      color: #cfeeff;
+      line-height: 1.45;
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 12px; }
+      .app { grid-template-columns: 1fr; }
+      header { flex-direction: column; }
+      .stats { justify-content: flex-start; }
+      .encounter-card { min-height: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Dice Ascent Prototype</h1>
+        <div class="subtitle">주사위 풀 전체를 굴리고, 조우 카드의 요구칸에 할당하며 층을 오르는 실험</div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </header>
+
+    <main class="main">
+      <section class="encounter-card" id="encounterCard"></section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span>굴린 주사위</span>
+          <span id="rollInfo"></span>
+        </div>
+        <div class="dice-row" id="rolledDice"></div>
+        <div class="actions" id="rollActions"></div>
+      </section>
+
+      <section class="panel" id="rewardPanel" hidden>
+        <div class="panel-title">
+          <span>보상 선택</span>
+          <span>주사위 풀에 추가</span>
+        </div>
+        <div class="hint" id="rewardText"></div>
+        <div class="reward-grid" id="rewardChoices"></div>
+      </section>
+    </main>
+
+    <aside>
+      <section class="panel">
+        <div class="panel-title">
+          <span>주사위 풀</span>
+          <span id="handCount"></span>
+        </div>
+        <div class="phase-note" id="phaseNote"></div>
+        <div class="pool-grid" id="poolGrid"></div>
+        <div class="actions" id="handActions"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span>로그</span>
+          <span>최근 사건</span>
+        </div>
+        <div class="log" id="log"></div>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+    const MAX_FLOOR = 8;
+    const START_HP = 16;
+    const REROLLS_PER_ENCOUNTER = 2;
+    const MAX_FACE_VALUE = 8;
+    const ADVERSITY_DICE_COUNT = 2;
+
+    const STATS = {
+      attack: { label: "공격", short: "공", color: "#ff6b6b" },
+      guard: { label: "수비", short: "수", color: "#66a8ff" },
+      agility: { label: "민첩", short: "민", color: "#68d98b" },
+    };
+
+    function f(stat, value) {
+      return { stat, value };
+    }
+
+    const DIE_TYPES = {
+      starter: {
+        name: "모험가",
+        faces: [
+          f("attack", 2), f("attack", 4),
+          f("guard", 2), f("guard", 4),
+          f("agility", 3), f("agility", 5),
+        ],
+        text: "공격/수비/민첩이 고르게 섞인 기본 주사위.",
+      },
+      scout: {
+        name: "정찰",
+        faces: [
+          f("agility", 1), f("agility", 3), f("agility", 5),
+          f("guard", 2), f("attack", 3), f("attack", 5),
+        ],
+        text: "민첩 면이 많고, 빈틈을 찌르는 공격도 섞여 있다.",
+      },
+      guard: {
+        name: "방패",
+        faces: [
+          f("guard", 2), f("guard", 3), f("guard", 4), f("guard", 6),
+          f("attack", 2), f("agility", 3),
+        ],
+        text: "수비 요구에 강하지만 공격/민첩 면도 조금 있다.",
+      },
+      spark: {
+        name: "불꽃",
+        faces: [
+          f("attack", 1), f("attack", 4), f("attack", 5), f("attack", 6),
+          f("agility", 5), f("guard", 2),
+        ],
+        text: "공격 고점이 높고 민첩 고점도 한 면 있다.",
+      },
+      hex: {
+        name: "주술",
+        faces: [
+          f("attack", 6), f("attack", 1),
+          f("guard", 6), f("guard", 1),
+          f("agility", 4), f("agility", 1),
+        ],
+        text: "각 속성에 극단적인 눈이 있어 잠금 판단이 중요하다.",
+      },
+      giant: {
+        name: "거인",
+        faces: [
+          f("attack", 0), f("attack", 4), f("attack", 7), f("attack", 8),
+          f("guard", 5), f("agility", 2),
+        ],
+        text: "공격 합계 요구를 크게 밀어주지만 꽝이 있다.",
+      },
+    };
+
+    const ENCOUNTERS = [
+      {
+        name: "버려진 계단",
+        type: "역경",
+        flavor: "무너진 계단 사이로 손잡이 하나만 남아 있다.",
+        choices: [
+          {
+            title: "무너진 계단을 정면 돌파",
+            tone: "high",
+            desc: "가장 빠른 길이다. 성공하면 더 좋은 보상을 고를 여지가 생기지만, 삐끗하면 크게 다친다.",
+            rewardText: "완전 해결 시 보상 선택지 +1",
+            rewardBonus: 1,
+            reqs: [
+              { kind: "sum", stat: "agility", label: "무너진 계단 돌파", target: 10, max: 2, penalty: 5 },
+            ],
+          },
+          {
+            title: "무난한 우회로 찾기",
+            tone: "safe",
+            desc: "시간은 더 걸리지만 위험한 구간을 피한다. 보상은 평범하지만 요구치가 낮다.",
+            rewardText: "일반 보상",
+            rewardBonus: 0,
+            reqs: [
+              { kind: "sum", stat: "guard", label: "우회로 확보", target: 6, max: 2, penalty: 2 },
+            ],
+          },
+        ],
+      },
+      {
+        name: "녹슨 문지기",
+        type: "적",
+        flavor: "갑옷 속은 비었지만 칼은 아직 날카롭다.",
+        reqs: [
+          { kind: "odd", stat: "attack", label: "빈틈 찌르기", penalty: 1 },
+          { kind: "min", stat: "attack", label: "방패 깨기", target: 5, penalty: 2 },
+          { kind: "pair", stat: "attack", label: "연속 압박", penalty: 2 },
+        ],
+      },
+      {
+        name: "거울 안개",
+        type: "역경",
+        flavor: "같은 발걸음을 두 번 내딛지 않으면 길이 열린다.",
+        choices: [
+          {
+            title: "안개 중심부를 가로지르기",
+            tone: "high",
+            desc: "반사된 길을 정면으로 해석한다. 어려운 체크지만, 성공하면 더 넓은 보상 선택지가 열린다.",
+            rewardText: "완전 해결 시 보상 선택지 +1",
+            rewardBonus: 1,
+            reqs: [
+              { kind: "pair", stat: "guard", label: "거울상 고정", penalty: 5 },
+            ],
+          },
+          {
+            title: "벽을 짚고 돌아가기",
+            tone: "safe",
+            desc: "시야를 포기하고 촉감에 의존한다. 화려한 보상은 없지만 실패해도 손실이 작다.",
+            rewardText: "일반 보상",
+            rewardBonus: 0,
+            reqs: [
+              { kind: "sum", stat: "agility", label: "벽을 따라 걷기", target: 6, max: 2, penalty: 2 },
+            ],
+          },
+        ],
+      },
+      {
+        name: "가시 덩굴",
+        type: "적",
+        flavor: "낮게 기어가거나, 힘으로 길을 열어야 한다.",
+        reqs: [
+          { kind: "even", stat: "guard", label: "줄기 묶기", penalty: 1 },
+          { kind: "low", stat: "agility", label: "가시 피하기", target: 2, penalty: 2 },
+          { kind: "sum", stat: "attack", label: "뿌리 뽑기", target: 12, max: 4, penalty: 3 },
+        ],
+      },
+      {
+        name: "심연의 사서",
+        type: "적",
+        flavor: "책장이 넘어갈 때마다 규칙이 바뀐다.",
+        reqs: [
+          { kind: "odd", stat: "agility", label: "금서 해독", penalty: 2 },
+          { kind: "even", stat: "guard", label: "봉인 고정", penalty: 2 },
+          { kind: "straight", stat: "attack", label: "문장 완성", count: 3, penalty: 3 },
+        ],
+      },
+      {
+        name: "용의 전초기지",
+        type: "적",
+        flavor: "마지막 문 앞, 작은 용들이 열기를 뿜는다.",
+        reqs: [
+          { kind: "min", stat: "guard", label: "정면 버티기", target: 6, penalty: 3 },
+          { kind: "pair", stat: "agility", label: "양익 회피", penalty: 3 },
+          { kind: "sum", stat: "attack", label: "방벽 붕괴", target: 15, max: 4, penalty: 4 },
+        ],
+      },
+    ];
+
+    let nextId = 1;
+
+    const state = {
+      floor: 1,
+      hp: START_HP,
+      phase: "choose",
+      pool: [],
+      selectedPoolIds: [],
+      hand: [],
+      selectedDieId: null,
+      adversityChoiceIndex: null,
+      replacementType: null,
+      rerollsLeft: REROLLS_PER_ENCOUNTER,
+      encounter: null,
+      rewards: [],
+      log: [],
+      gameOver: false,
+    };
+
+    function addPoolDie(type) {
+      state.pool.push({
+        id: nextId++,
+        type,
+        faces: DIE_TYPES[type].faces.map(face => ({ ...face })),
+      });
+    }
+
+    function scaleReq(req, id, pressure) {
+      return {
+        ...req,
+        id,
+        penalty: req.penalty + Math.floor(pressure / 2),
+        target: req.target && req.kind !== "low" ? req.target + pressure : req.target,
+      };
+    }
+
+    function rollFace(faces) {
+      const face = faces[Math.floor(Math.random() * faces.length)];
+      return { ...face };
+    }
+
+    function applyRoll(die) {
+      const poolDie = state.pool.find(item => item.id === die.poolId);
+      const face = rollFace(poolDie.faces);
+      die.stat = face.stat;
+      die.value = face.value;
+    }
+
+    function faceText(face) {
+      const stat = STATS[face.stat];
+      return `${stat.short}${face.value}`;
+    }
+
+    function renderFaceChips(faces) {
+      return faces.map(face => {
+        const stat = STATS[face.stat];
+        const maxed = face.value >= MAX_FACE_VALUE;
+        return `
+          <span class="face-chip ${maxed ? "maxed" : ""}" title="${stat.label} ${face.value}">
+            <span class="face-dot" style="--face-color:${stat.color}"></span>
+            ${faceText(face)}
+          </span>
+        `;
+      }).join("");
+    }
+
+    function sumDice(dice) {
+      return dice.reduce((sum, die) => sum + die.value, 0);
+    }
+
+    function addLog(html) {
+      state.log.unshift(html);
+      if (state.log.length > 24) state.log.pop();
+    }
+
+    function cloneEncounter(floor) {
+      const base = ENCOUNTERS[(floor - 1) % ENCOUNTERS.length];
+      const pressure = Math.floor((floor - 1) / 2);
+      const encounter = {
+        name: base.name,
+        type: base.type,
+        flavor: base.flavor,
+      };
+      if (base.choices) {
+        encounter.choices = base.choices.map((choice, choiceIndex) => ({
+          ...choice,
+          reqs: choice.reqs.map((req, reqIndex) => scaleReq(req, `f${floor}c${choiceIndex}r${reqIndex}`, pressure)),
+        }));
+      } else {
+        encounter.reqs = base.reqs.map((req, index) => scaleReq(req, `f${floor}r${index}`, pressure));
+      }
+      return encounter;
+    }
+
+    function resetRun() {
+      nextId = 1;
+      Object.assign(state, {
+        floor: 1,
+        hp: START_HP,
+        phase: "choose",
+        pool: [],
+        selectedPoolIds: [],
+        hand: [],
+        selectedDieId: null,
+        adversityChoiceIndex: null,
+        replacementType: null,
+        rerollsLeft: REROLLS_PER_ENCOUNTER,
+        encounter: null,
+        rewards: [],
+        log: [],
+        gameOver: false,
+      });
+      ["starter", "starter", "starter", "starter", "guard", "scout"].forEach(addPoolDie);
+      beginFloor();
+      addLog("<strong>새 런 시작.</strong> 이번 조우의 주사위 풀 전체를 굴리세요.");
+      render();
+    }
+
+    function beginFloor() {
+      state.phase = "choose";
+      state.selectedPoolIds = [];
+      state.hand = [];
+      state.selectedDieId = null;
+      state.adversityChoiceIndex = null;
+      state.replacementType = null;
+      state.rerollsLeft = REROLLS_PER_ENCOUNTER;
+      state.rewards = [];
+      state.encounter = cloneEncounter(state.floor);
+    }
+
+    function isAdversityEncounter() {
+      return state.encounter && state.encounter.type === "역경";
+    }
+
+    function currentChoice() {
+      if (!isAdversityEncounter()) return null;
+      return state.encounter.choices[state.adversityChoiceIndex] || null;
+    }
+
+    function currentReqs() {
+      const choice = currentChoice();
+      return choice ? choice.reqs : (state.encounter?.reqs || []);
+    }
+
+    function selectAdversityChoice(index) {
+      if (state.phase !== "choose" || !isAdversityEncounter() || state.gameOver) return;
+      state.adversityChoiceIndex = index;
+      state.selectedPoolIds = [];
+      const choice = currentChoice();
+      addLog(`<strong>${state.encounter.name}</strong> 선택: ${choice.title}`);
+      render();
+    }
+
+    function togglePoolDie(id) {
+      if (state.phase !== "choose" || !isAdversityEncounter() || !currentChoice() || state.gameOver) return;
+      const selected = state.selectedPoolIds.includes(id);
+      if (selected) {
+        state.selectedPoolIds = state.selectedPoolIds.filter(poolId => poolId !== id);
+      } else if (state.selectedPoolIds.length < ADVERSITY_DICE_COUNT) {
+        state.selectedPoolIds.push(id);
+      }
+      render();
+    }
+
+    function rollHand() {
+      if (state.phase !== "choose" || !state.pool.length) return;
+      if (isAdversityEncounter() && !currentChoice()) return;
+      const diceToRoll = isAdversityEncounter()
+        ? state.selectedPoolIds.map(id => state.pool.find(poolDie => poolDie.id === id)).filter(Boolean)
+        : state.pool;
+      if (isAdversityEncounter() && diceToRoll.length !== ADVERSITY_DICE_COUNT) return;
+      state.hand = diceToRoll.map(poolDie => {
+        const face = rollFace(poolDie.faces);
+        return {
+          id: nextId++,
+          poolId: poolDie.id,
+          type: poolDie.type,
+          stat: face.stat,
+          value: face.value,
+          locked: false,
+          assignedTo: null,
+        };
+      });
+      state.phase = "assign";
+      addLog(`<strong>${state.floor}층:</strong> 주사위 ${state.hand.length}개를 굴렸습니다.`);
+      render();
+    }
+
+    function toggleRolledDie(id) {
+      if (state.phase !== "assign" || state.gameOver) return;
+      const die = state.hand.find(item => item.id === id);
+      if (!die || die.assignedTo) return;
+      state.selectedDieId = state.selectedDieId === id ? null : id;
+      render();
+    }
+
+    function toggleLock(id) {
+      if (state.phase !== "assign" || state.gameOver) return;
+      const die = state.hand.find(item => item.id === id);
+      if (!die || die.assignedTo) return;
+      die.locked = !die.locked;
+      if (die.locked) state.selectedDieId = null;
+      render();
+    }
+
+    function rerollUnlocked() {
+      if (state.phase !== "assign" || state.rerollsLeft <= 0 || state.gameOver) return;
+      const targets = state.hand.filter(die => !die.locked && !die.assignedTo);
+      if (!targets.length) return;
+      for (const die of targets) applyRoll(die);
+      state.rerollsLeft--;
+      state.selectedDieId = null;
+      addLog(`잠기지 않고 할당되지 않은 주사위 ${targets.length}개를 리롤했습니다.`);
+      render();
+    }
+
+    function assignedDice(reqId) {
+      return state.hand.filter(die => die.assignedTo === reqId);
+    }
+
+    function reqCapacity(req) {
+      if (req.kind === "sum") return req.max || 4;
+      if (req.kind === "pair") return 2;
+      if (req.kind === "straight") return req.count || 3;
+      return 1;
+    }
+
+    function assignSelected(reqId) {
+      if (state.phase !== "assign" || state.gameOver) return;
+      const die = state.hand.find(item => item.id === state.selectedDieId);
+      const req = currentReqs().find(item => item.id === reqId);
+      if (!die || !req || die.assignedTo) return;
+      if (req.stat && die.stat !== req.stat) return;
+      if (assignedDice(reqId).length >= reqCapacity(req)) return;
+      die.assignedTo = reqId;
+      die.locked = true;
+      state.selectedDieId = null;
+      render();
+    }
+
+    function unassignDie(id) {
+      if (state.phase !== "assign" || state.gameOver) return;
+      const die = state.hand.find(item => item.id === id);
+      if (!die) return;
+      die.assignedTo = null;
+      render();
+    }
+
+    function isReqSatisfied(req) {
+      const dice = assignedDice(req.id);
+      if (req.stat && dice.some(die => die.stat !== req.stat)) return false;
+      const values = dice.map(die => die.value);
+      if (req.kind === "odd") return values.length === 1 && values[0] % 2 === 1;
+      if (req.kind === "even") return values.length === 1 && values[0] !== 0 && values[0] % 2 === 0;
+      if (req.kind === "min") return values.length === 1 && values[0] >= req.target;
+      if (req.kind === "low") return values.length === 1 && values[0] > 0 && values[0] <= req.target;
+      if (req.kind === "sum") return values.length > 0 && sumDice(dice) >= req.target;
+      if (req.kind === "pair") return values.length === 2 && values[0] === values[1];
+      if (req.kind === "straight") {
+        if (values.length !== (req.count || 3)) return false;
+        const sorted = [...new Set(values)].sort((a, b) => a - b);
+        if (sorted.length !== values.length) return false;
+        return sorted.every((value, index) => index === 0 || value === sorted[index - 1] + 1);
+      }
+      return false;
+    }
+
+    function reqText(req) {
+      const prefix = req.stat ? `${STATS[req.stat].label} ` : "";
+      if (req.kind === "odd") return `${prefix}홀수 주사위 1개`;
+      if (req.kind === "even") return `${prefix}짝수 주사위 1개`;
+      if (req.kind === "min") return `${prefix}${req.target} 이상 주사위 1개`;
+      if (req.kind === "low") return `${prefix}${req.target} 이하 주사위 1개 (0 제외)`;
+      if (req.kind === "sum") return `${prefix}합계 ${req.target} 이상 · 최대 ${req.max || 4}개`;
+      if (req.kind === "pair") return `${prefix}같은 눈 2개`;
+      if (req.kind === "straight") return `${prefix}연속된 눈 ${req.count || 3}개`;
+      return "";
+    }
+
+    function resolveEncounter() {
+      if (state.phase !== "assign" || state.gameOver) return;
+      const failed = currentReqs().filter(req => !isReqSatisfied(req));
+      const damage = failed.reduce((sum, req) => sum + req.penalty, 0);
+      const choice = currentChoice();
+      const encounterName = choice ? `${state.encounter.name} - ${choice.title}` : state.encounter.name;
+      if (damage > 0) {
+        state.hp -= damage;
+        addLog(`<strong>${encounterName}</strong> 미해결 요구 ${failed.length}개. 피해 ${damage}를 받았습니다.`);
+      } else {
+        addLog(`<strong>${encounterName}</strong> 완전 해결. 피해 없이 통과했습니다.`);
+      }
+
+      if (state.hp <= 0) {
+        state.hp = 0;
+        state.gameOver = true;
+        state.phase = "gameover";
+        addLog("<strong>런 종료.</strong> 체력이 모두 소진되었습니다.");
+        render();
+        return;
+      }
+
+      state.phase = "reward";
+      const rewardBonus = damage === 0 ? (choice?.rewardBonus || 0) : 0;
+      state.rewards = rollRewards((damage === 0 ? 3 : 2) + rewardBonus);
+      render();
+    }
+
+    function rollRewards(count) {
+      const keys = Object.keys(DIE_TYPES).filter(key => key !== "starter");
+      const rewards = [{ kind: "upgrade" }];
+      while (rewards.length < count) {
+        const type = keys[Math.floor(Math.random() * keys.length)];
+        rewards.push({ kind: "die", type });
+      }
+      return rewards;
+    }
+
+    function chooseReward(index) {
+      if (state.phase !== "reward" || state.gameOver) return;
+      const reward = state.rewards[index];
+      if (reward.kind === "upgrade") {
+        state.phase = "upgrade";
+        addLog("<strong>랜덤 면 업그레이드:</strong> 강화할 주사위 하나를 선택하세요.");
+        render();
+        return;
+      }
+      state.phase = "replace";
+      state.replacementType = reward.type;
+      addLog(`<strong>${DIE_TYPES[reward.type].name}</strong> 주사위 보상: 교체할 기존 주사위를 선택하세요.`);
+      render();
+    }
+
+    function advanceAfterReward() {
+      state.floor++;
+      if (state.floor > MAX_FLOOR) {
+        state.phase = "victory";
+        state.gameOver = true;
+        addLog("<strong>승리!</strong> 정상에 도달했습니다.");
+      } else {
+        beginFloor();
+      }
+    }
+
+    function upgradeRandomFaces(poolId) {
+      if (state.phase !== "upgrade" || state.gameOver) return;
+      const poolDie = state.pool.find(die => die.id === poolId);
+      if (!poolDie) return;
+      const candidates = poolDie.faces
+        .map((face, index) => ({ face, index }))
+        .filter(item => item.face.value < MAX_FACE_VALUE);
+      const picked = [];
+      while (picked.length < 2 && candidates.length) {
+        const pickIndex = Math.floor(Math.random() * candidates.length);
+        picked.push(candidates.splice(pickIndex, 1)[0]);
+      }
+      const changes = picked.map(item => {
+        const before = { ...item.face };
+        item.face.value++;
+        return `${faceText(before)} → ${faceText(item.face)}`;
+      });
+      const changeText = changes.length ? changes.join(", ") : "강화 가능한 면 없음";
+      addLog(`<strong>${DIE_TYPES[poolDie.type].name} #${poolDie.id}</strong> 랜덤 면 업그레이드: ${changeText}`);
+      advanceAfterReward();
+      render();
+    }
+
+    function replacePoolDie(poolId) {
+      if (state.phase !== "replace" || state.gameOver || !state.replacementType) return;
+      const poolDie = state.pool.find(die => die.id === poolId);
+      if (!poolDie) return;
+      const oldName = DIE_TYPES[poolDie.type].name;
+      const newName = DIE_TYPES[state.replacementType].name;
+      poolDie.type = state.replacementType;
+      poolDie.faces = DIE_TYPES[state.replacementType].faces.map(face => ({ ...face }));
+      addLog(`<strong>${oldName} #${poolDie.id}</strong>을 <strong>${newName}</strong> 주사위로 교체했습니다.`);
+      state.replacementType = null;
+      advanceAfterReward();
+      render();
+    }
+
+    function renderDie(die, options = {}) {
+      const type = DIE_TYPES[die.type];
+      const stat = STATS[die.stat];
+      const classes = ["die"];
+      if (options.clickable) classes.push("clickable");
+      if (die.locked) classes.push("locked");
+      if (state.selectedDieId === die.id) classes.push("selected");
+      if (options.assigned) classes.push("assigned-die");
+      const lockText = die.locked ? "잠금" : "클릭: 선택";
+      const onClick = options.onClick || "";
+      const onContext = options.onContext || "";
+      return `
+        <div class="${classes.join(" ")}" data-type="${die.type}" data-stat="${die.stat}"
+          style="--face-color:${stat.color}" title="${type.name} · ${stat.label} ${die.value} · ${lockText}" ${onClick} ${onContext}>
+          <span class="value">${die.value}</span>
+          <span class="stat-mark">${stat.short}</span>
+          <span class="name">${type.name}</span>
+        </div>
+      `;
+    }
+
+    function renderEncounter() {
+      const el = document.getElementById("encounterCard");
+      const enc = state.encounter;
+      if (!enc) return;
+      const reqs = currentReqs();
+      const totalPenalty = reqs.reduce((sum, req) => sum + req.penalty, 0);
+      const choice = currentChoice();
+      const choiceHtml = enc.choices ? `
+        <div class="choice-list">
+          ${enc.choices.map((item, index) => renderAdversityChoice(item, index)).join("")}
+        </div>
+      ` : "";
+      const reqHtml = reqs.length ? `
+        <div class="requirements">
+          ${reqs.map(req => renderRequirement(req)).join("")}
+        </div>
+      ` : `<div class="hint" style="margin-top:14px;color:#6f6472">해결할 선택지를 먼저 고르세요.</div>`;
+      el.innerHTML = `
+        <div class="encounter-top">
+          <div>
+            <span class="encounter-type">${enc.type}</span>
+            <h2 class="encounter-title">${state.floor}층 · ${enc.name}${choice ? ` · ${choice.title}` : ""}</h2>
+            <p class="encounter-flavor">${enc.flavor}</p>
+          </div>
+          <div class="danger">${reqs.length ? "최대 피해" : "선택 필요"}<br>${reqs.length ? totalPenalty : "-"}</div>
+        </div>
+        ${choiceHtml}
+        ${reqHtml}
+      `;
+    }
+
+    function renderAdversityChoice(choice, index) {
+      const selected = state.adversityChoiceIndex === index;
+      const totalPenalty = choice.reqs.reduce((sum, req) => sum + req.penalty, 0);
+      const disabled = state.phase !== "choose";
+      return `
+        <div class="choice-card ${choice.tone} ${selected ? "selected" : ""}" ${disabled ? "" : `onclick="selectAdversityChoice(${index})"`}>
+          <div class="choice-head">
+            <span>${choice.title}</span>
+            <span class="choice-tag">${choice.tone === "high" ? "하이리스크" : "무난한 도전"} · 최대 피해 ${totalPenalty}</span>
+          </div>
+          <div class="choice-desc">${choice.desc}</div>
+          <div class="choice-reward">${choice.rewardText}</div>
+        </div>
+      `;
+    }
+
+    function renderRequirement(req) {
+      const dice = assignedDice(req.id);
+      const satisfied = isReqSatisfied(req);
+      const selectedTarget = state.selectedDieId && state.phase === "assign";
+      const assignedHtml = dice.length
+        ? dice.map(die => renderDie(die, {
+            assigned: true,
+            clickable: true,
+            onClick: `onclick="event.stopPropagation(); unassignDie(${die.id})"`,
+          })).join("")
+        : `<span class="empty-slot">주사위를 선택한 뒤 이 요구칸을 클릭</span>`;
+      return `
+        <div class="req ${satisfied ? "satisfied" : ""} ${selectedTarget ? "selected-target" : ""}" onclick="assignSelected('${req.id}')">
+          <div>
+            <div class="req-label">${req.label}</div>
+            <div class="req-detail">${reqText(req)} · 슬롯 ${dice.length}/${reqCapacity(req)}</div>
+          </div>
+          <div class="penalty">${satisfied ? "해결" : `실패 시 피해 ${req.penalty}`}</div>
+          <div class="assigned">${assignedHtml}</div>
+        </div>
+      `;
+    }
+
+    function renderPool() {
+      const el = document.getElementById("poolGrid");
+      el.innerHTML = state.pool.map(poolDie => {
+        const type = DIE_TYPES[poolDie.type];
+        const selected = state.selectedPoolIds.includes(poolDie.id);
+        const choosingAdversityDie = state.phase === "choose" && isAdversityEncounter() && currentChoice();
+        const full = choosingAdversityDie && state.selectedPoolIds.length >= ADVERSITY_DICE_COUNT && !selected;
+        const disabled = !["upgrade", "replace"].includes(state.phase) && !choosingAdversityDie;
+        let cardAction = "";
+        if (choosingAdversityDie) cardAction = `togglePoolDie(${poolDie.id})`;
+        if (state.phase === "upgrade") cardAction = `upgradeRandomFaces(${poolDie.id})`;
+        if (state.phase === "replace") cardAction = `replacePoolDie(${poolDie.id})`;
+        return `
+          <div class="pool-card ${selected ? "selected" : ""} ${disabled || full ? "disabled" : ""}"
+            onclick="${cardAction}">
+            <div class="pool-name">
+              <span>${type.name}</span>
+              <span>#${poolDie.id}</span>
+            </div>
+            <div class="face-list">${renderFaceChips(poolDie.faces)}</div>
+            <div class="faces">${type.text}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderRolledDice() {
+      const el = document.getElementById("rolledDice");
+      const freeDice = state.hand.filter(die => !die.assignedTo);
+      if (!freeDice.length) {
+        el.innerHTML = `<span class="hint">할당되지 않은 주사위가 없습니다. 카드에서 주사위를 클릭하면 회수됩니다.</span>`;
+        return;
+      }
+      el.innerHTML = freeDice.map(die => renderDie(die, {
+        clickable: state.phase === "assign",
+        onClick: `onclick="toggleRolledDie(${die.id})"`,
+        onContext: `ondblclick="toggleLock(${die.id})"`,
+      })).join("");
+    }
+
+    function renderActions() {
+      const unresolved = currentReqs().filter(req => !isReqSatisfied(req));
+      const unlocked = state.hand.filter(die => !die.locked && !die.assignedTo);
+      const canRoll = state.phase === "choose" && state.pool.length && (
+        !isAdversityEncounter() || (currentChoice() && state.selectedPoolIds.length === ADVERSITY_DICE_COUNT)
+      );
+      let rollLabel = `풀 전체 굴리기 (${state.pool.length})`;
+      if (isAdversityEncounter()) {
+        rollLabel = currentChoice()
+          ? `선택한 주사위 굴리기 (${state.selectedPoolIds.length}/${ADVERSITY_DICE_COUNT})`
+          : "역경 선택 필요";
+      }
+      document.getElementById("handActions").innerHTML = `
+        <button class="btn primary" onclick="rollHand()"
+          ${canRoll ? "" : "disabled"}>
+          ${rollLabel}
+        </button>
+        <button class="btn" onclick="resetRun()">새 런</button>
+      `;
+      document.getElementById("rollActions").innerHTML = `
+        <button class="btn" onclick="rerollUnlocked()"
+          ${state.phase === "assign" && state.rerollsLeft > 0 && unlocked.length ? "" : "disabled"}>
+          잠기지 않은 주사위 리롤 (${state.rerollsLeft})
+        </button>
+        <button class="btn green" onclick="resolveEncounter()"
+          ${state.phase === "assign" ? "" : "disabled"}>
+          조우 해결 (${unresolved.length}개 미해결)
+        </button>
+        <button class="btn red" onclick="resetRun()">처음부터</button>
+      `;
+    }
+
+    function renderRewardPanel() {
+      const panel = document.getElementById("rewardPanel");
+      if (state.phase !== "reward") {
+        panel.hidden = true;
+        return;
+      }
+      panel.hidden = false;
+      document.getElementById("rewardText").textContent =
+        state.rewards.length > 3
+          ? "하이리스크 선택지를 완전 해결했습니다. 보상 선택지가 추가됩니다."
+        : state.rewards.length === 3
+          ? "완전 해결 보너스: 보상 선택지가 3개입니다."
+          : "피해를 받았으므로 보상 선택지가 2개입니다.";
+      document.getElementById("rewardChoices").innerHTML = state.rewards.map((reward, index) => {
+        if (reward.kind === "upgrade") {
+          return `
+            <button class="reward" onclick="chooseReward(${index})">
+              <strong>랜덤 면 업그레이드</strong>
+              보유 주사위 하나를 고르면, 그 주사위의 랜덤 면 2개 숫자가 +1 됩니다. 최대 ${MAX_FACE_VALUE}.
+            </button>
+          `;
+        }
+        const type = DIE_TYPES[reward.type];
+        return `
+          <button class="reward" onclick="chooseReward(${index})">
+            <strong>${type.name}로 교체</strong>
+            <div class="face-list">${renderFaceChips(type.faces)}</div>
+            기존 주사위 하나를 이 주사위로 바꿉니다. ${type.text}
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderStatus() {
+      document.getElementById("stats").innerHTML = `
+        <span class="stat">층 <strong>${Math.min(state.floor, MAX_FLOOR)}</strong>/${MAX_FLOOR}</span>
+        <span class="stat">체력 <strong>${state.hp}</strong>/${START_HP}</span>
+        <span class="stat">굴림 <strong>${state.pool.length}</strong>개</span>
+        <span class="stat">풀 크기 <strong>${state.pool.length}</strong></span>
+      `;
+      document.getElementById("handCount").textContent =
+        state.phase === "upgrade"
+          ? "강화 대상"
+          : state.phase === "replace"
+            ? "교체 대상"
+          : state.phase === "choose" && isAdversityEncounter() && currentChoice()
+            ? `${state.selectedPoolIds.length}/${ADVERSITY_DICE_COUNT}`
+          : `전체 ${state.pool.length}개`;
+      document.getElementById("rollInfo").textContent =
+        state.phase === "assign" ? `더블클릭: 잠금 · 리롤 ${state.rerollsLeft}` : "";
+    }
+
+    function renderPhaseNote() {
+      const el = document.getElementById("phaseNote");
+      if (state.phase === "choose") {
+        if (isAdversityEncounter() && !currentChoice()) {
+          el.textContent = "역경 선택지를 고르세요.";
+        } else if (isAdversityEncounter()) {
+          el.textContent = `풀에서 주사위 ${ADVERSITY_DICE_COUNT}개를 고르세요.`;
+        } else {
+          el.textContent = `풀 전체 ${state.pool.length}개를 굴립니다.`;
+        }
+      } else if (state.phase === "assign") {
+        el.textContent = "주사위를 선택해 요구칸에 할당하세요.";
+      } else if (state.phase === "reward") {
+        el.textContent = "보상을 고르세요.";
+      } else if (state.phase === "upgrade") {
+        el.textContent = "강화할 주사위를 고르세요.";
+      } else if (state.phase === "replace") {
+        el.textContent = `${DIE_TYPES[state.replacementType].name}로 교체할 주사위를 고르세요.`;
+      } else if (state.phase === "victory") {
+        el.textContent = "정상에 도달했습니다. 새 런으로 다른 주사위 조합을 실험해보세요.";
+      } else {
+        el.textContent = "체력이 0이 되어 런이 끝났습니다.";
+      }
+    }
+
+    function renderLog() {
+      document.getElementById("log").innerHTML =
+        state.log.map(entry => `<div class="log-entry">${entry}</div>`).join("");
+    }
+
+    function render() {
+      renderStatus();
+      renderPhaseNote();
+      renderEncounter();
+      renderPool();
+      renderRolledDice();
+      renderActions();
+      renderRewardPanel();
+      renderLog();
+    }
+
+    resetRun();
+  </script>
+</body>
+</html>
