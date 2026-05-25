@@ -3,143 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>액션 주사위 엔진 — 프로토 v0.1</title>
+  <title>액션 주사위 엔진 — v0.9</title>
   <style>
     :root {
-      --bg: #14121a; --surface: #1e1b26; --surface2: #2a2535;
+      --bg: #0f0e17; --surface: #1a1826; --surface2: #252336;
       --accent: #7eb8ff; --green: #6ecf8f; --gold: #ffd166;
-      --pink: #ff8fab; --text: #f0ecf5; --muted: #9a8fad;
-      --die: #faf6ff; --hand-bg: rgba(126,184,255,0.06);
-      --field-bg: rgba(255,209,102,0.06);
-      --lock: #ffd166;
+      --pink: #ff8fab; --red: #ff6b6b; --text: #f0ecf5; --muted: #9a8fad;
+      --die-bg: #faf6ff; --die-locked-bg: #fff8e1;
+      --field-bg: rgba(255,209,102,0.04);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh; padding: 1rem 1.2rem 2rem;
       font-family: "Segoe UI", system-ui, sans-serif;
       background: var(--bg);
-      background-image: radial-gradient(ellipse 70% 45% at 50% -10%, rgba(126,184,255,0.14), transparent);
+      background-image: radial-gradient(ellipse 70% 45% at 50% -10%, rgba(126,184,255,0.1), transparent);
       color: var(--text);
     }
-    .app { max-width: 52rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
-    header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: flex-start; }
-    h1 { font-size: 1.15rem; font-weight: 700; }
-    .sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
-    .stats { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; font-size: 0.82rem; color: var(--muted); }
+    .app { max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.65rem; }
+
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.4rem; }
+    h1 { font-size: 1.1rem; font-weight: 700; }
+    .sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .stats {
+      display: flex; flex-wrap: wrap; gap: 0.25rem 0.7rem;
+      font-size: 0.78rem; color: var(--muted);
+    }
     .stats strong { color: var(--gold); }
-    .stats .danger strong { color: var(--pink); }
 
     .panel {
-      background: var(--surface); border-radius: 0.75rem;
-      padding: 0.85rem 1rem; box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-      border: 1px solid rgba(255,255,255,0.04);
+      background: var(--surface); border-radius: 0.65rem;
+      padding: 0.7rem 0.85rem; border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     }
-    .panel h2 {
-      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--muted); margin-bottom: 0.45rem;
+    .panel-label {
+      font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 0.35rem; font-weight: 600;
     }
-    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 
     .banner {
-      padding: 0.55rem 0.75rem; border-radius: 0.5rem;
-      background: var(--surface2); font-size: 0.82rem; line-height: 1.4;
+      padding: 0.45rem 0.65rem; border-radius: 0.4rem;
+      background: var(--surface2); font-size: 0.78rem; line-height: 1.4;
     }
     .banner.stage { border-left: 3px solid var(--pink); }
     .banner.goal { border-left: 3px solid var(--accent); }
     .banner span { color: var(--gold); font-weight: 600; }
 
-    .zone {
-      border-radius: 0.65rem; padding: 0.75rem; min-height: 5.5rem;
-      border: 2px dashed rgba(154,143,173,0.25);
+    .field-zone {
+      border-radius: 0.55rem; padding: 0.7rem;
+      background: var(--field-bg); min-height: 6rem;
+      border: 2px dashed rgba(255,209,102,0.2);
     }
-    .zone.hand { background: var(--hand-bg); border-color: rgba(126,184,255,0.25); }
-    .zone.field { background: var(--field-bg); border-color: rgba(255,209,102,0.25); }
-    .zone-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); margin-bottom: 0.5rem; }
-    .zone-label em { font-style: normal; font-weight: 400; opacity: 0.85; }
-    .dice-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; min-height: 3.2rem; }
-    .empty-slot { font-size: 0.75rem; color: var(--muted); }
+    .field-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); margin-bottom: 0.45rem; }
+    .field-label em { font-style: normal; font-weight: 400; opacity: 0.8; }
+    .dice-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; min-height: 3.4rem; }
+    .empty-msg { font-size: 0.72rem; color: var(--muted); }
 
     .die {
-      --sz: 3rem; width: var(--sz); height: var(--sz);
-      background: var(--die); border-radius: 0.55rem;
-      box-shadow: 0 3px 0 #d4cce4, 0 4px 12px rgba(0,0,0,0.2);
-      display: grid; place-items: center; font-weight: 800; font-size: 1.45rem;
-      color: #2d2640; border: 2px solid transparent; cursor: pointer;
-      transition: 0.12s; user-select: none; position: relative;
+      --sz: 3.2rem; width: var(--sz); height: var(--sz);
+      background: var(--die-bg); border-radius: 0.5rem;
+      box-shadow: 0 3px 0 #d0c8e0, 0 4px 10px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.4rem; color: #2d2640;
+      border: 2.5px solid transparent; cursor: pointer;
+      transition: transform 0.1s, border-color 0.1s, background 0.1s;
+      user-select: none; position: relative;
     }
     .die:hover { transform: translateY(-2px); }
-    .die.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(126,184,255,0.35); }
+    .die.locked {
+      background: var(--die-locked-bg);
+      border-color: var(--gold);
+      box-shadow: 0 3px 0 #d4c87e, 0 0 8px rgba(255,209,102,0.25);
+    }
     .die.locked::after {
-      content: "🔒"; position: absolute; top: -0.35rem; right: -0.35rem;
-      font-size: 0.65rem; line-height: 1;
+      content: "🔒"; position: absolute; top: -0.3rem; right: -0.3rem;
+      font-size: 0.6rem; line-height: 1;
     }
-    .die.unrolled {
-      background: linear-gradient(145deg, #eee8f8, #ddd4ef);
-      color: var(--muted); font-size: 1rem;
+    .die .type-tag {
+      font-size: 0.42rem; font-weight: 600; letter-spacing: 0.03em;
+      color: var(--muted); margin-top: 0.05rem;
     }
-    .die.unrolled::before { content: "?"; font-size: 1.2rem; }
-    .die.rolling { animation: shake 0.4s ease-in-out; }
+    .die.locked .type-tag { color: #b8a040; }
+    .die.rolling { animation: shake 0.35s ease-in-out; }
     @keyframes shake {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-10deg) translateY(-3px); }
-      75% { transform: rotate(10deg) translateY(-3px); }
+      0%,100% { transform: rotate(0deg); }
+      25% { transform: rotate(-12deg) translateY(-3px); }
+      75% { transform: rotate(12deg) translateY(-3px); }
     }
 
-    .actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
     .btn {
-      padding: 0.5rem 0.75rem; border: none; border-radius: 0.45rem;
-      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      padding: 0.45rem 0.65rem; border: none; border-radius: 0.4rem;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
       background: var(--surface2); color: var(--text);
       border: 1px solid rgba(255,255,255,0.06); transition: 0.12s;
     }
     .btn:hover:not(:disabled) { background: #353040; }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .btn.active { background: rgba(126,184,255,0.2); border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .btn.primary { background: var(--accent); color: #0f1520; border-color: transparent; }
-    .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+    .btn.primary:hover:not(:disabled) { filter: brightness(1.1); }
     .btn.end { background: rgba(110,207,143,0.15); border-color: var(--green); color: var(--green); }
+    .btn.end:hover:not(:disabled) { background: rgba(110,207,143,0.25); }
 
-    .items { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .items { display: flex; flex-wrap: wrap; gap: 0.3rem; }
     .chip {
-      font-size: 0.72rem; padding: 0.25rem 0.5rem; border-radius: 999px;
+      font-size: 0.68rem; padding: 0.2rem 0.45rem; border-radius: 999px;
       background: var(--surface2); color: var(--muted);
     }
-    .chip.owned { background: rgba(255,209,102,0.12); color: var(--gold); border: 1px solid rgba(255,209,102,0.25); }
+    .chip.owned { background: rgba(255,209,102,0.12); color: var(--gold); border: 1px solid rgba(255,209,102,0.2); }
 
     .log {
-      max-height: 9rem; overflow-y: auto; font-size: 0.76rem;
-      line-height: 1.5; color: var(--muted);
+      max-height: 8rem; overflow-y: auto; font-size: 0.72rem;
+      line-height: 1.55; color: var(--muted);
     }
-    .log .line-score { color: var(--green); font-weight: 600; }
-    .log .line-turn { color: var(--accent); margin-top: 0.35rem; }
+    .log .sc { color: var(--green); font-weight: 600; }
+    .log .turn { color: var(--accent); margin-top: 0.3rem; }
 
     .overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
       display: grid; place-items: center; z-index: 100; padding: 1rem;
     }
     .overlay.hidden { display: none; }
     .modal {
-      background: var(--surface); border-radius: 0.85rem; padding: 1.25rem;
-      max-width: 24rem; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      background: var(--surface); border-radius: 0.75rem; padding: 1.15rem;
+      max-width: 22rem; width: 100%; box-shadow: 0 16px 48px rgba(0,0,0,0.5);
     }
-    .modal h3 { font-size: 1rem; margin-bottom: 0.5rem; }
-    .modal p { font-size: 0.82rem; color: var(--muted); line-height: 1.45; margin-bottom: 0.75rem; }
-    .pick-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .modal h3 { font-size: 0.95rem; margin-bottom: 0.4rem; }
+    .modal p { font-size: 0.78rem; color: var(--muted); line-height: 1.45; margin-bottom: 0.65rem; }
+    .pick-list { display: flex; flex-direction: column; gap: 0.35rem; }
     .pick-btn {
-      text-align: left; padding: 0.65rem 0.75rem; border-radius: 0.5rem;
+      text-align: left; padding: 0.55rem 0.7rem; border-radius: 0.45rem;
       background: var(--surface2); border: 2px solid transparent;
-      color: var(--text); cursor: pointer; font-size: 0.82rem;
+      color: var(--text); cursor: pointer; font-size: 0.78rem;
     }
     .pick-btn:hover { border-color: var(--accent); }
-    .pick-btn strong { display: block; color: var(--gold); margin-bottom: 0.15rem; }
+    .pick-btn strong { display: block; color: var(--gold); margin-bottom: 0.1rem; }
 
     .toast {
       position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%);
-      background: var(--surface2); padding: 0.5rem 1rem; border-radius: 999px;
-      font-size: 0.78rem; color: var(--text); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      background: var(--surface2); padding: 0.45rem 0.9rem; border-radius: 999px;
+      font-size: 0.75rem; color: var(--text); box-shadow: 0 6px 20px rgba(0,0,0,0.4);
       z-index: 50; opacity: 0; pointer-events: none; transition: 0.25s;
     }
     .toast.show { opacity: 1; }
+
+    .score-preview {
+      margin-top: 0.4rem; padding: 0.4rem 0.6rem; border-radius: 0.35rem;
+      background: rgba(110,207,143,0.08); border: 1px solid rgba(110,207,143,0.15);
+      font-size: 0.72rem; color: var(--green);
+    }
+    .score-preview strong { font-size: 0.95rem; }
   </style>
 </head>
 <body>
@@ -147,36 +161,37 @@
     <header>
       <div>
         <h1>액션 주사위 엔진</h1>
-        <p class="sub">v0.8 — 던지기 · 필드 리셋 · 족보 아이템</p>
+        <p class="sub">v0.9 — 전체 리롤 · 자유 잠금 · 주사위 타입</p>
       </div>
       <div class="stats" id="stats"></div>
     </header>
 
     <div class="banner stage" id="stageRule"></div>
     <div class="panel">
-      <h2>턴 목표</h2>
+      <div class="panel-label">턴 목표</div>
       <div class="banner goal" id="turnGoal"></div>
     </div>
 
     <div class="panel">
-      <h2>아이템</h2>
+      <div class="panel-label">아이템</div>
       <div class="items" id="items"></div>
     </div>
 
     <div class="panel">
-      <div class="zone field">
-        <div class="zone-label">필드 <em>— 던지기로 채움 · 턴 종료 시 전부 리셋</em></div>
+      <div class="field-zone">
+        <div class="field-label">필드 <em>— 클릭으로 잠금 토글 · 턴 종료 시 리셋</em></div>
         <div class="dice-row" id="fieldZone"></div>
       </div>
+      <div class="score-preview" id="preview"></div>
     </div>
 
     <div class="panel">
-      <h2>액션 <span id="actionHint" style="font-weight:400;text-transform:none;letter-spacing:0"></span></h2>
+      <div class="panel-label">액션</div>
       <div class="actions" id="actions"></div>
     </div>
 
     <div class="panel">
-      <h2>로그</h2>
+      <div class="panel-label">로그</div>
       <div class="log" id="log"></div>
     </div>
   </div>
@@ -188,62 +203,76 @@
   </div>
 
   <script>
-    const MAX_DICE = 5;
-    const ACTIONS_PER_TURN = 5;
+    const INITIAL_DICE = 5;
+    const MAX_FIELD = 8;
+    const REROLLS_PER_TURN = 3;
+    const THROWS_PER_TURN = 2;
     const TURNS_PER_STAGE = 5;
-    const STAGE_GOAL_BASE = 40;
-    const STAGE_GOAL_STEP = 15;
+    const STAGE_GOAL_BASE = 50;
+    const STAGE_GOAL_STEP = 20;
+
+    const DICE_TYPES = {
+      stable:   { tag: "안정", faces: [2,2,3,3,4,4], color: "#7eb8ff" },
+      berserk:  { tag: "폭주", faces: [1,1,1,6,6,6], color: "#ff8fab" },
+      straight: { tag: "직선", faces: [1,2,3,4,5,6], color: "#b8e986" },
+      pair:     { tag: "족보", faces: [2,2,3,3,5,5], color: "#c9b0ff" },
+      lock:     { tag: "잠금", faces: [3,3,4,4,5,5], color: "#ffd166" },
+    };
+    const DICE_TYPE_KEYS = Object.keys(DICE_TYPES);
 
     const ITEMS = {
-      pair: { id: "pair", name: "짝 맞추기 판", hand: "페어", score: 6 },
-      triple: { id: "triple", name: "세 줄표", hand: "트리플", score: 12 },
-      straight: { id: "straight", name: "계단 조각", hand: "스트레이트", score: 10 },
-      glue: { id: "glue", name: "낡은 접착제", hand: "이월", score: 0 },
+      pairItem:     { id: "pairItem",     name: "짝 맞추기 판", hand: "페어",       score: 6  },
+      tripleItem:   { id: "tripleItem",   name: "세 줄표",      hand: "트리플",     score: 12 },
+      straightItem: { id: "straightItem", name: "계단 조각",    hand: "스트레이트", score: 10 },
+      overheat:     { id: "overheat",     name: "과열 베어링",  hand: "리롤 +1점",  score: 0  },
+      glue:         { id: "glue",         name: "낡은 접착제",  hand: "턴 이월",    score: 0  },
     };
 
     const STAGE_RULES = [
-      { id: "none", label: "규칙 없음", desc: "스테이지 규칙 없음 — 합계 그대로" },
-      { id: "evens", label: "짝수만", desc: "홀수 눈은 합계에서 0" },
-      { id: "high5", label: "5 이상만", desc: "4 이하 눈은 합계에서 0" },
-      { id: "oddBonus", label: "홀수 보너스", desc: "홀수 눈 1개당 +2 (합계와 별도)" },
-      { id: "lowSum", label: "저합 스테이지", desc: "턴 합계 15 이하일 때 +6" },
+      { id: "none",     label: "규칙 없음",   desc: "합계 그대로" },
+      { id: "evens",    label: "짝수만",       desc: "홀수 눈 → 점수 0" },
+      { id: "high5",    label: "5 이상만",     desc: "4 이하 → 점수 0" },
+      { id: "oddBonus", label: "홀수 보너스",  desc: "홀수 눈 1개당 +2" },
+      { id: "lowSum",   label: "저합 보너스",  desc: "합계 15 이하 시 +8" },
     ];
 
     const TURN_GOALS = [
-      { id: "roll3", label: "필드 3개 이상", bonus: 6, check: (ctx) => ctx.values.length >= 3 },
-      { id: "has6", label: "6이 1개 이상", bonus: 4, check: (ctx) => ctx.values.includes(6) },
-      { id: "even2", label: "짝수 2개 이상", bonus: 5, check: (ctx) => ctx.values.filter(v => v % 2 === 0).length >= 2 },
-      { id: "sum18", label: "합계 18 이상", bonus: 8, check: (ctx) => ctx.rawSum >= 18 },
-      { id: "pair", label: "페어 1개 이상", bonus: 4, needsItem: "pair", check: (ctx) => hasPair(ctx.values) },
+      { id: "sum18",   label: "합 18 이상",    bonus: 8, check: c => c.rawSum >= 18 },
+      { id: "has6",    label: "6이 1개 이상",   bonus: 4, check: c => c.values.includes(6) },
+      { id: "even3",   label: "짝수 3개 이상",  bonus: 5, check: c => c.values.filter(v => v%2===0).length >= 3 },
+      { id: "field6",  label: "필드 6개 이상",  bonus: 6, check: c => c.values.length >= 6 },
+      { id: "pair",    label: "페어 달성",      bonus: 4, needsItem: "pairItem", check: c => hasPair(c.values) },
     ];
 
-    let dieId = 0;
-    let mode = null;
+    let uid = 0;
 
     const state = {
-      stage: 1,
-      stageGoal: STAGE_GOAL_BASE,
-      stageScore: 0,
+      stage: 1, stageGoal: STAGE_GOAL_BASE, stageScore: 0,
       turnsLeft: TURNS_PER_STAGE,
-      actionsLeft: ACTIONS_PER_TURN,
-      field: [],
-      items: [],
-      stageRule: null,
-      turnGoal: null,
-      log: [],
-      gameOver: false,
-      carryToField: null,
+      rerollsLeft: REROLLS_PER_TURN,
+      throwsLeft: THROWS_PER_TURN,
+      rerollsUsed: 0,
+      field: [], items: [],
+      stageRule: null, turnGoal: null,
+      log: [], gameOver: false,
+      carryDice: [],
     };
 
-    function d6() { return 1 + Math.floor(Math.random() * 6); }
-    function fieldCount() { return state.field.length; }
+    function rollFace(type) {
+      const f = DICE_TYPES[type].faces;
+      return f[Math.floor(Math.random() * f.length)];
+    }
+
+    function makeDie(type) {
+      return { id: ++uid, value: rollFace(type), locked: false, type };
+    }
 
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function pickType() { return pick(DICE_TYPE_KEYS); }
 
     function toast(msg) {
       const el = document.getElementById("toast");
-      el.textContent = msg;
-      el.classList.add("show");
+      el.textContent = msg; el.classList.add("show");
       setTimeout(() => el.classList.remove("show"), 2200);
     }
 
@@ -252,69 +281,63 @@
       if (state.log.length > 40) state.log.pop();
     }
 
-    function hasPair(values) {
-      const c = counts(values);
-      return Object.values(c).some(n => n >= 2);
-    }
-
-    function counts(values) {
+    function counts(vals) {
       const m = {};
-      for (const v of values) m[v] = (m[v] || 0) + 1;
+      for (const v of vals) m[v] = (m[v]||0) + 1;
       return m;
     }
+    function hasPair(vals) { return Object.values(counts(vals)).some(n => n >= 2); }
+    function hasTriple(vals) { return Object.values(counts(vals)).some(n => n >= 3); }
 
-    function longestStraight(values) {
-      const uniq = [...new Set(values)].sort((a, b) => a - b);
-      if (uniq.length < 3) return 0;
+    function longestStraight(vals) {
+      const u = [...new Set(vals)].sort((a,b) => a-b);
+      if (u.length < 3) return 0;
       let best = 1, run = 1;
-      for (let i = 1; i < uniq.length; i++) {
-        if (uniq[i] === uniq[i - 1] + 1) { run++; best = Math.max(best, run); }
+      for (let i = 1; i < u.length; i++) {
+        if (u[i] === u[i-1]+1) { run++; best = Math.max(best, run); }
         else run = 1;
       }
       return best;
     }
 
-    function detectHands(values) {
-      const c = counts(values);
-      const freqs = Object.values(c);
-      const result = [];
-      if (freqs.some(n => n >= 2)) result.push("pair");
-      if (freqs.some(n => n >= 3)) result.push("triple");
-      if (longestStraight(values) >= 3) result.push("straight");
-      return result;
+    function detectHands(vals) {
+      const res = [];
+      if (hasPair(vals)) res.push("pairItem");
+      if (hasTriple(vals)) res.push("tripleItem");
+      if (longestStraight(vals) >= 3) res.push("straightItem");
+      return res;
     }
 
-    function dieValue(d) {
-      return d.locked ? d.value * 2 : d.value;
+    function dieScore(d, rule) {
+      let v = d.value;
+      if (rule.id === "evens" && v % 2 !== 0) v = 0;
+      if (rule.id === "high5" && v < 5) v = 0;
+      return d.locked ? v * 2 : v;
     }
 
     function computeScore() {
-      const fieldDice = state.field;
-      const values = fieldDice.map(d => d.value);
-      const rawSum = fieldDice.reduce((s, d) => s + dieValue(d), 0);
-
-      let sum = rawSum;
-      let stageExtra = 0;
+      const dice = state.field;
       const rule = state.stageRule;
+      const values = dice.map(d => d.value);
+      const rawSum = dice.reduce((s,d) => s + (d.locked ? d.value*2 : d.value), 0);
 
-      if (rule.id === "evens") {
-        sum = fieldDice.reduce((s, d) => s + (d.value % 2 === 0 ? dieValue(d) : 0), 0);
-      } else if (rule.id === "high5") {
-        sum = fieldDice.reduce((s, d) => s + (d.value >= 5 ? dieValue(d) : 0), 0);
-      } else if (rule.id === "oddBonus") {
-        stageExtra = fieldDice.filter(d => d.value % 2 === 1).length * 2;
-      } else if (rule.id === "lowSum") {
-        if (rawSum <= 15) stageExtra += 6;
-      }
+      let sum = dice.reduce((s,d) => s + dieScore(d, rule), 0);
+      let stageExtra = 0;
+      if (rule.id === "oddBonus") stageExtra = dice.filter(d => d.value%2===1).length * 2;
+      if (rule.id === "lowSum" && rawSum <= 15) stageExtra = 8;
 
       let handScore = 0;
       const handsHit = [];
-      const detected = detectHands(values);
-      for (const h of detected) {
+      for (const h of detectHands(values)) {
         if (state.items.includes(h)) {
           handScore += ITEMS[h].score;
           handsHit.push(ITEMS[h].hand);
         }
+      }
+
+      let overheatBonus = 0;
+      if (state.items.includes("overheat")) {
+        overheatBonus = state.rerollsUsed;
       }
 
       const ctx = { values, rawSum, sum };
@@ -326,35 +349,75 @@
         }
       }
 
-      const total = sum + stageExtra + handScore + goalBonus;
-      return { values, rawSum, sum, stageExtra, handScore, handsHit, goalBonus, total, rule };
+      const total = sum + stageExtra + handScore + goalBonus + overheatBonus;
+      return { values, rawSum, sum, stageExtra, handScore, handsHit, goalBonus, overheatBonus, total };
     }
 
     function startStage() {
-      state.field = [];
-      if (state.carryToField) {
-        state.field.push(state.carryToField);
-        state.carryToField = null;
-        addLog(`<span style="color:var(--gold)">아이템: 잠긴 주사위 필드 이월</span>`);
-      }
       state.stageScore = 0;
       state.gameOver = false;
       state.turnsLeft = TURNS_PER_STAGE;
       state.stageGoal = STAGE_GOAL_BASE + (state.stage - 1) * STAGE_GOAL_STEP;
       if (state.stage === 1) state.stageRule = STAGE_RULES[0];
       else state.stageRule = pick(STAGE_RULES.filter(r => r.id !== "none"));
-      startTurn(true);
-      addLog(`<span class="line-turn">── 스테이지 ${state.stage} 시작 (목표 ${state.stageGoal}) · ${state.stageRule.label} ──</span>`);
+      addLog(`<span class="turn">── 스테이지 ${state.stage} 시작 (목표 ${state.stageGoal}) · ${state.stageRule.label} ──</span>`);
+      startTurn();
     }
 
-    function startTurn(isStageStart) {
-      state.actionsLeft = ACTIONS_PER_TURN;
-      mode = null;
+    function startTurn() {
+      state.rerollsLeft = REROLLS_PER_TURN;
+      state.throwsLeft = THROWS_PER_TURN;
+      state.rerollsUsed = 0;
+
+      state.field = [];
+      for (const d of state.carryDice) {
+        state.field.push({ ...d, id: ++uid });
+      }
+      if (state.carryDice.length) {
+        addLog(`<span style="color:var(--gold)">접착제: 잠긴 주사위 ${state.carryDice.length}개 이월</span>`);
+      }
+      state.carryDice = [];
+
+      const needed = INITIAL_DICE - state.field.length;
+      for (let i = 0; i < needed; i++) {
+        state.field.push(makeDie("stable"));
+      }
+
       const pool = TURN_GOALS.filter(g => !g.needsItem || state.items.includes(g.needsItem));
       state.turnGoal = pick(pool.length ? pool : TURN_GOALS.slice(0, 4));
-      if (!isStageStart) {
-        addLog(`<span class="line-turn">── 턴 시작 (남은 턴 ${state.turnsLeft}) ──</span>`);
+      addLog(`<span class="turn">── 턴 시작 (남은 턴 ${state.turnsLeft}) ──</span>`);
+      render();
+    }
+
+    function doRerollAll() {
+      if (state.gameOver || state.rerollsLeft <= 0) return;
+      const unlocked = state.field.filter(d => !d.locked);
+      if (!unlocked.length) { toast("잠기지 않은 주사위 없음"); return; }
+      for (const d of unlocked) {
+        d.value = rollFace(d.type);
       }
+      state.rerollsLeft--;
+      state.rerollsUsed++;
+      for (const d of unlocked) animateDie(d.id);
+      render();
+    }
+
+    function toggleLock(dieId) {
+      if (state.gameOver) return;
+      const die = state.field.find(d => d.id === dieId);
+      if (!die) return;
+      die.locked = !die.locked;
+      render();
+    }
+
+    function doThrow() {
+      if (state.gameOver || state.throwsLeft <= 0) return;
+      if (state.field.length >= MAX_FIELD) { toast(`필드 가득 참 (최대 ${MAX_FIELD})`); return; }
+      const type = pickType();
+      const die = makeDie(type);
+      state.field.push(die);
+      state.throwsLeft--;
+      animateDie(die.id);
       render();
     }
 
@@ -363,26 +426,24 @@
       const sc = computeScore();
       state.stageScore += sc.total;
 
-      let detail = `합 ${sc.rawSum}`;
-      if (sc.sum !== sc.rawSum) detail += ` → 규칙 후 ${sc.sum}`;
-      if (sc.stageExtra) detail += ` +규칙보너스 ${sc.stageExtra}`;
-      if (sc.handScore) detail += ` +족보 ${sc.handScore}${sc.handsHit.length ? " (" + sc.handsHit.join(", ") + ")" : ""}`;
+      let detail = `합 ${sc.sum}`;
+      if (sc.stageExtra) detail += ` +규칙 ${sc.stageExtra}`;
+      if (sc.handScore) detail += ` +족보 ${sc.handScore} (${sc.handsHit.join(",")})`;
+      if (sc.overheatBonus) detail += ` +과열 ${sc.overheatBonus}`;
       if (sc.goalBonus) detail += ` +목표 ${sc.goalBonus}`;
-      addLog(`<span class="line-score">+${sc.total}점</span> (${detail}) → 누적 ${state.stageScore}`);
+      addLog(`<span class="sc">+${sc.total}점</span> (${detail}) → 누적 ${state.stageScore}`);
+
+      if (state.items.includes("glue")) {
+        const locked = state.field.filter(d => d.locked);
+        if (locked.length) {
+          state.carryDice = [locked[0]];
+        }
+      }
 
       state.field = [];
-      addLog(`<span style="color:var(--muted)">필드 리셋</span>`);
-
       state.turnsLeft--;
-      state.actionsLeft = 0;
 
       if (state.stageScore >= state.stageGoal) {
-        if (state.items.includes("glue")) {
-          const locked = state.field.filter(d => d.locked);
-          if (locked.length) {
-            state.carryToField = { ...locked[0], id: ++dieId };
-          }
-        }
         render();
         showStageClear();
         return;
@@ -390,30 +451,27 @@
       if (state.turnsLeft <= 0) {
         state.gameOver = true;
         render();
-        showModal("스테이지 실패", `<p>목표 ${state.stageGoal}점에 ${state.stageScore}점. 턴을 모두 썼습니다.</p>`, [
-          { label: "다시 시작", action: resetRun },
-        ]);
+        showModal("스테이지 실패",
+          `<p>목표 ${state.stageGoal}점에 ${state.stageScore}점.</p>`,
+          [{ label: "다시 시작", action: resetRun }]);
         return;
       }
-      startTurn(false);
+      startTurn();
     }
 
     function showStageClear() {
-      const unowned = Object.keys(ITEMS).filter(k => k !== "glue" && !state.items.includes(k));
-      if (unowned.length === 0) {
-        showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성. 모든 족보 아이템을 모았습니다. 다음 스테이지로!</p>`, [
-          { label: "다음 스테이지", action: () => { hideModal(); state.stage++; startStage(); } },
-        ]);
+      const unowned = Object.keys(ITEMS).filter(k => !state.items.includes(k));
+      if (!unowned.length) {
+        showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성. 모든 아이템 보유. 다음 스테이지!</p>`,
+          [{ label: "다음 스테이지", action: () => { hideModal(); state.stage++; startStage(); }}]);
         return;
       }
-      const choices = [];
-      const pool = [...unowned].sort(() => Math.random() - 0.5).slice(0, 3);
-      for (const id of pool) {
+      const pool = [...unowned].sort(() => Math.random()-0.5).slice(0, 3);
+      const choices = pool.map(id => {
         const it = ITEMS[id];
-        choices.push({
-          label: it.id === "glue"
-            ? `<strong>${it.name}</strong> — 스테이지 클리어 시 잠긴 주사위 1개 다음 스테이지 필드 이월`
-            : `<strong>${it.name}</strong> — ${it.hand} +${it.score}점 활성화`,
+        const desc = it.score ? `${it.hand} +${it.score}점` : it.hand;
+        return {
+          label: `<strong>${it.name}</strong> — ${desc}`,
           action: () => {
             state.items.push(id);
             hideModal();
@@ -421,127 +479,68 @@
             state.stage++;
             startStage();
           },
-        });
-      }
-      showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성! 아이템 1개를 고르세요.</p>`, choices);
+        };
+      });
+      showModal("스테이지 클리어!", `<p>${state.stageScore}점 달성! 아이템 선택:</p>`, choices);
     }
 
     function grantStartingItem() {
-      const pool = Object.keys(ITEMS).filter(k => k !== "glue");
+      const pool = ["pairItem", "tripleItem", "straightItem"];
       const id = pick(pool);
       state.items = [id];
       const it = ITEMS[id];
-      addLog(`<span class="line-turn">시작 아이템: <span style="color:var(--gold)">${it.name}</span> (${it.hand} +${it.score})</span>`);
+      addLog(`<span class="turn">시작 아이템: <span style="color:var(--gold)">${it.name}</span> (${it.hand} +${it.score})</span>`);
       toast(`시작 아이템: ${it.name}`);
     }
 
     function resetRun() {
       hideModal();
-      dieId = 0;
+      uid = 0;
       Object.assign(state, {
         stage: 1, stageGoal: STAGE_GOAL_BASE, stageScore: 0,
-        turnsLeft: TURNS_PER_STAGE, actionsLeft: ACTIONS_PER_TURN,
+        turnsLeft: TURNS_PER_STAGE,
+        rerollsLeft: REROLLS_PER_TURN, throwsLeft: THROWS_PER_TURN, rerollsUsed: 0,
         field: [], items: [],
-        log: [], gameOver: false, carryToField: null,
+        log: [], gameOver: false, carryDice: [],
       });
-      addLog(`<span class="line-turn">── 새 런 시작 ──</span>`);
+      addLog(`<span class="turn">── 새 런 시작 ──</span>`);
       grantStartingItem();
       startStage();
-    }
-
-    function spendAction() {
-      state.actionsLeft--;
-      if (state.actionsLeft <= 0) toast("액션 소진 — 턴 종료하세요");
-    }
-
-    function doThrow() {
-      if (state.gameOver || state.actionsLeft <= 0) return;
-      if (fieldCount() >= MAX_DICE) {
-        toast("필드가 가득 참 (최대 5)");
-        return;
-      }
-      const die = { id: ++dieId, value: d6(), locked: false };
-      state.field.push(die);
-      spendAction();
-      mode = null;
-      animateDie(die.id);
-      render();
-    }
-
-    function doReroll(dieId) {
-      if (state.gameOver || state.actionsLeft <= 0) return;
-      const die = state.field.find(d => d.id === dieId);
-      if (!die || die.locked) return;
-      die.value = d6();
-      spendAction();
-      mode = null;
-      animateDie(die.id);
-      render();
-    }
-
-    function doLock(dieId) {
-      if (state.gameOver || state.actionsLeft <= 0) return;
-      const die = state.field.find(d => d.id === dieId);
-      if (!die || die.locked) return;
-      die.locked = true;
-      spendAction();
-      mode = null;
-      render();
     }
 
     function animateDie(id) {
       requestAnimationFrame(() => {
         const el = document.querySelector(`[data-id="${id}"]`);
-        if (el) {
-          el.classList.add("rolling");
-          setTimeout(() => el.classList.remove("rolling"), 400);
-        }
+        if (el) { el.classList.add("rolling"); setTimeout(() => el.classList.remove("rolling"), 350); }
       });
     }
 
-    function setMode(m) {
-      if (state.gameOver || state.actionsLeft <= 0) return;
-      mode = mode === m ? null : m;
-      render();
-    }
-
-    function onDieClick(id) {
-      if (state.gameOver) return;
-      if (mode === "reroll") { doReroll(id); return; }
-      if (mode === "lock") { doLock(id); return; }
-    }
-
     function showModal(title, body, buttons) {
-      const modal = document.getElementById("modal");
-      modal.innerHTML = `<h3>${title}</h3>${body}<div class="pick-list"></div>`;
-      const list = modal.querySelector(".pick-list");
+      const m = document.getElementById("modal");
+      m.innerHTML = `<h3>${title}</h3>${body}<div class="pick-list"></div>`;
+      const list = m.querySelector(".pick-list");
       for (const b of buttons) {
         const btn = document.createElement("button");
-        btn.className = "pick-btn";
-        btn.innerHTML = b.label;
-        btn.onclick = b.action;
-        list.appendChild(btn);
+        btn.className = "pick-btn"; btn.innerHTML = b.label;
+        btn.onclick = b.action; list.appendChild(btn);
       }
       document.getElementById("overlay").classList.remove("hidden");
     }
-
-    function hideModal() {
-      document.getElementById("overlay").classList.add("hidden");
-    }
+    function hideModal() { document.getElementById("overlay").classList.add("hidden"); }
 
     function render() {
-      const est = state.field.length && !state.gameOver ? computeScore().total : null;
+      const sc = state.field.length && !state.gameOver ? computeScore() : null;
+
       document.getElementById("stats").innerHTML = `
         <span>스테이지 <strong>${state.stage}</strong></span>
-        <span>누적 <strong>${state.stageScore}</strong> / ${state.stageGoal}</span>
-        <span>남은 턴 <strong>${state.turnsLeft}</strong></span>
-        <span class="${state.actionsLeft === 0 ? "danger" : ""}">액션 <strong>${state.actionsLeft}</strong> / ${ACTIONS_PER_TURN}</span>
-        <span>필드 <strong>${fieldCount()}</strong> / ${MAX_DICE}</span>
-        ${est !== null ? `<span>턴 종료 시 <strong>+${est}</strong> 예상</span>` : ""}
+        <span>누적 <strong>${state.stageScore}</strong>/${state.stageGoal}</span>
+        <span>턴 <strong>${state.turnsLeft}</strong></span>
+        <span>리롤 <strong>${state.rerollsLeft}</strong>/${REROLLS_PER_TURN}</span>
+        <span>추가 <strong>${state.throwsLeft}</strong>/${THROWS_PER_TURN}</span>
       `;
 
       document.getElementById("stageRule").innerHTML =
-        `<strong>스테이지 규칙</strong> · <span>${state.stageRule.label}</span> — ${state.stageRule.desc}`;
+        `<strong>스테이지</strong> · <span>${state.stageRule.label}</span> — ${state.stageRule.desc}`;
 
       const tg = state.turnGoal;
       document.getElementById("turnGoal").innerHTML =
@@ -549,50 +548,59 @@
 
       const itemsEl = document.getElementById("items");
       if (!state.items.length) {
-        itemsEl.innerHTML = `<span class="chip">없음 — 족보 0점</span>`;
+        itemsEl.innerHTML = `<span class="chip">없음</span>`;
       } else {
         itemsEl.innerHTML = state.items.map(id => {
           const it = ITEMS[id];
-          if (id === "glue") return `<span class="chip owned">${it.name} (스테이지 이월)</span>`;
-          return `<span class="chip owned">${it.name} (${it.hand} +${it.score})</span>`;
+          const desc = it.score ? `${it.hand} +${it.score}` : it.hand;
+          return `<span class="chip owned">${it.name} (${desc})</span>`;
         }).join("");
       }
 
       renderField();
 
-      const hints = {
-        throw: "주머니에서 굴려 필드에 1개",
-        reroll: "필드 주사위 클릭 (잠금 제외)",
-        lock: "필드 주사위 클릭 → 잠금 (이번 턴만)",
-      };
-      document.getElementById("actionHint").textContent = mode ? `· ${hints[mode]}` : "";
+      const prev = document.getElementById("preview");
+      if (sc) {
+        let parts = [`합 ${sc.sum}`];
+        if (sc.stageExtra) parts.push(`규칙 +${sc.stageExtra}`);
+        if (sc.handScore) parts.push(`족보 +${sc.handScore}`);
+        if (sc.overheatBonus) parts.push(`과열 +${sc.overheatBonus}`);
+        if (sc.goalBonus) parts.push(`목표 +${sc.goalBonus}`);
+        prev.innerHTML = `턴 종료 시 <strong>+${sc.total}</strong> 예상 (${parts.join(" · ")})`;
+        prev.style.display = "";
+      } else {
+        prev.style.display = "none";
+      }
 
-      const canThrow = state.actionsLeft > 0 && fieldCount() < MAX_DICE && !state.gameOver;
-      const hasReroll = state.field.some(d => !d.locked);
-      const hasLock = state.field.some(d => !d.locked);
-
+      const unlocked = state.field.filter(d => !d.locked);
       document.getElementById("actions").innerHTML = `
-        <button class="btn primary" ${canThrow ? "" : "disabled"} onclick="doThrow()">던지기 (−1)</button>
-        <button class="btn ${mode === "reroll" ? "active" : ""}" ${state.actionsLeft > 0 && hasReroll && !state.gameOver ? "" : "disabled"}
-          onclick="setMode('reroll')">리롤 (−1)</button>
-        <button class="btn ${mode === "lock" ? "active" : ""}" ${state.actionsLeft > 0 && hasLock && !state.gameOver ? "" : "disabled"}
-          onclick="setMode('lock')">잠금 (−1)</button>
-        <button class="btn end" ${state.gameOver ? "disabled" : ""} onclick="endTurn()">턴 종료 (0)</button>
+        <button class="btn primary" ${state.rerollsLeft > 0 && unlocked.length && !state.gameOver ? "" : "disabled"}
+          onclick="doRerollAll()">전체 리롤 (${state.rerollsLeft})</button>
+        <button class="btn" ${state.throwsLeft > 0 && state.field.length < MAX_FIELD && !state.gameOver ? "" : "disabled"}
+          onclick="doThrow()">추가 주사위 (${state.throwsLeft})</button>
+        <button class="btn end" ${state.gameOver || !state.field.length ? "disabled" : ""}
+          onclick="endTurn()">턴 종료</button>
         <button class="btn" onclick="resetRun()">새 런</button>
       `;
 
-      document.getElementById("log").innerHTML = state.log.join("<br>") || "턴 종료 시 점수 breakdown이 여기 표시됩니다.";
+      document.getElementById("log").innerHTML =
+        state.log.join("<br>") || "턴 종료 시 점수 breakdown이 여기 표시됩니다.";
     }
 
     function renderField() {
       const el = document.getElementById("fieldZone");
       if (!state.field.length) {
-        el.innerHTML = `<span class="empty-slot">필드 비음 — 던지기로 주사위를 놓으세요</span>`;
+        el.innerHTML = `<span class="empty-msg">필드 비음</span>`;
         return;
       }
       el.innerHTML = state.field.map(d => {
+        const t = DICE_TYPES[d.type];
         const cls = ["die", d.locked ? "locked" : ""].filter(Boolean).join(" ");
-        return `<div class="${cls}" data-id="${d.id}" onclick="onDieClick(${d.id})">${d.value}</div>`;
+        return `<div class="${cls}" data-id="${d.id}" onclick="toggleLock(${d.id})"
+          title="${t.tag} [${t.faces.join(",")}]">
+          <span>${d.value}</span>
+          <span class="type-tag" style="color:${t.color}">${t.tag}</span>
+        </div>`;
       }).join("");
     }
 
