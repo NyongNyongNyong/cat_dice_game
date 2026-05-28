@@ -194,7 +194,7 @@
 
     <div class="panel">
       <div class="field-zone">
-        <div class="field-label">필드 <em>— 클릭으로 잠금 토글 · 턴 종료 시 리셋</em></div>
+        <div class="field-label">필드 <em>— 클릭 잠금(리롤 보호) · 점수는 눈값 그대로 · 턴 종료 리셋</em></div>
         <div class="dice-row" id="fieldZone"></div>
       </div>
       <div class="score-preview" id="preview"></div>
@@ -327,16 +327,16 @@
       let v = d.value;
       if (rule.id === "evens" && v % 2 !== 0) v = 0;
       if (rule.id === "high5" && v < 5) v = 0;
-      return d.locked ? v * 2 : v;
+      return v;
     }
 
     function computeScore() {
       const dice = state.field;
       const rule = state.stageRule;
       const values = dice.map(d => d.value);
-      const rawSum = dice.reduce((s,d) => s + (d.locked ? d.value*2 : d.value), 0);
+      const rawSum = dice.reduce((s, d) => s + d.value, 0);
 
-      let sum = dice.reduce((s,d) => s + dieScore(d, rule), 0);
+      let sum = dice.reduce((s, d) => s + dieScore(d, rule), 0);
       let stageExtra = 0;
       if (rule.id === "oddBonus") stageExtra = dice.filter(d => d.value%2===1).length * 2;
       if (rule.id === "lowSum" && rawSum <= 15) stageExtra = 8;

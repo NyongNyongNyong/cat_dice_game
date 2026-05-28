@@ -165,7 +165,9 @@ reg(def("delayed", "Delayed Gratification", "common", 4, "$2 per unused discard 
 }));
 reg(def("hack", "Hack", "uncommon", 6, "Retrigger 2,3,4,5 scored", {
   onScored(card, c, ctx) {
-    if (["2","3","4","5"].includes(card.rank)) ctx.state.retriggerScored.push(card);
+    if (!ctx.isRetrigger && ["2","3","4","5"].includes(card.rank)) {
+      ctx.state.retriggerScored.push(card);
+    }
   },
 }));
 reg(def("pareidolia", "Pareidolia", "uncommon", 5, "All cards count as face cards", {
@@ -455,7 +457,7 @@ reg(def("walkie", "Walkie Talkie", "common", 4, "10 or 4 scored: +10 Chips, +4 M
 reg(def("seltzer", "Seltzer", "uncommon", 6, "Retrigger all played next 10 hands", {
   initialState: { left: 10 },
   onScored(card, c, ctx) {
-    if (ctx.joker.state.left > 0) ctx.state.retriggerScored.push(card);
+    if (!ctx.isRetrigger && ctx.joker.state.left > 0) ctx.state.retriggerScored.push(card);
   },
   onHandPlayed(ctx) { if (ctx.joker.state.left > 0) ctx.joker.state.left--; },
 }));
@@ -483,7 +485,9 @@ reg(def("acrobat", "Acrobat", "uncommon", 6, "X3 Mult on final hand of round", {
 }));
 reg(def("sock_buskin", "Sock and Buskin", "uncommon", 6, "Retrigger face cards scored", {
   onScored(card, c, ctx) {
-    if (isFace(card.rank, ctx.state.pareidolia)) ctx.state.retriggerScored.push(card);
+    if (!ctx.isRetrigger && isFace(card.rank, ctx.state.pareidolia)) {
+      ctx.state.retriggerScored.push(card);
+    }
   },
 }));
 reg(def("swashbuckler", "Swashbuckler", "common", 4, "+Mult = sum other jokers' sell", {

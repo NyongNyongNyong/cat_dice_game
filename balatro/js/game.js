@@ -158,23 +158,24 @@ export function scorePlay(state, playedCards) {
   state.retriggerScored = [];
 
   let xmult = 1;
-  const applyScored = (card) => {
-    const s = runOnScored(state, baseCtx, card);
+  const applyScored = (card, isRetrigger = false) => {
+    const s = runOnScored(state, baseCtx, card, isRetrigger);
     chips += s.chips;
     mult += s.mult;
     xmult *= s.xmult;
   };
 
   for (const c of scoring) {
-    applyScored(c);
-    while (state.retriggerScored.length) {
+    applyScored(c, false);
+    let guard = 0;
+    while (state.retriggerScored.length && guard++ < 20) {
       const extra = state.retriggerScored.splice(0);
-      for (const card of extra) applyScored(card);
+      for (const card of extra) applyScored(card, true);
     }
   }
 
   if (pass.dusk && state.handsLeft === 0) {
-    for (const c of scoring) applyScored(c);
+    for (const c of scoring) applyScored(c, true);
   }
 
   // Held in hand
@@ -229,9 +230,10 @@ export function scorePlay(state, playedCards) {
     const joker = state.jokers[i];
     const def = JOKER_DEFS[joker.defId];
     if (def?.onAfterScoring) def.onAfterScoring({ ...baseCtx, joker, jokerIndex: i });
-    while (state.retriggerScored.length) {
+    let guard = 0;
+    while (state.retriggerScored.length && guard++ < 20) {
       const extra = state.retriggerScored.splice(0);
-      for (const card of extra) applyScored(card);
+      for (const card of extra) applyScored(card, true);
     }
   }
 
@@ -263,14 +265,14 @@ export function scorePlay(state, playedCards) {
   return breakdown;
 }
 
-function runOnScored(state, baseCtx, card) {
+function runOnScored(state, baseCtx, card, isRetrigger = false) {
   const s = { chips: 0, mult: 0, xmult: 1 };
   for (let i = 0; i < state.jokers.length; i++) {
     const joker = state.jokers[i];
     let def = JOKER_DEFS[joker.defId];
     if (def?.copyRight && state.jokers[i + 1]) def = JOKER_DEFS[state.jokers[i + 1].defId];
     if (def?.copyLeft && state.jokers[0]) def = JOKER_DEFS[state.jokers[0].defId];
-    if (def?.onScored) def.onScored(card, s, { ...baseCtx, joker, jokerIndex: i });
+    if (def?.onScored) def.onScored(card, s, { ...baseCtx, joker, jokerIndex: i, isRetrigger });
   }
   return s;
 }
