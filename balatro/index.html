@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balatro — 골격 데모</title>
+  <style>
+    :root {
+      --bg: #1a4d3e; --felt: #0f3328; --panel: #0d281f;
+      --text: #e8f0ec; --muted: #8fb5a8; --gold: #f5c842;
+      --red: #e85d5d; --blue: #6eb5ff; --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg); color: var(--text); padding: 0.75rem;
+    }
+    .layout {
+      max-width: 900px; margin: 0 auto;
+      display: grid; gap: 0.6rem;
+      grid-template-columns: 1fr 220px;
+    }
+    @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+
+    h1 { font-size: 1rem; font-weight: 700; }
+    .sub { font-size: 0.68rem; color: var(--muted); }
+
+    .panel {
+      background: var(--panel); border-radius: 0.5rem;
+      border: 1px solid var(--border); padding: 0.6rem 0.75rem;
+    }
+    .panel h2 {
+      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin-bottom: 0.4rem;
+    }
+
+    .stats { display: flex; flex-wrap: wrap; gap: 0.35rem 0.8rem; font-size: 0.78rem; color: var(--muted); }
+    .stats strong { color: var(--gold); }
+    .stats .bad strong { color: var(--red); }
+
+    .joker-row { display: flex; flex-wrap: wrap; gap: 0.35rem; min-height: 3.2rem; }
+    .joker-slot {
+      width: 4.5rem; min-height: 5.5rem; padding: 0.35rem;
+      background: rgba(0,0,0,0.25); border-radius: 0.35rem;
+      border: 1px dashed var(--border); font-size: 0.58rem; line-height: 1.25;
+    }
+    .joker-slot.filled { border-style: solid; border-color: rgba(245,200,66,0.35); }
+    .joker-slot .jn { color: var(--gold); font-weight: 700; font-size: 0.62rem; }
+
+    .hand-zone {
+      background: var(--felt); border-radius: 0.5rem; padding: 0.75rem;
+      border: 2px solid rgba(0,0,0,0.2); min-height: 7rem;
+    }
+    .cards { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
+
+    .card {
+      width: 3.4rem; height: 4.6rem; border-radius: 0.35rem;
+      background: #faf8f5; color: #222; font-weight: 800;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; border: 2px solid transparent; user-select: none;
+      font-size: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      transition: transform 0.08s;
+    }
+    .card:hover { transform: translateY(-3px); }
+    .card.red { color: var(--red); }
+    .card.sel { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245,200,66,0.4); }
+    .card .r { font-size: 1.1rem; }
+    .card .s { font-size: 0.85rem; opacity: 0.85; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+    .btn {
+      padding: 0.45rem 0.7rem; border: none; border-radius: 0.35rem;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      background: rgba(255,255,255,0.1); color: var(--text);
+    }
+    .btn:hover:not(:disabled) { background: rgba(255,255,255,0.18); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn.play { background: var(--gold); color: #1a1a1a; }
+    .btn.disc { background: rgba(232,93,93,0.25); color: #ffb4b4; }
+
+    .log { font-size: 0.7rem; line-height: 1.5; color: var(--muted); max-height: 14rem; overflow-y: auto; }
+    .log .sc { color: #7dffb0; font-weight: 600; }
+    .log .bad { color: var(--red); }
+    .log b { color: var(--text); }
+
+    .shop { display: flex; flex-direction: column; gap: 0.4rem; }
+    .shop-item {
+      text-align: left; padding: 0.5rem; border-radius: 0.35rem;
+      background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      cursor: pointer; font-size: 0.72rem;
+    }
+    .shop-item:hover { border-color: var(--gold); }
+    .shop-item .cost { color: var(--gold); font-weight: 700; }
+
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      display: grid; place-items: center; z-index: 50; padding: 1rem;
+    }
+    .overlay.hidden { display: none; }
+    .modal {
+      background: var(--panel); padding: 1rem; border-radius: 0.6rem;
+      max-width: 20rem; text-align: center;
+    }
+    .modal h3 { margin-bottom: 0.5rem; }
+    .modal p { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+
+    .preview {
+      font-size: 0.72rem; color: var(--muted); margin-top: 0.35rem; text-align: center;
+    }
+    .deck-info { font-size: 0.68rem; color: var(--muted); text-align: center; margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <header style="max-width:900px;margin:0 auto 0.5rem">
+    <h1>Balatro 골격</h1>
+    <p class="sub">52장 · 포커 플레이 · 조커 150종 · 애니/타로/블라인드 효과 제외</p>
+    <p style="margin-top:0.35rem">
+      <a href="../" style="font-size:0.72rem;font-weight:600;color:#7dffb0;text-decoration:none">← 액션 주사위 엔진</a>
+    </p>
+  </header>
+
+  <div class="layout">
+    <div class="main-col">
+      <div class="panel">
+        <div class="stats" id="stats"></div>
+      </div>
+
+      <div class="panel">
+        <h2>조커 (최대 5)</h2>
+        <div class="joker-row" id="jokers"></div>
+      </div>
+
+      <div class="hand-zone">
+        <div class="cards" id="hand"></div>
+        <p class="deck-info" id="deckInfo"></p>
+        <p class="preview" id="preview"></p>
+        <div class="actions" id="actions"></div>
+      </div>
+
+      <div class="panel" id="shopPanel" style="display:none">
+        <h2>상점</h2>
+        <div class="shop" id="shop"></div>
+        <div class="actions" style="margin-top:0.5rem">
+          <button class="btn play" id="btnLeaveShop">다음 앤티</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>로그</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <p id="modalBody"></p>
+      <button class="btn play" id="modalBtn">새 런</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      newRun, initFullDeck, startRound, playHand, discardSelected,
+      toggleSelect, buyJoker, leaveShop, formatCard,
+    } from "./js/game.js";
+    import { JOKER_DEFS, createJokerInstance } from "./js/jokers.js";
+    import { evaluatePlayed, getScoringCards, rankVal, HAND_DEFS } from "./js/poker.js";
+    import { getPassiveFlags } from "./js/jokers.js";
+
+    let state = newRun();
+
+    function startRun() {
+      state = newRun();
+      initFullDeck(state);
+      state.jokers.push(createJokerInstance("joker", JOKER_DEFS));
+      state.jokers.push(createJokerInstance("jolly", JOKER_DEFS));
+      startRound(state);
+      document.getElementById("overlay").classList.add("hidden");
+      render();
+    }
+
+    function previewScore() {
+      const sel = [...state.selected].map(i => state.hand[i]).filter(Boolean);
+      if (!sel.length || state.phase !== "play") {
+        document.getElementById("preview").textContent = "";
+        return;
+      }
+      const pass = getPassiveFlags(state.jokers);
+      const hand = evaluatePlayed(sel, { fourFingers: pass.fourFingers, shortcut: pass.shortcut });
+      if (!hand) return;
+      const scoring = getScoringCards(sel, hand, pass.splash);
+      const lv = HAND_DEFS[hand.type];
+      let chips = lv.chips + scoring.reduce((s, c) => s + rankVal(c.rank), 0);
+      let mult = lv.mult;
+      document.getElementById("preview").textContent =
+        `미리보기: ${hand.name} → 약 ${chips} × ${mult} (+조커)`;
+    }
+
+    function render() {
+      const s = state;
+      document.getElementById("stats").innerHTML = s.phase === "shop" ? `
+        <span>앤티 <strong>${s.ante}</strong></span>
+        <span>돈 <strong>$${s.money}</strong></span>
+        <span>조커 <strong>${s.jokers.length}</strong>/5</span>
+      ` : `
+        <span>앤티 <strong>${s.ante}</strong></span>
+        <span>점수 <strong>${s.roundScore}</strong> / ${s.targetScore}</span>
+        <span>핸드 <strong>${s.handsLeft}</strong></span>
+        <span>버림 <strong>${s.discardsLeft}</strong></span>
+        <span>돈 <strong>$${s.money}</strong></span>
+      `;
+
+      const jEl = document.getElementById("jokers");
+      const slots = [];
+      for (let i = 0; i < 5; i++) {
+        const j = s.jokers[i];
+        if (j) {
+          const d = JOKER_DEFS[j.defId];
+          slots.push(`<div class="joker-slot filled"><div class="jn">${j.name}</div>${d?.desc || ""}</div>`);
+        } else {
+          slots.push(`<div class="joker-slot">빈 슬롯</div>`);
+        }
+      }
+      jEl.innerHTML = slots.join("");
+
+      const handEl = document.getElementById("hand");
+      handEl.innerHTML = s.hand.map((c, i) => {
+        const f = formatCard(c);
+        const cls = ["card", f.red ? "red" : "", s.selected.has(i) ? "sel" : ""].filter(Boolean).join(" ");
+        return `<div class="${cls}" data-i="${i}"><span class="r">${c.rank}</span><span class="s">${f.suit}</span></div>`;
+      }).join("");
+
+      handEl.querySelectorAll(".card").forEach(el => {
+        el.onclick = () => {
+          if (s.phase !== "play") return;
+          toggleSelect(s, +el.dataset.i);
+          render();
+        };
+      });
+
+      document.getElementById("deckInfo").textContent =
+        `덱 ${s.deck.length}장 · 버린 더미 ${s.discardPile.length}장 · 손패 ${s.hand.length}/${s.handSize}`;
+
+      const inPlay = s.phase === "play";
+      document.getElementById("actions").innerHTML = inPlay ? `
+        <button class="btn play" ${s.handsLeft > 0 ? "" : "disabled"} id="btnPlay">플레이 (−1 핸드)</button>
+        <button class="btn disc" ${s.discardsLeft > 0 ? "" : "disabled"} id="btnDiscard">버리기 (−1 버림)</button>
+        <button class="btn" id="btnNew">새 런</button>
+      ` : "";
+
+      if (inPlay) {
+        document.getElementById("btnPlay").onclick = () => {
+          const r = playHand(s);
+          if (r.error) alert(r.error);
+          if (r.lost) showModal("게임 오버", `${s.roundScore} / ${s.targetScore} 점`);
+          render();
+        };
+        document.getElementById("btnDiscard").onclick = () => {
+          const r = discardSelected(s);
+          if (r.error) alert(r.error);
+          render();
+        };
+        document.getElementById("btnNew").onclick = startRun;
+        previewScore();
+      } else {
+        document.getElementById("preview").textContent = "";
+      }
+
+      document.getElementById("shopPanel").style.display = s.phase === "shop" ? "" : "none";
+      if (s.phase === "shop") {
+        document.getElementById("shop").innerHTML = s.shopOffers.map(id => {
+          const d = JOKER_DEFS[id];
+          return `<button class="shop-item" data-id="${id}">
+            <div class="cost">$${d.cost}</div>
+            <strong>${d.name}</strong><br>${d.desc}
+          </button>`;
+        }).join("") || "<p>구매 가능 조커 없음</p>";
+        document.querySelectorAll(".shop-item").forEach(btn => {
+          btn.onclick = () => {
+            const r = buyJoker(s, btn.dataset.id);
+            if (r.error) alert(r.error);
+            else {
+              s.shopOffers = s.shopOffers.filter(x => x !== btn.dataset.id);
+              render();
+            }
+          };
+        });
+        document.getElementById("btnLeaveShop").onclick = () => {
+          leaveShop(s);
+          render();
+        };
+      }
+
+      document.getElementById("log").innerHTML = s.log.join("<br>") || "플레이 로그";
+    }
+
+    function showModal(title, body) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalBody").textContent = body;
+      document.getElementById("overlay").classList.remove("hidden");
+      document.getElementById("modalBtn").onclick = startRun;
+    }
+
+    startRun();
+  </script>
+</body>
+</html>

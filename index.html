@@ -154,6 +154,18 @@
       font-size: 0.72rem; color: var(--green);
     }
     .score-preview strong { font-size: 0.95rem; }
+
+    .nav-demos {
+      display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;
+      width: 100%; margin-top: 0.15rem;
+    }
+    .demo-link {
+      font-size: 0.72rem; font-weight: 600; text-decoration: none;
+      color: var(--green); padding: 0.3rem 0.55rem; border-radius: 0.35rem;
+      background: rgba(110,207,143,0.12); border: 1px solid rgba(110,207,143,0.25);
+      transition: background 0.12s;
+    }
+    .demo-link:hover { background: rgba(110,207,143,0.22); }
   </style>
 </head>
 <body>
@@ -162,6 +174,9 @@
       <div>
         <h1>액션 주사위 엔진</h1>
         <p class="sub">v0.9 — 전체 리롤 · 자유 잠금 · 주사위 타입</p>
+        <nav class="nav-demos">
+          <a class="demo-link" href="balatro/">Balatro 골격 데모 →</a>
+        </nav>
       </div>
       <div class="stats" id="stats"></div>
     </header>
