@@ -1,0 +1,30 @@
+---
+description: "Editing docs/gdd; GDD changelog and undecided sections"
+globs:
+  - "docs/**/*.md"
+  - ".cursor/**/*.md"
+alwaysApply: false
+---
+
+# 문서
+
+## 경로
+
+| 용도 | 경로 |
+|------|------|
+| 게임 기획 (정본) | `docs/gdd-cat-tower-casino.md` |
+
+## GDD 수정
+
+- 확정한 내용은 §11 **미정** 표에서 제거하거나 “확정”으로 옮긴다.
+- 임의로 새 시스템 이름·수치를 GDD에 대량 추가하지 않는다. 사용자·plan과 맞출 것.
+- 문서 이력(§12)에 날짜·한 줄 요약을 남긴다.
+
+## 스타일
+
+- 기획 문서: 한국어, 표·목록으로 읽기 쉽게.
+- 코드·식별자 예시: 영문 snake_case / PascalCase.
+
+## README
+
+- 실행 방법은 Godot 프로젝트 생성 후 README에 반영한다.

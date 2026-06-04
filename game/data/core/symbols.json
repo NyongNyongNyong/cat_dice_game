@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "symbols": [
+    {
+      "id": "pip",
+      "display_ko": "눈금",
+      "adds_to_sum": true,
+      "note": "면 개수가 라운드 점수 합(Σ숫자)에 더해짐. GDD §5.2"
+    },
+    {
+      "id": "bomb",
+      "display_ko": "폭탄",
+      "adds_to_sum": false,
+      "note": "효과 미정. GDD §5.3 — 족보/특수 효과 연결 전까지 점수 합에 미포함"
+    }
+  ]
+}

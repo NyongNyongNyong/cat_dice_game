@@ -1,44 +1,75 @@
-# 캣타워 다이스
+# 캣타워 카지노 (가칭)
 
-고양이 주사위를 **캣타워 층**에 배치하고, 한 번에 굴려 시너지·배수를 쌓는 세팅 중심 로그라이크 웹 프로토타입.
+고양이들이 운영하는 캣타워 카지노를 등반하며, 특수 주사위를 수집·조합하고 최상층 금고를 노리는 **주사위 로그라이크** 프로젝트.
 
-## 실행
+## 기획
 
-```bash
-python3 -m http.server 8765
+[게임 기획 문서](docs/gdd-cat-tower-casino.md) · [데이터 계층](docs/data-hierarchy.md) · [Godot 폴더 상세](docs/godot-project-layout.md)
+
+## 저장소 구조
+
+```text
+Dice/                          # Git 루트 — Cursor에서 이 폴더를 연다
+├── docs/                      # GDD, 레이아웃 (Godot res 밖)
+├── scripts/                   # Git 셸 (start-feature, push-feature, …)
+├── .cursor/                   # Rules, Skills
+├── AGENTS.md                  # Agent 요약
+├── README.md
+│
+└── game/                      # Godot 프로젝트 (project.godot)
+    ├── project.godot
+    ├── data/                  # JSON 카탈로그 → res://data/
+    │   └── registry.json
+    ├── scenes/
+    │   ├── game/              # 런·층·라운드·상점
+    │   ├── ui/                # HUD, 메뉴
+    │   └── dice/              # 굴림·결과 연출
+    ├── scripts/
+    │   ├── autoload/          # DataRegistry, RunManager, …
+    │   ├── core/              # 점수·칩·런 로직
+    │   ├── ui/
+    │   └── dice/
+    ├── resources/             # .tres (JSON 이전 후)
+    │   ├── dice/
+    │   └── items/
+    └── assets/
+        ├── images/
+        └── sounds/
 ```
 
-http://localhost:8765/
+## Godot 실행
 
-## 플레이
+1. Godot 4.x 설치
+2. **Import** → `game/project.godot` 열기 (또는 `game/` 폴더)
+3. 메인 씬은 아직 없음 — `scenes/game/`에 추가 예정
 
-1. **보유 고양이** 클릭 → **캣타워 층** 클릭으로 배치 (다시 클릭하면 회수)
-2. **한 번에 굴리기!** — 조작 없이 전 층 동시 굴림
-3. 층별 연출 · 세로/면 시너지 · 점수 정산
-4. 라운드 목표 달성 → **상점** (고양이 / 층 강화)
-5. **다음 라운드** (목표 미달 시 런 종료)
+## 게임 데이터
 
-**시작:** 잠냥 · 식빵냥 · 캣닢냥 · 15G
+정적 정의: [`game/data/`](game/data/) · 진입점 `game/data/registry.json`
 
-## 고양이 (프로토타입)
+## Cursor — 슬래시 (`/`)
 
-| 고양이 | 특징 |
-|--------|------|
-| 잠냥 | 아래층 안정, 같은 면 세로 시너지 |
-| 점프냥 | 위층 선호, 점프 시 윗층 점수 복사 |
-| 캣닢냥 | RNG 재굴림, 하악+긁기 난동 |
-| 식빵냥 | 안정, 타워 전체 +2, 식빵+잠듦 평온 |
-| 욕심냥 | 5층 고배수·고리스크 |
+| 명령 | 때 |
+|------|-----|
+| `/start-feature <slug>` | 작업 시작 |
+| **`/push`** | 피쳐 완료 (커밋 + main) |
+| `/merge-feature` | 머지만 (예외) |
 
-## 층 배수
+```bash
+./scripts/start-feature.sh dice-roll
+./scripts/push-feature.sh -m "feat: ..."
+```
 
-1층 ×1 · 2층 ×1.2 · 3층 ×1.5 · 4층 ×2 · 5층 ×3 (상점으로 +0.2 가능)
+`origin/main` 갱신 시 push 스크립트 **중단** → `git merge main` → 재실행.
 
-## 문서
+### Feature 범위
 
-- [액션 주사위 엔진 — 게임 스펙](docs/spec-action-engine-roguelike.md) *(현재 방향)*
-- [캣타워 다이스 컨셉](docs/cat-tower-concept.md)
-- [이전 B안 프로토타입 기획](docs/plan-b.md)
+- 기획: GDD만 · 개발 범위: `feature/<slug>` 브랜치명·합의
+- 예: `feature/shop-ui` → `game/scenes/ui/`, `game/scenes/game/shop*`, `game/scripts/ui/`
+
+## Git
+
+`feature/*` → `main`, PR 필수 아님. 상세: [AGENTS.md](AGENTS.md), `.cursor/rules/`
 
 ## 저장소
 

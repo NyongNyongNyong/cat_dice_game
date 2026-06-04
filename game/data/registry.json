@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "catalogs": {
+    "symbols": "core/symbols.json",
+    "effects": "core/effects.json",
+    "dice": "dice/dice_defs.json",
+    "starter_loadout": "dice/starter_loadout.json",
+    "score_rules": "scoring/score_rules.json",
+    "hands": "scoring/hands.json",
+    "chip_brackets": "economy/chip_brackets.json",
+    "casino_rules": "casino/rules.json",
+    "floors": "casino/floors.json",
+    "run_structure": "casino/run_default.json",
+    "relics": "items/relics.json",
+    "consumables": "items/consumables.json",
+    "shop_pools": "items/shop_pools.json"
+  }
+}

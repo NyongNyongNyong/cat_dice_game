@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "id": "run_tower_default",
+  "display_ko": "캣타워 기본 런",
+  "floor_ids": ["floor_01"],
+  "final_floor_id": null,
+  "note": "보스 층·다층 확장은 GDD §11. MVP는 1층만"
+}

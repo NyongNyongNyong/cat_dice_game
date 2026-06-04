@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "dice": [
+    {
+      "id": "dice_basic",
+      "display_ko": "기본 주사위",
+      "rarity": "starter",
+      "faces": [
+        { "symbol_id": "pip", "count": 1 },
+        { "symbol_id": "pip", "count": 2 },
+        { "symbol_id": "pip", "count": 3 },
+        { "symbol_id": "pip", "count": 4 },
+        { "symbol_id": "pip", "count": 5 },
+        { "symbol_id": "pip", "count": 6 }
+      ]
+    },
+    {
+      "id": "dice_bomb",
+      "display_ko": "폭탄 주사위",
+      "rarity": "common",
+      "faces": [
+        { "symbol_id": "pip", "count": 1 },
+        { "symbol_id": "pip", "count": 2 },
+        { "symbol_id": "pip", "count": 3 },
+        { "symbol_id": "bomb", "count": 1 },
+        { "symbol_id": "bomb", "count": 2 },
+        { "symbol_id": "bomb", "count": 3 }
+      ]
+    },
+    {
+      "id": "dice_golden",
+      "display_ko": "황금 주사위",
+      "rarity": "uncommon",
+      "faces": [
+        { "symbol_id": "pip", "count": 2 },
+        { "symbol_id": "pip", "count": 2 },
+        { "symbol_id": "pip", "count": 3 },
+        { "symbol_id": "pip", "count": 3 },
+        { "symbol_id": "pip", "count": 4 },
+        { "symbol_id": "pip", "count": 4 }
+      ],
+      "note": "GDD 예시만. 효과는 추후 effect 훅"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "curves": [
+    {
+      "id": "chips_floor_01",
+      "floor_id": "floor_01",
+      "gdd_ref": "§10.1",
+      "brackets": [
+        { "cumulative_score": 100, "chips_awarded": 1, "delta_from_prev": 100 },
+        { "cumulative_score": 150, "chips_awarded": 2, "delta_from_prev": 50 },
+        { "cumulative_score": 220, "chips_awarded": 3, "delta_from_prev": 70 },
+        { "cumulative_score": 310, "chips_awarded": 4, "delta_from_prev": 90 }
+      ],
+      "note": "이후 구간은 기획 확정 시 동일 패턴으로 append"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "rule_even_double",
+      "display_ko": "짝수 점수 배수",
+      "effect_ids": ["even_score_mult"],
+      "gdd_ref": "§6 예시"
+    },
+    {
+      "id": "rule_reroll_scaling",
+      "display_ko": "리롤 횟수당 배수 증가",
+      "effect_ids": ["reroll_count_score_mult"]
+    },
+    {
+      "id": "rule_reroll_tax",
+      "display_ko": "리롤 패널티",
+      "effect_ids": ["reroll_penalty"]
+    },
+    {
+      "id": "rule_bomb_forfeit",
+      "display_ko": "폭탄 면 시 칩 몰수",
+      "effect_ids": ["forfeit_chips_on_symbol"]
+    },
+    {
+      "id": "rule_rich_penalty",
+      "display_ko": "보유 칩이 많을수록 불리",
+      "effect_ids": ["scale_penalty_by_chips"]
+    }
+  ]
+}
