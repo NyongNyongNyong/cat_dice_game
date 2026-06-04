@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "floors": [
+    {
+      "id": "floor_01",
+      "display_ko": "1층",
+      "casino_rule_ids": ["rule_even_double"],
+      "round": {
+        "min_score": 100,
+        "chip_curve_id": "chips_floor_01"
+      },
+      "loadout": {
+        "select_from_owned": 10,
+        "note": "GDD §4.2"
+      },
+      "shop_pool_id": "shop_floor_01"
+    }
+  ]
+}

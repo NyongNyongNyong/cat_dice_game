@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "relics": [
+    {
+      "id": "relic_lucky_claw",
+      "display_ko": "행운의 발톱",
+      "effect_ids": ["first_reroll_free"],
+      "gdd_ref": "§7"
+    },
+    {
+      "id": "relic_magnet_collar",
+      "display_ko": "자석 목걸이",
+      "effect_ids": ["symbol_weight_up"],
+      "gdd_ref": "§7"
+    },
+    {
+      "id": "relic_fake_chips",
+      "display_ko": "가짜 칩",
+      "effect_ids": ["chip_gain_mult", "chip_gain_penalty"],
+      "gdd_ref": "§7"
+    },
+    {
+      "id": "relic_insider_tip",
+      "display_ko": "내부자 정보",
+      "effect_ids": ["reveal_next_floor_rule"],
+      "gdd_ref": "§7"
+    }
+  ]
+}

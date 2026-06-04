@@ -1,0 +1,26 @@
+---
+description: "Cat Tower Casino project identity, GDD source of truth, MVP scope"
+alwaysApply: true
+---
+
+# 캣타워 카지노 — 프로젝트
+
+Godot 주사위 로그라이크.
+
+## 단일 기준 (Source of Truth)
+
+- 기획: `docs/gdd-cat-tower-casino.md`만 현재 게임 정의로 본다.
+- 기획 변경 시 **GDD를 먼저** 수정하거나, 같은 PR에 GDD diff를 포함한다.
+- GDD **§11 미정·추후 과제** 항목은 임의로 확정·구현하지 않는다. 필요하면 GDD에 옵션을 적거나 사용자에게 확인한다.
+
+## 핵심 설계 (구현 시 참고)
+
+- 재미 축: 주사위 수집·편성·카지노 규칙 공략·Push Your Luck.
+- 라운드 점수(현재안): `Σ(숫자) × Σ(족보 가치)`, 10개 일괄 굴림, 최소 점수 클리어.
+- MVP 밖 대량 콘텐츠(유물·직원 매수 전 종 등)는 요청·plan 없이 넣지 않는다.
+
+## 에이전트 동작
+
+- 작업 전 GDD 관련 섹션을 읽는다.
+- 사용자가 기획과 다른 구현을 요청하면, GDD 갱신 여부를 짧게 확인한다.
+- 커밋은 사용자가 요청할 때만 생성한다 (명시 없으면 커밋·푸시 금지).

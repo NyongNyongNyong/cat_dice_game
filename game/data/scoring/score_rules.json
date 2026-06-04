@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "id": "score_default",
+  "dice_per_roll": 10,
+  "formula": "sum_pip_counts_times_sum_hand_values",
+  "gdd_ref": "§9.1",
+  "round_clear": {
+    "type": "min_total_score",
+    "note": "미달 시 실패 규칙은 GDD §9.2 미정"
+  }
+}

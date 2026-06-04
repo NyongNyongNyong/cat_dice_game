@@ -1,0 +1,49 @@
+---
+description: "Godot 4 layout, scene collaboration, score formula per GDD"
+globs:
+  - "**/*.gd"
+  - "**/*.tscn"
+  - "**/project.godot"
+  - "**/*.tres"
+alwaysApply: false
+---
+
+# Godot 개발
+
+## 엔진
+
+- **Godot 4.x** — 팀이 합의한 마이너 버전과 동일하게 맞춘다 (버전 불일치 시 `project.godot` 기준).
+- 신규 API는 Godot 4 문법만 사용한다 (Godot 3 패턴 금지).
+
+## 폴더 (생성 후 유지)
+
+Godot 루트: `game/` (`project.godot`). 상세: `docs/godot-project-layout.md`.
+
+```
+res://scenes/game/   res://scenes/ui/   res://scenes/dice/
+res://scripts/autoload/   res://scripts/core/   res://scripts/ui/   res://scripts/dice/
+res://resources/dice/   res://resources/items/
+res://assets/images/   res://assets/sounds/
+```
+
+`docs/`, repo `scripts/*.sh`는 res 밖. JSON 정의는 `game/data/` (`res://data/`). 루트·`game/` 밖에 `.tscn` 금지.
+
+## 씬 vs 스크립트
+
+- **로직·점수·족보·칩** → `.gd` / Autoload / Resource.
+- `.tscn`은 배치·애니·UI 위주. 2인 협업 시 **같은 `.tscn`을 동시에 수정하지 않는다** (당일 담당 씬을 이슈·채팅에 공유).
+
+## 네이밍
+
+- 노드: PascalCase (`DiceRoller`)
+- 파일: snake_case (`golden_dice.tres`, `run_manager.gd`)
+- 클래스명은 파일명과 일치 (`class_name` 사용 시)
+
+## GDD 연동
+
+- 점수·클리어·칩 구간은 GDD §9–§10과 일치해야 한다. 수식 변경 시 GDD도 같이 수정한다.
+- 카지노 규칙·유물·수치 등 **기획 변경**은 `docs/gdd-cat-tower-casino.md`만.
+
+## 변경 범위
+
+- 요청된 feature·task만 수정한다. 무관한 리팩터·포맷 전체 스윕 금지.

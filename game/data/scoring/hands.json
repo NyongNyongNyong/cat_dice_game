@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "note": "GDD §11 족보 미정 — MVP 임시. pip count만으로 판정",
+  "hands": [
+    {
+      "id": "hand_any",
+      "display_ko": "아무 판",
+      "value": 1,
+      "detect": { "type": "always" }
+    },
+    {
+      "id": "hand_pair",
+      "display_ko": "페어",
+      "value": 2,
+      "detect": { "type": "n_of_kind", "n": 2, "symbol_id": "pip" }
+    },
+    {
+      "id": "hand_two_pair",
+      "display_ko": "투페어",
+      "value": 4,
+      "detect": { "type": "two_pair", "symbol_id": "pip" }
+    }
+  ]
+}

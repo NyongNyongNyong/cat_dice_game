@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "effects": [
+    {
+      "id": "first_reroll_free",
+      "trigger": "on_reroll",
+      "params": { "free_uses": 1, "which": "first" }
+    },
+    {
+      "id": "symbol_weight_up",
+      "trigger": "on_roll",
+      "params": { "symbol_id": "pip", "weight_mult": 1.5 }
+    },
+    {
+      "id": "chip_gain_mult",
+      "trigger": "on_chip_gain",
+      "params": { "mult": 1.25 }
+    },
+    {
+      "id": "chip_gain_penalty",
+      "trigger": "on_chip_gain",
+      "params": { "mult": 0.85 }
+    },
+    {
+      "id": "reveal_next_floor_rule",
+      "trigger": "on_floor_enter",
+      "params": { "lookahead_floors": 1 }
+    },
+    {
+      "id": "even_score_mult",
+      "trigger": "on_score",
+      "params": { "mult": 2.0, "condition": "sum_is_even" }
+    },
+    {
+      "id": "reroll_count_score_mult",
+      "trigger": "on_score",
+      "params": { "per_reroll_mult": 0.1 }
+    },
+    {
+      "id": "reroll_penalty",
+      "trigger": "on_reroll",
+      "params": { "chip_cost": 1 }
+    },
+    {
+      "id": "forfeit_chips_on_symbol",
+      "trigger": "on_roll",
+      "params": { "symbol_id": "bomb", "forfeit_all_chips": true }
+    },
+    {
+      "id": "scale_penalty_by_chips",
+      "trigger": "on_score",
+      "params": { "per_chip_owned": -0.02 }
+    },
+    {
+      "id": "extra_reroll",
+      "trigger": "on_round_start",
+      "params": { "rerolls": 1 }
+    },
+    {
+      "id": "nullify_penalty",
+      "trigger": "on_penalty",
+      "params": { "consume_on_use": true }
+    },
+    {
+      "id": "free_shop_reroll",
+      "trigger": "on_shop",
+      "params": { "free_rerolls": 1 }
+    },
+    {
+      "id": "modify_die_face",
+      "trigger": "on_consumable",
+      "params": { "targets": "one_owned_die" }
+    }
+  ]
+}

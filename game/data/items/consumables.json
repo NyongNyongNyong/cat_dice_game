@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "consumables": [
+    {
+      "id": "cons_bribe_dealer",
+      "display_ko": "딜러 매수",
+      "effect_ids": ["extra_reroll"],
+      "gdd_ref": "§8"
+    },
+    {
+      "id": "cons_bribe_guard",
+      "display_ko": "보안요원 매수",
+      "effect_ids": ["nullify_penalty"]
+    },
+    {
+      "id": "cons_bribe_cleaner",
+      "display_ko": "청소부 매수",
+      "effect_ids": [],
+      "note": "저주 시스템 미정 — effect 추후 연결"
+    },
+    {
+      "id": "cons_bribe_audit",
+      "display_ko": "감사팀 매수",
+      "effect_ids": ["free_shop_reroll"]
+    },
+    {
+      "id": "cons_bribe_it",
+      "display_ko": "전산팀 매수",
+      "effect_ids": ["modify_die_face"]
+    }
+  ]
+}

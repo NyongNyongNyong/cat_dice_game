@@ -1,0 +1,12 @@
+# Godot 4
+.godot/
+*.translation
+
+# Import cache (optional: some teams commit .import)
+# *.import
+
+export_presets.cfg
+export/
+
+# OS
+.DS_Store

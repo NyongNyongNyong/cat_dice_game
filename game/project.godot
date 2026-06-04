@@ -1,0 +1,22 @@
+; Engine configuration file.
+; Godot 4.x — 팀 마이너 버전에 맞춰 열기.
+
+config_version=5
+
+[application]
+
+config/name="Cat Tower Casino"
+config/description="Dice roguelike — res://docs via repo docs/"
+run/main_scene=""
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+[autoload]
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[rendering]
+
+renderer/rendering_method="forward_plus"

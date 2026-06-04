@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "pools": [
+    {
+      "id": "shop_floor_01",
+      "floor_id": "floor_01",
+      "slots": 3,
+      "offers": [
+        { "kind": "dice", "id": "dice_bomb", "weight": 10, "cost_chips": 5 },
+        { "kind": "dice", "id": "dice_golden", "weight": 5, "cost_chips": 8 },
+        { "kind": "relic", "id": "relic_lucky_claw", "weight": 8, "cost_chips": 6 },
+        { "kind": "relic", "id": "relic_magnet_collar", "weight": 8, "cost_chips": 6 },
+        { "kind": "relic", "id": "relic_fake_chips", "weight": 6, "cost_chips": 7 },
+        { "kind": "relic", "id": "relic_insider_tip", "weight": 4, "cost_chips": 9 },
+        { "kind": "consumable", "id": "cons_bribe_dealer", "weight": 10, "cost_chips": 3 },
+        { "kind": "consumable", "id": "cons_bribe_guard", "weight": 8, "cost_chips": 4 },
+        { "kind": "consumable", "id": "cons_bribe_audit", "weight": 6, "cost_chips": 4 },
+        { "kind": "consumable", "id": "cons_bribe_it", "weight": 5, "cost_chips": 5 }
+      ],
+      "note": "cost·weight는 밸런스 임시"
+    }
+  ]
+}
