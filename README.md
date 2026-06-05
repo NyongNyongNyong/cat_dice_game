@@ -39,8 +39,10 @@ Dice/                          # Git 루트 — Cursor에서 이 폴더를 연�
 
 ## Godot 실행
 
-1. Godot 4.x 설치
-2. **Import** → `game/project.godot` 열기 (또는 `game/` 폴더)
+**엔진 버전: [4.6.3 stable](https://godotengine.org/download/archive/4.6.3-stable/)** (팀 고정 — 다른 버전 사용 금지)
+
+1. Godot **4.6.3** 설치
+2. **Import** → `game/project.godot` 열기
 3. 메인 씬은 아직 없음 — `scenes/game/`에 추가 예정
 
 ## 게임 데이터

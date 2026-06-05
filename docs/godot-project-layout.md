@@ -1,6 +1,8 @@
 # Godot 프로젝트 폴더
 
-**정본:** repo의 `game/` 트리 (이미 생성됨). README 저장소 구조와 동일.
+**엔진:** Godot **4.6.3 stable** ([다운로드](https://godotengine.org/download/archive/4.6.3-stable/))
+
+**정본:** repo의 `game/` 트리. README 저장소 구조와 동일.
 
 ## `res://` 매핑
 

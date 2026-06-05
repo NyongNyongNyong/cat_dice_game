@@ -1,5 +1,5 @@
 ; Engine configuration file.
-; Godot 4.x — 팀 마이너 버전에 맞춰 열기.
+; Godot 4.6.3 stable — 팀 전원 동일 버전 사용.
 
 config_version=5
 
@@ -8,7 +8,7 @@ config_version=5
 config/name="Cat Tower Casino"
 config/description="Dice roguelike — res://docs via repo docs/"
 run/main_scene=""
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]
 
