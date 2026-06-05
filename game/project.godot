@@ -7,10 +7,12 @@ config_version=5
 
 config/name="Cat Tower Casino"
 config/description="Dice roguelike — res://docs via repo docs/"
-run/main_scene=""
+run/main_scene="res://scenes/game/main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]
+
+RunManager="*res://scripts/autoload/run_manager.gd"
 
 [display]
 

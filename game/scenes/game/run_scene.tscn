@@ -1,0 +1,234 @@
+[gd_scene load_steps=9 format=3 uid="uid://run_scene_v01"]
+
+[ext_resource type="Script" path="res://scripts/ui/run_scene.gd" id="1_run"]
+[ext_resource type="Script" path="res://scripts/core/round_controller.gd" id="2_round"]
+[ext_resource type="Script" path="res://scripts/ui/roll_phase_presenter.gd" id="3_roll"]
+[ext_resource type="Script" path="res://scripts/ui/score_phase_presenter.gd" id="4_score"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_left"]
+bg_color = Color(0.98, 0.96, 0.9, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.75, 0.68, 0.5, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_right"]
+bg_color = Color(0.96, 0.94, 0.98, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.62, 0.58, 0.78, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_roll_slot"]
+bg_color = Color(0.94, 0.92, 0.86, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.66, 0.52, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[node name="RunScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_run")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="FloorLabel" type="Label" parent="MarginContainer/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+text = "층: 1"
+
+[node name="TargetScoreLabel" type="Label" parent="MarginContainer/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+text = "목표: 50"
+
+[node name="CurrentScoreLabel" type="Label" parent="MarginContainer/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+text = "점수: 0"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 18
+text = "Roll을 눌러 주사위를 굴리세요."
+
+[node name="RollPhaseSlot" type="PanelContainer" parent="MarginContainer/VBox"]
+visible = false
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_roll_slot")
+
+[node name="RollPhaseLabel" type="Label" parent="MarginContainer/VBox/RollPhaseSlot"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 24
+text = "주사위를 굴리는 중..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DiceRow" type="Control" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBox/DiceRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DiceContainer" type="HBoxContainer" parent="MarginContainer/VBox/DiceRow/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PopupOverlay" type="Control" parent="MarginContainer/VBox/DiceRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ScoreBoard" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="LeftPanel" type="PanelContainer" parent="MarginContainer/VBox/ScoreBoard"]
+custom_minimum_size = Vector2(320, 180)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_left")
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/VBox/ScoreBoard/LeftPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="LeftTitle" type="Label" parent="MarginContainer/VBox/ScoreBoard/LeftPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.38, 0.22, 1)
+theme_override_font_sizes/font_size = 20
+text = "숫자 합"
+horizontal_alignment = 1
+
+[node name="LeftValue" type="Label" parent="MarginContainer/VBox/ScoreBoard/LeftPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 72
+text = "0"
+horizontal_alignment = 1
+
+[node name="MultiplyLabel" type="Label" parent="MarginContainer/VBox/ScoreBoard"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 64
+text = "×"
+vertical_alignment = 1
+
+[node name="RightPanel" type="PanelContainer" parent="MarginContainer/VBox/ScoreBoard"]
+custom_minimum_size = Vector2(320, 180)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_right")
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/VBox/ScoreBoard/RightPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="RightTitle" type="Label" parent="MarginContainer/VBox/ScoreBoard/RightPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.38, 0.34, 0.52, 1)
+theme_override_font_sizes/font_size = 20
+text = "족보"
+horizontal_alignment = 1
+
+[node name="RightValue" type="Label" parent="MarginContainer/VBox/ScoreBoard/RightPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 72
+text = "0"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RollButton" type="Button" parent="MarginContainer/VBox/Buttons"]
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+text = "Roll"
+
+[node name="NextFloorButton" type="Button" parent="MarginContainer/VBox/Buttons"]
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+disabled = true
+text = "Next Floor"
+
+[node name="RoundController" type="Node" parent="."]
+script = ExtResource("2_round")
+
+[node name="RollPhasePresenter" type="Node" parent="."]
+script = ExtResource("3_roll")
+
+[node name="ScorePhasePresenter" type="Node" parent="."]
+script = ExtResource("4_score")

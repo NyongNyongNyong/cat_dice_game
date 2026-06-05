@@ -2,15 +2,22 @@
 
 고양이들이 운영하는 캣타워 카지노를 등반하며, 특수 주사위를 수집·조합하고 최상층 금고를 노리는 **주사위 로그라이크** 프로젝트.
 
-## 기획
+## 문서
 
-[게임 기획 문서](docs/gdd-cat-tower-casino.md) · [데이터 계층](docs/data-hierarchy.md) · [Godot 폴더 상세](docs/godot-project-layout.md)
+| 구분 | 링크 |
+|------|------|
+| 기획 | [게임 기획 문서](docs/gdd-cat-tower-casino.md) |
+| 설계 | [설계 문서](docs/design/README.md) · [v0.1 초기 플레이어블](docs/design/v0.1-initial-playable.md) |
+| 시스템 스펙 | [족보 계산 v1](docs/design/systems/hand-scoring-v1.md) |
+| 참고 | [데이터 계층](docs/data-hierarchy.md) · [Godot 폴더 상세](docs/godot-project-layout.md) |
 
 ## 저장소 구조
 
 ```text
 Dice/                          # Git 루트 — Cursor에서 이 폴더를 연다
-├── docs/                      # GDD, 레이아웃 (Godot res 밖)
+├── docs/                      # 기획·설계 (Godot res 밖)
+│   ├── gdd-*.md               # 기획
+│   └── design/                # 구현 설계
 ├── scripts/                   # Git 셸 (start-feature, push-feature, …)
 ├── .cursor/                   # Rules, Skills
 ├── AGENTS.md                  # Agent 요약
@@ -43,7 +50,7 @@ Dice/                          # Git 루트 — Cursor에서 이 폴더를 연�
 
 1. Godot **4.6.3** 설치
 2. **Import** → `game/project.godot` 열기
-3. 메인 씬은 아직 없음 — `scenes/game/`에 추가 예정
+3. **Run Project** (F5) — 메인 씬: `scenes/game/main.tscn`
 
 ## 게임 데이터
 

@@ -5,7 +5,10 @@ Godot 주사위 로그라이크.
 ## 저장소 레이아웃
 
 ```text
-docs/              # GDD — res 밖
+docs/              # 기획·설계 — res 밖
+  gdd-*.md         # 기획 (비전·방향)
+  design/          # 구현 설계 (씬·스크립트·범위)
+    systems/       # 시스템 스펙 (족보 계산 등)
 scripts/           # git 셸 (Godot 아님)
 game/              # Godot 루트 (project.godot)
   data/            # res://data/ JSON 카탈로그
@@ -18,9 +21,11 @@ game/              # Godot 루트 (project.godot)
 - **씬·스크립트·에셋**은 `game/` 안만. `docs/`, repo `scripts/*.sh`는 res 밖.
 - 로직 → `scripts/**/*.gd` · UI 배치 → `scenes/**` · 정의 JSON → `game/data/`
 
-## 기획
+## 문서
 
-- `docs/gdd-cat-tower-casino.md`만 게임 정의. §11 미정은 임의 구현 금지.
+- **기획:** `docs/gdd-cat-tower-casino.md` — 비전·시스템 방향. §11 미정은 임의 구현 금지.
+- **설계:** `docs/design/` — 현재 구현 스코프·씬·스크립트. 최신: `v0.1-initial-playable.md`.
+- **시스템 스펙:** `docs/design/systems/` — 족보 계산 등. 최신: `hand-scoring-v1.md`.
 
 ## Git
 
@@ -31,7 +36,7 @@ game/              # Godot 루트 (project.godot)
 
 ## Feature 범위
 
-`feature/<slug>` — 해당 피쳐 파일만. 기획은 GDD만.
+`feature/<slug>` — 해당 피쳐 파일만. 방향은 GDD, 구현 범위는 설계 문서.
 
 **Agent:** 수정 전에 스스로 `game/...` 경로 목록을 짧게 쓰고, 그 안에서만 작업 (사용자에게 “경로 적어줘” 요구하지 않음).
 
@@ -40,8 +45,9 @@ game/              # Godot 루트 (project.godot)
 - **4.6.3 stable** 고정 (`game/project.godot`). 4.7 beta·다른 마이너 사용 금지.
 - 같은 `.tscn` 동시 수정 금지
 
-## 점수 (GDD §9)
+## 점수
 
-10개 굴림 → `Σ(숫자) × Σ(족보 가치)`.
+- **v0.1 구현:** 숫자 총합만, 우측 족보 ×1 고정.
+- **풀 게임 (GDD §9):** `Σ(숫자) × Σ(족보 가치)` — 족보 계산: `docs/design/systems/hand-scoring-v1.md`.
 
 Rules: `.cursor/rules/*.mdc` · README: 저장소 구조·슬래시
