@@ -37,7 +37,7 @@ game/              # Godot 루트 (project.godot)
 
 ## Godot
 
-- 4.x, `game/project.godot`
+- **4.6.3 stable** 고정 (`game/project.godot`). 4.7 beta·다른 마이너 사용 금지.
 - 같은 `.tscn` 동시 수정 금지
 
 ## 점수 (GDD §9)
