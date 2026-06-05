@@ -31,7 +31,15 @@ Repo 밖: `docs/`, `scripts/*.sh`, `.cursor/`
 
 `scripts/autoload/data_registry.gd` — `res://data/registry.json` 로드
 
-## MVP 다음 파일
+## v0.1 설계 다음 파일
+
+설계: [design/v0.1-initial-playable.md](design/v0.1-initial-playable.md)
 
 - `scenes/game/main.tscn`
-- `scripts/autoload/data_registry.gd`
+- `scenes/game/run_scene.tscn`
+- `scenes/dice/dice.tscn`
+- `scripts/autoload/run_manager.gd`
+- `scripts/core/round_controller.gd` · `round_phase.gd`
+- `scripts/core/hand_calculator.gd` · `hand_step.gd` · `hand_evaluation.gd`
+- `scripts/core/score_calculator.gd`
+- `scripts/ui/roll_phase_presenter.gd` · `score_phase_presenter.gd`
