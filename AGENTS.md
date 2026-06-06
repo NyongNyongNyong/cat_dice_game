@@ -25,7 +25,7 @@ game/              # Godot 루트 (project.godot)
 
 - **기획:** `docs/gdd-cat-tower-casino.md` — 비전·시스템 방향. §11 미정은 임의 구현 금지.
 - **설계:** `docs/design/` — 현재 구현 스코프·씬·스크립트. 최신: `v0.1-initial-playable.md`.
-- **시스템 스펙:** `docs/design/systems/` — 족보 계산 등. 최신: `hand-scoring-v1.md`.
+- **시스템 스펙:** `docs/design/systems/` — 족보 **v2 정본**: `hand-scoring-v2.md` (`hand_calculator.gd` v2).
 
 ## Git
 
@@ -48,6 +48,6 @@ game/              # Godot 루트 (project.godot)
 ## 점수
 
 - **v0.1 구현:** 숫자 총합만, 우측 족보 ×1 고정.
-- **풀 게임 (GDD §9):** `Σ(숫자) × Σ(족보 가치)` — 족보 계산: `docs/design/systems/hand-scoring-v1.md`.
+- **풀 게임 (GDD §9):** `Σ(숫자) × Σ(족보 가치)` — **스펙·코드:** `docs/design/systems/hand-scoring-v2.md`, `hand_calculator.gd`.
 
 Rules: `.cursor/rules/*.mdc` · README: 저장소 구조·슬래시

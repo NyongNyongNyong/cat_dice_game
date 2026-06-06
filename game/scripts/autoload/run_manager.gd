@@ -1,11 +1,12 @@
 extends Node
 
-const FLOOR_TARGETS: Array[int] = [50, 70, 90, 120, 150]
+# hand-scoring-v2 playtest targets (Σ(숫자) × Σ(족보) 스케일)
+const FLOOR_TARGETS: Array[int] = [150, 350, 600, 1000, 1600]
 const MAX_FLOOR: int = 5
 const DICE_COUNT: int = 10
 
 var current_floor: int = 1
-var target_score: int = 50
+var target_score: int = 150
 var current_score: int = 0
 var run_finished: bool = false
 
