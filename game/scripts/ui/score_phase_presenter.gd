@@ -1,12 +1,19 @@
 class_name ScorePhasePresenter
 extends Node
 
-const HAND_STEP_DELAY := 0.65
+const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
+
+const HAND_STEP_DELAY := 0.2
 const NUMBER_STEP_DELAY := 0.04
 const HAND_POPUP_DURATION := 0.55
 const NUMBER_POPUP_DURATION := 0.28
 const TIER_RESET_DELAY := 0.15
 const POPUP_RISE := 32.0
+const FOCUS_MOVE_DURATION := 0.22
+const FOCUS_HOLD_DURATION := 0.16
+const FOCUS_RETURN_DURATION := 0.2
+const FOCUS_GAP := 10.0
+const FOCUS_SCALE := Vector2(1.22, 1.22)
 
 signal presentation_finished()
 
@@ -16,6 +23,7 @@ var _dice_views: Array[Control] = []
 var _left_value: Label
 var _right_value: Label
 var _status_label: Label
+var _dice_values: Array[int] = []
 
 
 func setup(
@@ -40,6 +48,7 @@ func play(evaluation: HandEvaluation) -> void:
 	_dice_row.visible = true
 	_clear_popups()
 	_reset_score_board()
+	_dice_values = evaluation.dice_values.duplicate()
 
 	for dice in _dice_views:
 		dice.show_placeholder()
@@ -93,6 +102,7 @@ func _play_hand_steps(steps: Array[HandStep]) -> void:
 		prev_hand_id = step.hand_id
 		prev_highlight_indices = step.highlight_indices.duplicate()
 		_apply_highlights(step.highlight_indices)
+		await _play_focus_dice(step.highlight_indices)
 		hand_running += step.points_added
 		_right_value.text = str(hand_running)
 		await _show_hand_popup(step.display_ko, step.points_added, step.highlight_indices)
@@ -129,6 +139,113 @@ func _clear_highlights() -> void:
 	for dice in _dice_views:
 		dice.set_highlighted(false)
 		dice.set_dimmed(true)
+
+
+func _play_focus_dice(indices: Array[int]) -> void:
+	if indices.is_empty():
+		return
+
+	var focus_items: Array[Dictionary] = []
+	var seen_indices: Dictionary = {}
+	for idx in indices:
+		if idx < 0 or idx >= _dice_views.size() or idx >= _dice_values.size():
+			continue
+		if seen_indices.has(idx):
+			continue
+		seen_indices[idx] = true
+
+		var original: Control = _dice_views[idx]
+		var original_rect := original.get_global_rect()
+		var local_position := _popup_layer.get_global_transform().affine_inverse() * original_rect.position
+		var clone: Control = DICE_SCENE.instantiate()
+		clone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		clone.z_index = 8
+		clone.position = local_position
+		clone.size = original_rect.size
+		clone.pivot_offset = original_rect.size * 0.5
+		clone.set_value(_dice_values[idx])
+		clone.set_dimmed(false)
+		clone.set_highlighted(false)
+		_popup_layer.add_child(clone)
+
+		focus_items.append({
+			"index": idx,
+			"original": original,
+			"clone": clone,
+			"start_position": local_position,
+			"size": original_rect.size,
+		})
+
+	if focus_items.is_empty():
+		return
+
+	for item in focus_items:
+		var original: Control = item["original"]
+		original.visible = false
+
+	await _move_focus_items(focus_items, _target_positions_for_focus(focus_items))
+	for item in focus_items:
+		var clone: Control = item["clone"]
+		clone.set_highlighted(true)
+
+	await _pulse_focus_items(focus_items)
+	await get_tree().create_timer(FOCUS_HOLD_DURATION).timeout
+	await _return_focus_items(focus_items)
+
+	for item in focus_items:
+		var original: Control = item["original"]
+		var clone: Control = item["clone"]
+		original.visible = true
+		if is_instance_valid(clone):
+			clone.queue_free()
+
+
+func _target_positions_for_focus(focus_items: Array[Dictionary]) -> Array[Vector2]:
+	var target_positions: Array[Vector2] = []
+	var item_count := focus_items.size()
+	var dice_size: Vector2 = focus_items[0]["size"]
+	var gap_count: int = maxi(0, item_count - 1)
+	var total_width: float = dice_size.x * item_count + FOCUS_GAP * gap_count
+	var start_x: float = (_popup_layer.size.x - total_width) * 0.5
+	var target_y: float = (_popup_layer.size.y - dice_size.y) * 0.5
+
+	for i in item_count:
+		target_positions.append(Vector2(start_x + i * (dice_size.x + FOCUS_GAP), target_y))
+
+	return target_positions
+
+
+func _move_focus_items(focus_items: Array[Dictionary], target_positions: Array[Vector2]) -> void:
+	var tween := create_tween()
+	tween.set_parallel(true)
+	for i in focus_items.size():
+		var clone: Control = focus_items[i]["clone"]
+		tween.tween_property(clone, "position", target_positions[i], FOCUS_MOVE_DURATION)\
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await tween.finished
+
+
+func _pulse_focus_items(focus_items: Array[Dictionary]) -> void:
+	var tween := create_tween()
+	tween.set_parallel(true)
+	for item in focus_items:
+		var clone: Control = item["clone"]
+		tween.tween_property(clone, "scale", FOCUS_SCALE, FOCUS_HOLD_DURATION)\
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(clone, "scale", Vector2.ONE, FOCUS_HOLD_DURATION)\
+			.set_delay(FOCUS_HOLD_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	await tween.finished
+
+
+func _return_focus_items(focus_items: Array[Dictionary]) -> void:
+	var tween := create_tween()
+	tween.set_parallel(true)
+	for item in focus_items:
+		var clone: Control = item["clone"]
+		clone.set_highlighted(false)
+		tween.tween_property(clone, "position", item["start_position"], FOCUS_RETURN_DURATION)\
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	await tween.finished
 
 
 func _show_hand_popup(hand_name: String, points: int, highlight_indices: Array[int]) -> void:
