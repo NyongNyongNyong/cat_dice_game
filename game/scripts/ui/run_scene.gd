@@ -3,8 +3,8 @@ extends Control
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 
 @onready var _floor_label: Label = $MarginContainer/VBox/Header/FloorLabel
-@onready var _target_label: Label = $MarginContainer/VBox/Header/TargetScoreLabel
-@onready var _current_label: Label = $MarginContainer/VBox/Header/CurrentScoreLabel
+@onready var _target_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow/TargetScoreLabel
+@onready var _current_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow/CurrentScoreLabel
 @onready var _status_label: Label = $MarginContainer/VBox/StatusLabel
 @onready var _roll_slot: Control = $MarginContainer/VBox/RollPhaseSlot
 @onready var _dice_row: Control = $MarginContainer/VBox/DiceRow

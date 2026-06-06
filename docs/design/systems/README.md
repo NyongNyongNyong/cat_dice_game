@@ -4,7 +4,8 @@
 
 | 문서 | 요약 |
 |------|------|
-| [hand-scoring-v1.md](hand-scoring-v1.md) | 족보 계산 v1 — 순차 독립 카운트, 재료 소모, 전체 족보 목록 |
+| [hand-scoring-v2.md](hand-scoring-v2.md) | **족보 v2 정본** — 밸런스·bundle tier, 29종 · `hand_calculator.gd` |
+| [hand-scoring-v1.md](hand-scoring-v1.md) | 족보 v1 — 레거시 (가치=1) |
 
 ## 왜 분리?
 

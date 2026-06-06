@@ -24,7 +24,8 @@
 
 | 스펙 | 요약 |
 |------|------|
-| [hand-scoring-v1.md](systems/hand-scoring-v1.md) | 족보 계산 v1 (22종, 가치=1) |
+| [hand-scoring-v1.md](systems/hand-scoring-v1.md) | 족보 v1 (구현·레거시) |
+| [hand-scoring-v2.md](systems/hand-scoring-v2.md) | **족보 v2 정본** (밸런스) |
 
 ## 수정 규칙
 

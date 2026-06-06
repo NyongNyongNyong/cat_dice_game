@@ -211,11 +211,12 @@
 - 족보끼리는 **순차 독립** 계산; 같은 족보 내 횟수만 **재료 소모**로 센다.
 - **조합론(CnR)은 사용하지 않는다.**
 
-계산 상세·족보 목록·예시: [design/systems/hand-scoring-v1.md](design/systems/hand-scoring-v1.md)
+계산 상세·족보 목록·가치: [design/systems/hand-scoring-v2.md](design/systems/hand-scoring-v2.md) (v1: [hand-scoring-v1.md](design/systems/hand-scoring-v1.md))
 
 ### 9.3 족보 가치 (밸런스)
 
-- v1 구현 가정: **전 족보 가치 = 1** (추후 `game/data/scoring/hands.json`에서 조정)
+- **v2 정본:** [hand-scoring-v2.md](design/systems/hand-scoring-v2.md) — 29종, 계열별 가치표.
+- **현재 코드:** v2 규칙·가치표 (`hand_calculator.gd`).
 
 ### 9.4 라운드 클리어 조건
 
@@ -253,7 +254,7 @@
 | 항목 | 비고 |
 |------|------|
 | 턴 내 주사위 사용 방식 | 10개 일괄 굴림 vs 선택 굴림 등 |
-| 족보 **가치** 밸런스 | 계산 규칙은 [hand-scoring-v1](design/systems/hand-scoring-v1.md) 확정 · 수치는 미정 |
+| 족보 **가치** 밸런스 | v2 초안 — [hand-scoring-v2.md](design/systems/hand-scoring-v2.md) · `hand_calculator.gd` 반영 |
 | 문양 종류·폭탄 효과 | 면 설계 확정 |
 | 리롤·잠금 규칙 | 액션 엔진과의 통합 여부 |
 | 층 vs 라운드 용어 | 기획서 상 계층 정리 |
@@ -269,3 +270,4 @@
 |------|------|------|
 | v0.1 | 2026-06-04 | 캣타워 카지노 가칭 기획 초안 정리 |
 | v0.1.1 | 2026-06-05 | §9 족보 철학·스펙 문서 링크 · §11 족보 가치만 미정으로 정리 |
+| v0.1.2 | 2026-06-05 | §9·§11 족보 v2 밸런스 스펙 링크 (29종, 가치표) |

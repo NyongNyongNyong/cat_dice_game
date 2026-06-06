@@ -4,7 +4,7 @@
 > **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §9  
 > **구현:** `scripts/core/hand_calculator.gd` · `score_calculator.gd` · `score_phase_presenter.gd`  
 > **데이터:** `game/data/scoring/hands.json` (가치 테이블 — 추후)  
-> **상태:** v1 — 계산·연출 구현됨
+> **상태:** v1 레거시 스펙 — **현재 코드는 [hand-scoring-v2.md](hand-scoring-v2.md) 기준.**
 
 ---
 

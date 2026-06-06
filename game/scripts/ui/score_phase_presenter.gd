@@ -1,8 +1,11 @@
 class_name ScorePhasePresenter
 extends Node
 
-const STEP_DELAY := 0.4
-const NUMBER_STEP_DELAY := 0.12
+const HAND_STEP_DELAY := 0.65
+const NUMBER_STEP_DELAY := 0.04
+const HAND_POPUP_DURATION := 0.55
+const NUMBER_POPUP_DURATION := 0.28
+const TIER_RESET_DELAY := 0.15
 const POPUP_RISE := 32.0
 
 signal presentation_finished()
@@ -55,6 +58,7 @@ func play(evaluation: HandEvaluation) -> void:
 func _play_number_sum(values: Array[int]) -> void:
 	var running := 0
 	_left_value.text = "0"
+	_status_label.text = "숫자 합을 계산하는 중..."
 
 	for i in values.size():
 		_clear_highlights()
@@ -72,18 +76,42 @@ func _play_number_sum(values: Array[int]) -> void:
 
 func _play_hand_steps(steps: Array[HandStep]) -> void:
 	var hand_running := 0
+	var prev_hand_id := ""
+	var prev_highlight_indices: Array[int] = []
 	_right_value.text = "0"
+	_status_label.text = "족보를 계산하는 중..."
 
 	for step in steps:
-		if step.clear_before:
+		var tier_changed := prev_hand_id != "" and step.hand_id != prev_hand_id
+		if step.clear_before or tier_changed:
 			_clear_highlights()
+			if _highlights_overlap(prev_highlight_indices, step.highlight_indices):
+				await get_tree().create_timer(TIER_RESET_DELAY).timeout
+			else:
+				await get_tree().process_frame
 
+		prev_hand_id = step.hand_id
+		prev_highlight_indices = step.highlight_indices.duplicate()
 		_apply_highlights(step.highlight_indices)
 		hand_running += step.points_added
 		_right_value.text = str(hand_running)
-		_status_label.text = "%s (+ %d)" % [step.display_ko, step.points_added]
-		await _show_points_popup("+%d" % step.points_added, step.highlight_indices)
-		await get_tree().create_timer(STEP_DELAY).timeout
+		await _show_hand_popup(step.display_ko, step.points_added, step.highlight_indices)
+		await get_tree().create_timer(HAND_STEP_DELAY).timeout
+
+
+func _highlights_overlap(previous: Array[int], next: Array[int]) -> bool:
+	if previous.is_empty() or next.is_empty():
+		return false
+
+	var previous_set: Dictionary = {}
+	for index in previous:
+		previous_set[index] = true
+
+	for index in next:
+		if previous_set.has(index):
+			return true
+
+	return false
 
 
 func _apply_highlights(indices: Array[int]) -> void:
@@ -103,6 +131,33 @@ func _clear_highlights() -> void:
 		dice.set_dimmed(true)
 
 
+func _show_hand_popup(hand_name: String, points: int, highlight_indices: Array[int]) -> void:
+	var popup := VBoxContainer.new()
+	popup.add_theme_constant_override("separation", 2)
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.z_index = 10
+
+	var name_label := Label.new()
+	name_label.text = hand_name
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 28)
+	name_label.add_theme_color_override("font_color", Color(0.42, 0.28, 0.62, 1.0))
+	name_label.add_theme_color_override("font_outline_color", Color(1, 1, 1, 0.95))
+	name_label.add_theme_constant_override("outline_size", 4)
+	popup.add_child(name_label)
+
+	var points_label := Label.new()
+	points_label.text = "+%d" % points
+	points_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	points_label.add_theme_font_size_override("font_size", 24)
+	points_label.add_theme_color_override("font_color", Color(0.72, 0.42, 0.08, 1.0))
+	points_label.add_theme_color_override("font_outline_color", Color(1, 1, 1, 0.9))
+	points_label.add_theme_constant_override("outline_size", 4)
+	popup.add_child(points_label)
+
+	await _animate_popup(popup, highlight_indices, HAND_POPUP_DURATION)
+
+
 func _show_points_popup(text: String, highlight_indices: Array[int]) -> void:
 	var popup := Label.new()
 	popup.text = text
@@ -115,19 +170,25 @@ func _show_points_popup(text: String, highlight_indices: Array[int]) -> void:
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	popup.z_index = 10
 
+	await _animate_popup(popup, highlight_indices, NUMBER_POPUP_DURATION)
+
+
+func _animate_popup(popup: Control, highlight_indices: Array[int], duration: float) -> void:
+	popup.modulate.a = 0.0
 	_popup_layer.add_child(popup)
 	await popup.get_tree().process_frame
 
 	var anchor := _anchor_above_dice(highlight_indices)
 	popup.position = anchor - Vector2(popup.size.x * 0.5, popup.size.y + 8.0)
+	popup.modulate.a = 1.0
 
 	var start_y := popup.position.y
 	var tween := create_tween()
 	tween.bind_node(popup)
 	tween.set_parallel(true)
-	tween.tween_property(popup, "position:y", start_y - POPUP_RISE, 0.45)\
+	tween.tween_property(popup, "position:y", start_y - POPUP_RISE, duration)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(popup, "modulate:a", 0.0, 0.45).set_delay(0.12)
+	tween.tween_property(popup, "modulate:a", 0.0, duration).set_delay(duration * 0.25)
 	await tween.finished
 	if is_instance_valid(popup):
 		popup.queue_free()
