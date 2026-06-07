@@ -1,0 +1,7 @@
+interface:
+  display_name: "Cat Dice Merge Feature"
+  short_description: "Merge an already committed feature"
+  default_prompt: "Use $cat-dice-merge-feature to merge an already committed Cat Dice feature branch."
+
+policy:
+  allow_implicit_invocation: true

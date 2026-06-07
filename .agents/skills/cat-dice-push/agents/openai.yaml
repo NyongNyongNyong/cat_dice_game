@@ -1,0 +1,7 @@
+interface:
+  display_name: "Cat Dice Push"
+  short_description: "Finish and push a Cat Dice feature"
+  default_prompt: "Use $cat-dice-push to finish the current Cat Dice feature branch."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Cat Dice Start Feature"
+  short_description: "Start a Cat Dice feature branch"
+  default_prompt: "Use $cat-dice-start-feature to start a new Cat Dice feature branch."
+
+policy:
+  allow_implicit_invocation: true
