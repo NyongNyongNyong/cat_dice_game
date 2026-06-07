@@ -5,6 +5,7 @@
 | 문서 | 요약 |
 |------|------|
 | [hand-scoring-v2.md](hand-scoring-v2.md) | **족보 v2 정본** — 밸런스·bundle tier, 29종 · `hand_calculator.gd` |
+| [dice-hover-reroll-preview.md](dice-hover-reroll-preview.md) | Hover 리롤 Preview — 주사위별 최고·최저 점수 변화량 표시 |
 | [hand-scoring-v1.md](hand-scoring-v1.md) | 족보 v1 — 레거시 (가치=1) |
 
 ## 왜 분리?

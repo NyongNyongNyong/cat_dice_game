@@ -26,6 +26,7 @@
 |------|------|
 | [hand-scoring-v1.md](systems/hand-scoring-v1.md) | 족보 v1 (구현·레거시) |
 | [hand-scoring-v2.md](systems/hand-scoring-v2.md) | **족보 v2 정본** (밸런스) |
+| [dice-hover-reroll-preview.md](systems/dice-hover-reroll-preview.md) | Hover 리롤 Preview (최고·최저 변화량) |
 
 ## 수정 규칙
 

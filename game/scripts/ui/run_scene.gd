@@ -14,11 +14,14 @@ const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 @onready var _right_value: Label = $MarginContainer/VBox/ScoreBoard/RightPanel/VBox/RightValue
 @onready var _roll_button: Button = $MarginContainer/VBox/Buttons/RollButton
 @onready var _next_floor_button: Button = $MarginContainer/VBox/Buttons/NextFloorButton
+@onready var _dice_popup_layer: Control = $MarginContainer/VBox/DiceRow/PopupOverlay
 @onready var _round: RoundController = $RoundController
 @onready var _roll_presenter: RollPhasePresenter = $RollPhasePresenter
 @onready var _score_presenter: ScorePhasePresenter = $ScorePhasePresenter
+@onready var _reroll_preview_presenter: Node = $RerollPreviewPresenter
 
 var _dice_views: Array[Control] = []
+var _hovered_dice_index := -1
 
 
 func _ready() -> void:
@@ -33,9 +36,12 @@ func _setup_round_flow() -> void:
 	_roll_presenter.setup(_roll_slot, _dice_row)
 	_score_presenter.setup(_dice_row, _popup_overlay, _left_value, _right_value, _status_label)
 	_score_presenter.set_dice_views(_dice_views)
+	_reroll_preview_presenter.setup(_dice_popup_layer)
 
 	_round.phase_changed.connect(_on_round_phase_changed)
 	_round.dice_rolled.connect(_on_dice_rolled)
+	_round.die_selected.connect(_on_die_selected)
+	_round.die_rerolled.connect(_on_die_rerolled)
 	_round.score_ready.connect(_on_score_ready)
 	_round.round_reset.connect(_on_round_reset)
 
@@ -56,6 +62,9 @@ func _spawn_dice() -> void:
 		var dice: Control = DICE_SCENE.instantiate()
 		_dice_container.add_child(dice)
 		dice.show_placeholder()
+		dice.mouse_entered.connect(_on_dice_mouse_entered.bind(i))
+		dice.mouse_exited.connect(_on_dice_mouse_exited)
+		dice.gui_input.connect(_on_dice_gui_input.bind(i))
 		_dice_views.append(dice)
 
 	_score_presenter.set_dice_views(_dice_views)
@@ -68,15 +77,76 @@ func _on_roll_pressed() -> void:
 
 
 func _on_dice_rolled(values: Array[int]) -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
 	await _roll_presenter.play(values)
 	_round.complete_roll_presentation()
+	_show_dice_values(values)
+
+
+func _on_die_rerolled(values: Array[int]) -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
+	_clear_dice_selection()
+	_show_dice_values(values)
+	_reroll_preview_presenter.invalidate_cache()
 
 
 func _on_score_ready(evaluation: HandEvaluation) -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
 	await _score_presenter.play(evaluation)
 	_round.complete_score_presentation()
 	RunManager.set_score(evaluation.total_score)
+	_show_dice_values(evaluation.dice_values)
+	_clear_dice_selection()
+	_reroll_preview_presenter.set_active(_round.can_reroll_preview())
 	_sync_ui()
+
+
+func _on_die_selected(index: int) -> void:
+	_update_dice_selection(index)
+	_sync_ui()
+
+
+func _show_dice_values(values: Array[int]) -> void:
+	_dice_row.visible = true
+	for i in values.size():
+		_dice_views[i].set_value(values[i])
+
+
+func _update_dice_selection(index: int) -> void:
+	for i in _dice_views.size():
+		_dice_views[i].set_selected(i == index)
+
+
+func _clear_dice_selection() -> void:
+	for dice in _dice_views:
+		dice.clear_selection()
+
+
+func _on_dice_mouse_entered(index: int) -> void:
+	_hovered_dice_index = index
+	if not _round.can_reroll_preview():
+		return
+	_reroll_preview_presenter.show_preview(_dice_views[index], index, _round.dice_values)
+
+
+func _on_dice_mouse_exited() -> void:
+	_hovered_dice_index = -1
+	_reroll_preview_presenter.hide_preview()
+
+
+func _on_dice_gui_input(event: InputEvent, index: int) -> void:
+	if not _round.can_reroll_preview():
+		return
+	if not event is InputEventMouseButton:
+		return
+	var mouse_event := event as InputEventMouseButton
+	if not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
+		return
+
+	_round.select_die(index)
 
 
 func _on_next_floor_pressed() -> void:
@@ -92,6 +162,8 @@ func _on_next_floor_pressed() -> void:
 
 
 func _on_round_reset() -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
 	_roll_slot.visible = false
 	_dice_row.visible = true
 	for dice in _dice_views:
@@ -143,8 +215,14 @@ func _update_status() -> void:
 			_status_label.text = "주사위를 굴리는 중..."
 		RoundPhase.Phase.SCORING:
 			_status_label.text = "점수를 계산하는 중..."
-		RoundPhase.Phase.RESOLVED:
-			if RunManager.can_advance_floor():
-				_status_label.text = "목표 달성! Next Floor로 이동하세요."
+		RoundPhase.Phase.REROLL_READY:
+			if _round.selected_die_index >= 0:
+				_status_label.text = "Roll을 눌러 선택한 주사위를 다시 굴리세요."
+			elif RunManager.can_advance_floor():
+				_status_label.text = (
+					"목표 달성! Next Floor로 이동하거나, 주사위를 선택해 더 리롤할 수 있습니다."
+				)
 			else:
-				_status_label.text = "목표 점수에 미달했습니다. (v0.1에서는 재시도 없음)"
+				_status_label.text = (
+					"주사위에 마우스를 올려 리롤 효과를 확인하고, 클릭해 선택하세요."
+				)

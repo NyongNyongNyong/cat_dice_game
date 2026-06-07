@@ -4,6 +4,7 @@ const FACE_COLOR := Color(0.95, 0.93, 0.88, 1.0)
 const DIM_FACE_COLOR := Color(0.82, 0.8, 0.74, 1.0)
 const HIGHLIGHT_FACE_COLOR := Color(1.0, 0.96, 0.78, 1.0)
 const HIGHLIGHT_BORDER_COLOR := Color(0.85, 0.55, 0.12, 1.0)
+const SELECTED_BORDER_COLOR := Color(0.22, 0.48, 0.86, 1.0)
 const PIP_COLOR := Color(0.18, 0.15, 0.12, 1.0)
 const DIM_PIP_COLOR := Color(0.18, 0.15, 0.12, 0.45)
 const PIP_RADIUS_RATIO := 0.07
@@ -34,6 +35,7 @@ var _face_value: int = 0
 var _show_placeholder: bool = true
 var _highlighted: bool = false
 var _dimmed: bool = false
+var _selected: bool = false
 
 
 func set_value(face_value: int) -> void:
@@ -48,6 +50,17 @@ func show_placeholder() -> void:
 	_show_placeholder = true
 	_highlighted = false
 	_dimmed = false
+	_selected = false
+	queue_redraw()
+
+
+func set_selected(on: bool) -> void:
+	_selected = on
+	queue_redraw()
+
+
+func clear_selection() -> void:
+	_selected = false
 	queue_redraw()
 
 
@@ -73,6 +86,8 @@ func _draw() -> void:
 
 	if _highlighted:
 		draw_rect(face_rect, HIGHLIGHT_BORDER_COLOR, false, 4.0)
+	elif _selected:
+		draw_rect(face_rect, SELECTED_BORDER_COLOR, false, 4.0)
 
 	if _show_placeholder:
 		return
