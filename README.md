@@ -56,17 +56,31 @@ Dice/                          # Git 루트 — Cursor에서 이 폴더를 연�
 
 정적 정의: [`game/data/`](game/data/) · 진입점 `game/data/registry.json`
 
-## Cursor — 슬래시 (`/`)
+## Feature 개발 워크플로
 
-| 명령 | 때 |
-|------|-----|
-| `/start-feature <slug>` | 작업 시작 |
-| **`/push`** | 피쳐 완료 (커밋 + main) |
-| `/merge-feature` | 머지만 (예외) |
+```mermaid
+flowchart TB
+  A["/feature 기능 설명"] --> B["feature/slug 브랜치"]
+  B --> C["스펙 → Task → 코드 → Audit"]
+  C --> D["유저 확인"]
+  D --> E{"피드백?"}
+  E -->|있음| F["스펙 → Task/AC → 코드 → 미니 Audit"]
+  F --> D
+  E -->|완료| G["전체 Audit"]
+  G --> H["/push → main"]
+```
+
+| 단계 | 명령 / 동작 |
+|------|-------------|
+| 시작 | **`/feature`** — 에이전트가 `feature/<slug>` 브랜치 생성 후 문서·구현 |
+| 피드백 | 평문으로 전달 (별도 스킬 불필요). 매번 스펙 → Task → 코드 순 |
+| 완료 | **`/push`** — 스펙·Task·diff 정합성 확인 후 커밋 + main merge |
+
+상세 다이어그램·문서 계층·금지 사항: **[Feature 워크플로](docs/design/feature-workflow.md)**
 
 ```bash
-./scripts/start-feature.sh dice-roll
-./scripts/push-feature.sh -m "feat: ..."
+./scripts/start-feature.sh dice-roll          # 수동 브랜치 시작 (선택)
+./scripts/push-feature.sh -m "feat: ..."      # /push 와 동일
 ```
 
 `origin/main` 갱신 시 push 스크립트 **중단** → `git merge main` → 재실행.

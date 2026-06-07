@@ -4,7 +4,7 @@
 > **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §4·§9 — Push Your Luck, 리롤  
 > **점수 계산:** [hand-scoring-v2.md](hand-scoring-v2.md) — Preview는 **동일 계산기·동일 입력**을 사용  
 > **상태:** v0.1 구현 완료 — `REROLL_READY` phase, Hover Preview, 선택 후 Roll로 단일 리롤  
-> **구현:** `game/scripts/core/reroll_preview_calculator.gd` · `game/scripts/ui/reroll_preview_presenter.gd`
+> **구현:** `reroll_preview_calculator.gd` · `reroll_preview_result.gd` · `reroll_preview_presenter.gd` · `round_controller.gd` · `run_scene.gd` · `dice.gd`
 
 ---
 
@@ -59,6 +59,14 @@
 
 Preview는 **리롤 비용·칩·남은 리롤 횟수**를 바꾸지 않는다. 순수하게 “이 면이 바뀌면 점수가 어떻게 달라지는가”만 본다.
 
+### 3.1 v0.1 구현 범위
+
+| 포함 (현재 코드) | 미포함 (추후) |
+|------------------|---------------|
+| 현재 주사위 10개 눈금 (`RoundController.dice_values`) | 유물·버프·디버프 |
+| `HandCalculator.evaluate(dice_values)` | `RunState` 모디파이어 스냅샷 |
+| 기본 6면 `[1, 2, 3, 4, 5, 6]` 고정 | 주사위 리소스 `faces` · 카지노 규칙 |
+
 ---
 
 ## 4. 계산 방식
@@ -75,9 +83,11 @@ delta_up   = max_score - current_score
 delta_down = min_score - current_score
 ```
 
-7. UI에는 `▲ +{delta_up}`, `▼ {delta_down}` (음수는 `-` 포함)만 표시한다.
+7. UI에는 `▲ +{delta_up}`, `▼ {delta_down}` (음수는 `-` 포함)만 표시한다. v0.1은 **항상 화살표 포함** 형식을 사용한다.
 
 **주의:** 현재 눈금과 동일한 면도 후보에 포함한다. 따라서 `delta_up`·`delta_down` 모두 0일 수 있다 (“건드려도 변화 거의 없음”).
+
+**v0.1:** `RerollPreviewCalculator.DEFAULT_FACE_VALUES` = `[1, 2, 3, 4, 5, 6]`. 특수 주사위·가변 면은 미연동.
 
 ---
 
@@ -121,19 +131,42 @@ Hover만으로 플레이어가 직관적으로 판단할 수 있게 한다.
 
 리롤 **결정 보조**이지, 리롤 실행·확정을 대체하지 않는다.
 
-### 6.1 플레이 흐름 (v0.1)
+### 6.1 Phase (`RoundPhase`)
+
+| Phase | Preview | Roll 버튼 | Next Floor |
+|-------|---------|-----------|------------|
+| IDLE | 비표시 | 활성 (10개 전부 굴림) | 비활성 |
+| ROLLING | 비표시 | 비활성 | 비활성 |
+| SCORING | 비표시 | 비활성 | 비활성 |
+| REROLL_READY | 활성 | 선택 시만 활성 (단일 리롤) | 목표 달성 시 활성 |
+
+`RoundController.can_reroll_preview()` · `can_advance_floor()` 모두 `REROLL_READY`일 때만 true.
+
+### 6.2 플레이 흐름 (v0.1)
 
 ```text
-Roll → 굴림 + 점수 연출 완료 → REROLL_READY
-REROLL_READY: Hover Preview · 주사위 클릭(선택) · Roll(선택 주사위만 리롤 + 점수 재계산)
+Roll → 굴림 연출 + 점수 연출 → REROLL_READY
+REROLL_READY: Hover Preview · 클릭(선택) · Roll(단일 리롤) 또는 Next Floor(목표 달성 시)
+단일 리롤 → 값 즉시 반영 + 점수 연출 → REROLL_READY 복귀 (반복 가능)
 ```
 
 | 단계 | 동작 |
 |------|------|
-| **Roll** (IDLE) | 10개 전부 굴림 → 점수 연출까지 완료 |
-| **Hover** (REROLL_READY) | `▲ +N  ▼ -N` 표시 |
-| **클릭** | 해당 주사위 **선택** (파란 테두리) |
-| **Roll** (선택 후) | 선택 주사위 1개만 리롤 → 점수 **재계산·연출** → REROLL_READY 복귀 |
+| **Roll** (IDLE) | 10개 전부 굴림 (`RollPhasePresenter` 연출) → 점수 연출 → `REROLL_READY` |
+| **Hover** (REROLL_READY) | 주사위 위 툴팁에 `▲ +N  ▼ -N` 표시. `mouse_exited` 시 숨김 |
+| **클릭** | 해당 주사위 **선택** — 파란 테두리 (`dice.gd` `set_selected`) |
+| **Roll** (선택 후) | 선택 주사위 1개만 `randi_range(1, 6)` 리롤 — **굴림 연출 없이** 눈금 즉시 갱신 → 점수 **재계산·연출** → `REROLL_READY` |
+| **Next Floor** (목표 달성 시) | 리롤과 **병행 가능**. 층 이동 시 라운드 리셋 → `IDLE` |
+
+v0.1은 **리롤 횟수 제한 없음**. 목표 점수를 넘긴 뒤에도 계속 리롤하거나 Next Floor로 진행할 수 있다.
+
+### 6.3 상태 안내 (`StatusLabel`)
+
+| 조건 (`REROLL_READY`) | 문구 |
+|------------------------|------|
+| 주사위 선택됨 | Roll을 눌러 선택한 주사위를 다시 굴리세요. |
+| 미선택 + 목표 달성 | 목표 달성! Next Floor로 이동하거나, 주사위를 선택해 더 리롤할 수 있습니다. |
+| 미선택 + 목표 미달 | 주사위에 마우스를 올려 리롤 효과를 확인하고, 클릭해 선택하세요. |
 
 ---
 
@@ -147,39 +180,49 @@ REROLL_READY: Hover Preview · 주사위 클릭(선택) · Roll(선택 주사위
 
 주사위당 독립 계산이므로 실시간 Hover에 충분하다.
 
-구현 시 권장:
+v0.1 구현 (`RerollPreviewPresenter`):
 
-- Hover 진입 시 1회 계산, 동일 주사위·동일 보드 상태면 **캐시** 재사용
-- 보드(다른 주사위 눈금)·버프·유물 변경 시 해당 주사위 캐시 무효화
-- `mouse_entered`마다 무조건 재계산하지 않도록 debounce는 선택 사항 (6회 수준이면 생략 가능)
+- 보드 키: 10개 눈금을 `,`로 join — 변경 시 전체 캐시 클리어
+- 주사위 인덱스별 결과 캐시 — 동일 보드에서 재 Hover 시 재계산 생략
+- 단일 리롤 완료 시 `invalidate_cache()` 호출
+- `set_active(false)` 시 Preview 숨김 + 캐시 클리어
+- debounce 없음 (6회 계산으로 충분)
 
 ---
 
 ## 8. 구현 메모
 
-| 항목 | 방향 |
-|------|------|
-| 점수 | `HandCalculator.evaluate()` (또는 동등 API) — [hand-scoring-v2.md](hand-scoring-v2.md) 정본 |
-| 입력 | `RunState` / 라운드 컨텍스트에서 현재 dice 배열·모디파이어 스냅샷 |
-| UI | `dice.tscn` Hover 또는 `run_scene` 툴팁 레이어 — 별도 `RerollPreviewPresenter` 검토 |
-| 면 목록 | 주사위 리소스의 `faces` (특수 주사위·변형 면 대응) |
-| 미구현 모디파이어 | 유물·규칙 효과가 아직 없으면 빈 목록으로라도 동일 인터페이스 유지 |
+| 항목 | v0.1 구현 |
+|------|-----------|
+| 계산 | `RerollPreviewCalculator.compute()` → `RerollPreviewResult` |
+| 점수 | `HandCalculator.evaluate()` — [hand-scoring-v2.md](hand-scoring-v2.md) 정본 |
+| 입력 | `RoundController.dice_values` (모디파이어 없음) |
+| 라운드 | `RoundController` — `select_die`, `_reroll_selected_die`, phase 전환 |
+| UI 연동 | `run_scene.gd` — `mouse_entered` / `mouse_exited` / `gui_input`(클릭) |
+| 툴팁 | `RerollPreviewPresenter` — `run_scene` `DiceRow/PopupOverlay` 위에 동적 생성, 주사위 중심 상단 (`offset y: -12`) |
+| 선택 표시 | `dice.gd` — `set_selected` 파란 테두리 |
+| 테스트 | `reroll_preview_calculator_spec_test.gd` — brute-force 대조 |
+| 면 목록 (추후) | 주사위 리소스 `faces` |
+| 모디파이어 (추후) | `RunState` 스냅샷 — API 도입 시 `compute()` 인자 확장 |
 
 ### 8.1 엣지 케이스
 
-| 상황 | 동작 |
-|------|------|
-| 점수 연출 중 (SCORING) | Preview 비표시 |
-| 선택 없이 Roll (REROLL_READY) | Roll 버튼 비활성 |
-| 주사위 잠금(고정) | Hover 시 Preview 생략 또는 “고정됨” 표시 |
-| 면 1개만 있는 주사위 | `delta_up` = `delta_down` = 0 |
-| 계산 중 보드 변경 | 진행 중 Preview 취소 후 재계산 |
+| 상황 | v0.1 동작 |
+|------|-----------|
+| ROLLING / SCORING | Preview 비표시 (`set_active(false)`) |
+| 선택 없이 Roll (`REROLL_READY`) | Roll 버튼 비활성 |
+| `mouse_exited` | 툴팁 숨김 |
+| 단일 리롤 후 | 선택 해제, 캐시 무효화, SCORING → 점수 연출 → `REROLL_READY` |
+| 보드(눈금) 변경 | 보드 키 불일치 시 캐시 클리어 후 재계산 |
+| 면 1개만 있는 주사위 | `delta_up` = `delta_down` = 0 (계산기 `face_values` 인자) |
+| 주사위 잠금(고정) | **미구현** — 추후: Preview 생략 또는 “고정됨” 표시 |
 
 ---
 
-## 9. 문서 이력
+## 변경 이력
 
-| 버전 | 날짜 | 내용 |
-|------|------|------|
-| v1 | 2026-06-07 | 초안 — Hover 리롤 최고·최저 변화량 Preview 규칙·알고리즘·성능 |
-| v1 | 2026-06-07 | `REROLL_READY` phase — Roll 후 점수 완료, Hover Preview, 선택+Roll 단일 리롤 |
+| 날짜 | 변경 |
+|------|------|
+| 2026-06-07 | v0.1 구현 반영 — Next Floor 병행, 상태 문구, 단일 리롤 연출, 캐시·파일 매핑, v0.1 범위 표 |
+| 2026-06-07 | v0.1 구현 완료 — `REROLL_READY`, Hover Preview, 선택+Roll 단일 리롤 |
+| 2026-06-07 | 초안 — Hover 리롤 최고·최저 변화량 규칙·알고리즘·성능 |

@@ -318,23 +318,51 @@ penta_bundle_count = Σ floor(count / 5)
 
 ---
 
-## 13. 구현 메모
+## 13. 점수 연출 (`ScorePhasePresenter`) — v0.1
+
+`HandCalculator.evaluate()`가 반환하는 `HandStep` 배열 순서대로 좌(숫자 합)·우(족보 가치) 패널을 채운다.
+
+### 13.1 `HandStep` 하이라이트
+
+각 step의 `highlight_indices`는 **해당 step이 점수에 기여한 주사위 인덱스만** 담는다. 이전 step과 **누적하지 않는다.**
+
+| 계열 | 하이라이트 범위 |
+|------|-----------------|
+| Pair~Penta bundle | tier instance마다 `divisor`개 chunk 중 **해당 instance 구간만** (`start_chunk` ~ `end_chunk`) |
+| High Kind | formation 1회분 (예: Hexa 6개) |
+| Straight | formation 1회분 |
+| Full House | triple 3 + pair 2 |
+| Stair | formation 1회분 |
+
+연출 시 step마다 `_apply_highlights(step.highlight_indices)`로 **교체**한다. 계열·tier가 바뀔 때 하이라이트를 비우는 tier reset·`clear_before` 지연은 **사용하지 않는다** (v0.1).
+
+### 13.2 연출 순서
+
+1. 숫자 합 — 주사위 1개씩 순회, `+N` 팝업
+2. 족보 step — 하이라이트 → 포커스 이동 → 우측 패널 누적 → 족보 팝업
+
+단일 리롤 후에도 동일 연출을 재생한다 (`round_controller` → `score_ready`).
+
+---
+
+## 14. 구현 메모
 
 | 항목 | 방향 |
 |------|------|
-| `HandCalculator` | v2 계열·tier·가치 테이블로 교체 |
+| `HandCalculator` | v2 계열·tier·가치 테이블 · step별 청크 하이라이트 (§13.1) |
 | `hand_calculator_spec_test.gd` | **스펙 예시 회귀 테스트** — 문서 예시와 불일치 시 실패 |
 | `hands.json` | id, display_ko, value, tier 규칙 메타 (detect는 코드) |
-| `ScorePhasePresenter` | 계열별 → tier별 연출 순서 재정의 |
+| `ScorePhasePresenter` | §13 연출 순서·하이라이트 교체 |
 | 층 목표 점수 | v2 점수 스케일에 맞게 재조정 필요 |
 
 ---
 
-## 14. 문서 이력
+## 변경 이력
 
-| 버전 | 날짜 | 내용 |
-|------|------|------|
-| v2 | 2026-06-05 | §9 Full House — pool 소모 알고리즘·예시 보강 (Triple/Pair 계열 chunk 재사용 금지) |
-| v2 | 2026-06-05 | `hand_calculator.gd` v2 구현 — bundle tier, Straight/Stair 최장만 |
-| v2 | 2026-06-05 | 플레이테스트 밸런스 — bundle tier, Straight/Stair 최장만, 29종 가치표 |
-| v1 | 2026-06-05 | [hand-scoring-v1.md](hand-scoring-v1.md) — 구현 완료, 가치=1 |
+| 날짜 | 변경 |
+|------|------|
+| 2026-06-07 | §13 점수 연출 — HandStep 청크 단위 하이라이트, tier reset 미사용 (v0.1 구현 반영) |
+| 2026-06-05 | §9 Full House — pool 소모 알고리즘·예시 보강 (Triple/Pair chunk 재사용 금지) |
+| 2026-06-05 | `hand_calculator.gd` 구현 — bundle tier, Straight/Stair 최장만 |
+| 2026-06-05 | 플레이테스트 밸런스 — 29종 가치표 |
+| 2026-06-05 | [hand-scoring-v1.md](hand-scoring-v1.md)에서 분기 — 레거시 (가치=1) |
