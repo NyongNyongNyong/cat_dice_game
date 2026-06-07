@@ -27,10 +27,10 @@ game/              # Godot 루트 (project.godot)
 - **설계:** `docs/design/` — 현재 구현 스코프·씬·스크립트. 최신: `v0.1-initial-playable.md`.
 - **시스템 스펙:** `docs/design/systems/` — 족보 **v2 정본**: `hand-scoring-v2.md` (`hand_calculator.gd` v2).
 
-## Git
+## Git · Feature 워크플로
 
-| `/start-feature` | 시작 | **`/push`** | 완료 |
-| `/merge-feature` | 머지만 (예외) |
+- **`/feature`** → 피드백(평문) → **`/push`**
+- 다이어그램: [docs/design/feature-workflow.md](docs/design/feature-workflow.md)
 
 원격 main 갱신 시 push **중단** → `git merge main` → 재실행. git은 슬래시·요청 시만.
 
