@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bhkwgtmiaon2n" path="res://scripts/core/round_controller.gd" id="2_round"]
 [ext_resource type="Script" uid="uid://cpq1n7tr7tiu1" path="res://scripts/ui/roll_phase_presenter.gd" id="3_roll"]
 [ext_resource type="Script" uid="uid://fis8x0ebu7il" path="res://scripts/ui/score_phase_presenter.gd" id="4_score"]
+[ext_resource type="Script" path="res://scripts/ui/reroll_preview_presenter.gd" id="5_reroll_preview"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header_score"]
 content_margin_left = 20.0
@@ -275,3 +276,6 @@ script = ExtResource("3_roll")
 
 [node name="ScorePhasePresenter" type="Node" parent="." unique_id=493166879]
 script = ExtResource("4_score")
+
+[node name="RerollPreviewPresenter" type="Node" parent="."]
+script = ExtResource("5_reroll_preview")

@@ -7,7 +7,6 @@ const HAND_STEP_DELAY := 0.2
 const NUMBER_STEP_DELAY := 0.04
 const HAND_POPUP_DURATION := 0.55
 const NUMBER_POPUP_DURATION := 0.28
-const TIER_RESET_DELAY := 0.15
 const POPUP_RISE := 32.0
 const FOCUS_MOVE_DURATION := 0.22
 const FOCUS_HOLD_DURATION := 0.16
@@ -85,43 +84,16 @@ func _play_number_sum(values: Array[int]) -> void:
 
 func _play_hand_steps(steps: Array[HandStep]) -> void:
 	var hand_running := 0
-	var prev_hand_id := ""
-	var prev_highlight_indices: Array[int] = []
 	_right_value.text = "0"
 	_status_label.text = "족보를 계산하는 중..."
 
 	for step in steps:
-		var tier_changed := prev_hand_id != "" and step.hand_id != prev_hand_id
-		if step.clear_before or tier_changed:
-			_clear_highlights()
-			if _highlights_overlap(prev_highlight_indices, step.highlight_indices):
-				await get_tree().create_timer(TIER_RESET_DELAY).timeout
-			else:
-				await get_tree().process_frame
-
-		prev_hand_id = step.hand_id
-		prev_highlight_indices = step.highlight_indices.duplicate()
 		_apply_highlights(step.highlight_indices)
 		await _play_focus_dice(step.highlight_indices)
 		hand_running += step.points_added
 		_right_value.text = str(hand_running)
 		await _show_hand_popup(step.display_ko, step.points_added, step.highlight_indices)
 		await get_tree().create_timer(HAND_STEP_DELAY).timeout
-
-
-func _highlights_overlap(previous: Array[int], next: Array[int]) -> bool:
-	if previous.is_empty() or next.is_empty():
-		return false
-
-	var previous_set: Dictionary = {}
-	for index in previous:
-		previous_set[index] = true
-
-	for index in next:
-		if previous_set.has(index):
-			return true
-
-	return false
 
 
 func _apply_highlights(indices: Array[int]) -> void:

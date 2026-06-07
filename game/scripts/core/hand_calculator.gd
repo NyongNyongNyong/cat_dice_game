@@ -135,19 +135,17 @@ static func _append_bundle_series_steps(
 		var value: int = tier_def["value"]
 
 		for instance in tier_count:
+			var start_chunk := instance * divisor
 			var end_chunk := mini((instance + 1) * divisor, chunks.size())
 			var highlight: Array[int] = []
-			for chunk_index in range(end_chunk):
+			for chunk_index in range(start_chunk, end_chunk):
 				highlight.append_array(chunks[chunk_index])
 
-			# tier 첫 instance마다 하이라이트 리셋 (페어→투페어→쓰리페어 …)
-			var reset_highlight := instance == 0
 			steps.append(HandStep.new(
 				tier_def["id"],
 				tier_def["display_ko"],
 				highlight,
 				value,
-				reset_highlight,
 			))
 
 
@@ -158,23 +156,17 @@ static func _append_high_kind_steps(
 ) -> void:
 	var size: int = hand_def["size"]
 	var value: int = hand_def["value"]
-	var cumulative: Array[int] = []
-	var hand_started := false
-
 	for face in range(1, 7):
 		var pool := _indices_for_face(dice_values, face).duplicate()
 		while pool.size() >= size:
-			var chunk := pool.slice(0, size)
+			var chunk: Array[int] = pool.slice(0, size)
 			pool = pool.slice(size)
-			cumulative.append_array(chunk)
 			steps.append(HandStep.new(
 				hand_def["id"],
 				hand_def["display_ko"],
-				cumulative.duplicate(),
+				chunk,
 				value,
-				not hand_started,
 			))
-			hand_started = true
 
 
 static func _append_longest_straight_steps(steps: Array[HandStep], dice_values: Array[int]) -> void:
@@ -184,17 +176,13 @@ static func _append_longest_straight_steps(steps: Array[HandStep], dice_values: 
 
 	var hand_def: Dictionary = STRAIGHT_BY_LENGTH[length]
 	var formations := _collect_straight_formations(dice_values, length)
-	var hand_started := false
-
 	for formation in formations:
 		steps.append(HandStep.new(
 			hand_def["id"],
 			hand_def["display_ko"],
 			formation,
 			hand_def["value"],
-			not hand_started,
 		))
-		hand_started = true
 
 
 static func _find_longest_straight_length(dice_values: Array[int]) -> int:
@@ -207,8 +195,6 @@ static func _find_longest_straight_length(dice_values: Array[int]) -> int:
 static func _append_full_house_steps(steps: Array[HandStep], dice_values: Array[int]) -> void:
 	# hand-scoring-v2.md §9 — Full House 전용 pool, Triple/Pair 계열 chunk와 분리
 	var pools := _build_face_pools(dice_values)
-	var hand_started := false
-
 	while true:
 		var choice := _pick_best_full_house(pools)
 		if choice.is_empty():
@@ -228,9 +214,7 @@ static func _append_full_house_steps(steps: Array[HandStep], dice_values: Array[
 			"풀하우스",
 			highlight,
 			FULL_HOUSE_VALUE,
-			not hand_started,
 		))
-		hand_started = true
 
 
 static func _pick_best_full_house(pools: Dictionary) -> Dictionary:
@@ -307,17 +291,13 @@ static func _append_longest_stair_steps(
 	var hand_def: Dictionary = tiers[length]
 	var buckets := _build_chunk_buckets(dice_values, chunk_size)
 	var formations := _collect_stair_formations(buckets, length)
-	var hand_started := false
-
 	for formation in formations:
 		steps.append(HandStep.new(
 			hand_def["id"],
 			hand_def["display_ko"],
 			formation,
 			hand_def["value"],
-			not hand_started,
 		))
-		hand_started = true
 
 
 static func _find_longest_stair_length(
