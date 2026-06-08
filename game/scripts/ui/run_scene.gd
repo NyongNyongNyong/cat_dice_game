@@ -58,7 +58,7 @@ func _spawn_dice() -> void:
 		child.queue_free()
 	_dice_views.clear()
 
-	for i in RunManager.DICE_COUNT:
+	for i in _round.get_dice_count():
 		var dice: Control = DICE_SCENE.instantiate()
 		_dice_container.add_child(dice)
 		dice.show_placeholder()
@@ -80,15 +80,19 @@ func _on_dice_rolled(values: Array[int]) -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	await _roll_presenter.play(values)
+	_show_dice_faces(_round.dice_faces, values)
+	await _play_dice_face_effects(_round.dice_faces, values)
 	_round.complete_roll_presentation()
-	_show_dice_values(values)
+	_show_dice_values(_round.dice_values)
 
 
 func _on_die_rerolled(values: Array[int]) -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_clear_dice_selection()
-	_show_dice_values(values)
+	_show_dice_faces(_round.dice_faces, values)
+	await _play_dice_face_effects(_round.dice_faces, values)
+	_show_dice_values(_round.dice_values)
 	_reroll_preview_presenter.invalidate_cache()
 
 
@@ -115,6 +119,28 @@ func _show_dice_values(values: Array[int]) -> void:
 		_dice_views[i].set_value(values[i])
 
 
+func _show_dice_faces(faces: Array[Resource], values: Array[int]) -> void:
+	_dice_row.visible = true
+	for i in values.size():
+		if i < faces.size():
+			_dice_views[i].set_face(faces[i], values[i])
+		else:
+			_dice_views[i].set_value(values[i])
+
+
+func _play_dice_face_effects(faces: Array[Resource], values: Array[int]) -> void:
+	for i in faces.size():
+		if i >= _dice_views.size() or i >= values.size():
+			continue
+		var face := faces[i]
+		if face == null or not face.has_method("has_visual_effect") or not face.has_visual_effect():
+			continue
+		await face.play_visual_effect(
+			_dice_views[i],
+			{"faces": faces, "resolved_value": values[i], "dice_index": i}
+		)
+
+
 func _update_dice_selection(index: int) -> void:
 	for i in _dice_views.size():
 		_dice_views[i].set_selected(i == index)
@@ -129,7 +155,12 @@ func _on_dice_mouse_entered(index: int) -> void:
 	_hovered_dice_index = index
 	if not _round.can_reroll_preview():
 		return
-	_reroll_preview_presenter.show_preview(_dice_views[index], index, _round.dice_values)
+	_reroll_preview_presenter.show_preview(
+		_dice_views[index],
+		index,
+		_round.dice_values,
+		_round.get_reroll_face_values(index)
+	)
 
 
 func _on_dice_mouse_exited() -> void:

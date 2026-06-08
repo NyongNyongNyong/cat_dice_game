@@ -44,6 +44,10 @@ game/              # Godot 루트 (project.godot)
 
 - **4.6.3 stable** 고정 (`game/project.godot`). 4.7 beta·다른 마이너 사용 금지.
 - 같은 `.tscn` 동시 수정 금지
+- **Headless 테스트 실행:** Godot는 기본 로그를 `user://logs`에 쓰므로 샌드박스 에이전트에서 `Failed to open 'user://logs/...'` 후 크래시할 수 있다. 항상 repo 내부 로그 파일을 지정한다.
+  - 권장 형식: `..\Godot_v4.6-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
+  - 씬 로딩 확인: `..\Godot_v4.6-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --quit-after 1`
+  - 실패 원인이 권한이 아니라 스크립트 오류인지 보기 위해, `--log-file` 없이 먼저 실행하지 않는다.
 
 ## 점수
 

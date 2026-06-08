@@ -1,0 +1,11 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Resource" path="res://resources/dice/basic_d6.tres" id="1_6wia4"]
+[ext_resource type="Resource" path="res://resources/dice/change_to_highest_test.tres" id="2_a3re6"]
+[ext_resource type="Script" path="res://scripts/core/dice_loadout_resource.gd" id="3_3s76u"]
+
+[resource]
+script = ExtResource("3_3s76u")
+id = &"change_to_highest_test_loadout"
+display_name = "Change To Highest Test Loadout"
+dice = Array[Resource]([ExtResource("1_6wia4"), ExtResource("2_a3re6"), ExtResource("2_a3re6")])
