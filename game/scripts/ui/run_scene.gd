@@ -14,11 +14,15 @@ const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 @onready var _right_value: Label = $MarginContainer/VBox/ScoreBoard/RightPanel/VBox/RightValue
 @onready var _roll_button: Button = $MarginContainer/VBox/Buttons/RollButton
 @onready var _next_floor_button: Button = $MarginContainer/VBox/Buttons/NextFloorButton
+@onready var _shop_panel: PanelContainer = $MarginContainer/VBox/ShopPanel
+@onready var _shop_slots: VBoxContainer = $MarginContainer/VBox/ShopPanel/ShopVBox/ShopSlots
+@onready var _shop_continue_button: Button = $MarginContainer/VBox/ShopPanel/ShopVBox/ShopContinueButton
 @onready var _dice_popup_layer: Control = $MarginContainer/VBox/DiceRow/PopupOverlay
 @onready var _round: RoundController = $RoundController
 @onready var _roll_presenter: RollPhasePresenter = $RollPhasePresenter
 @onready var _score_presenter: ScorePhasePresenter = $ScorePhasePresenter
 @onready var _reroll_preview_presenter: Node = $RerollPreviewPresenter
+@onready var _shop_presenter: Node = $DiceShopPresenter
 
 var _dice_views: Array[Control] = []
 var _hovered_dice_index := -1
@@ -26,9 +30,10 @@ var _score_after_reroll := false
 
 
 func _ready() -> void:
+	RunManager.start_run()
+	_apply_roster_to_round()
 	_spawn_dice()
 	_setup_round_flow()
-	RunManager.start_run()
 	_round.begin_round()
 	_sync_ui()
 
@@ -38,6 +43,7 @@ func _setup_round_flow() -> void:
 	_score_presenter.setup(_dice_row, _popup_overlay, _left_value, _right_value, _status_label)
 	_score_presenter.set_dice_views(_dice_views)
 	_reroll_preview_presenter.setup(_dice_popup_layer)
+	_shop_presenter.setup(_shop_panel, _shop_slots, _shop_continue_button)
 
 	_round.phase_changed.connect(_on_round_phase_changed)
 	_round.dice_rolled.connect(_on_dice_rolled)
@@ -49,9 +55,17 @@ func _setup_round_flow() -> void:
 	RunManager.floor_changed.connect(_on_floor_changed)
 	RunManager.score_changed.connect(_on_score_changed)
 	RunManager.run_completed.connect(_on_run_completed)
+	RunManager.roster_changed.connect(_on_roster_changed)
 
 	_roll_button.pressed.connect(_on_roll_pressed)
 	_next_floor_button.pressed.connect(_on_next_floor_pressed)
+	_shop_presenter.continue_pressed.connect(_on_shop_continue_pressed)
+	_shop_presenter.replace_requested.connect(_on_shop_replace_requested)
+
+
+func _apply_roster_to_round() -> void:
+	_round.dice_loadout = null
+	_round.dice_resources = RunManager.get_owned_dice()
 
 
 func _spawn_dice() -> void:
@@ -59,7 +73,8 @@ func _spawn_dice() -> void:
 		child.queue_free()
 	_dice_views.clear()
 
-	for i in _round.get_dice_count():
+	var dice_count := _round.get_dice_count()
+	for i in dice_count:
 		var dice: Control = DICE_SCENE.instantiate()
 		_dice_container.add_child(dice)
 		dice.show_placeholder()
@@ -72,7 +87,7 @@ func _spawn_dice() -> void:
 
 
 func _on_roll_pressed() -> void:
-	if not _round.can_roll() or RunManager.run_finished:
+	if _is_shop_open() or not _round.can_roll() or RunManager.run_finished:
 		return
 	_round.roll()
 
@@ -107,11 +122,13 @@ func _on_score_ready(evaluation: HandEvaluation) -> void:
 	RunManager.set_score(evaluation.total_score)
 	_show_dice_faces(_round.dice_faces, evaluation.dice_values)
 	_clear_dice_selection()
-	_reroll_preview_presenter.set_active(_round.can_reroll_preview())
+	_reroll_preview_presenter.set_active(_round.can_reroll_preview() and not _is_shop_open())
 	_sync_ui()
 
 
 func _on_die_selected(index: int) -> void:
+	if _is_shop_open():
+		return
 	_update_dice_selection(index)
 	_sync_ui()
 
@@ -119,7 +136,7 @@ func _on_die_selected(index: int) -> void:
 func _show_dice_faces(faces: Array, values: Array[int]) -> void:
 	_dice_row.visible = true
 	for i in values.size():
-		if i < faces.size() and faces[i] != null:
+		if i < faces.size() and faces[i] != null and i < _dice_views.size():
 			_dice_views[i].set_face(faces[i], values[i])
 
 
@@ -147,6 +164,8 @@ func _clear_dice_selection() -> void:
 
 
 func _on_dice_mouse_entered(index: int) -> void:
+	if _is_shop_open():
+		return
 	_hovered_dice_index = index
 	if not _round.can_reroll_preview():
 		return
@@ -159,7 +178,7 @@ func _on_dice_mouse_exited() -> void:
 
 
 func _on_dice_gui_input(event: InputEvent, index: int) -> void:
-	if not _round.can_reroll_preview():
+	if _is_shop_open() or not _round.can_reroll_preview():
 		return
 	if not event is InputEventMouseButton:
 		return
@@ -173,17 +192,49 @@ func _on_dice_gui_input(event: InputEvent, index: int) -> void:
 func _on_next_floor_pressed() -> void:
 	if not _round.can_advance_floor() or not RunManager.can_advance_floor():
 		return
-
-	RunManager.advance_floor()
 	if RunManager.run_finished:
 		return
 
+	_open_shop()
+
+
+func _open_shop() -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
+	_clear_dice_selection()
+	_shop_presenter.open(RunManager.get_dice_roster())
+	_sync_ui()
+
+
+func _on_shop_replace_requested(slot_index: int) -> void:
+	if RunManager.replace_owned_dice_with_h(slot_index):
+		_apply_roster_to_round()
+		_shop_presenter.open(RunManager.get_dice_roster())
+		_reroll_preview_presenter.invalidate_cache()
+	_sync_ui()
+
+
+func _on_shop_continue_pressed() -> void:
+	_shop_presenter.close()
+	RunManager.advance_floor()
+	if RunManager.run_finished:
+		_sync_ui()
+		return
+
+	_apply_roster_to_round()
+	_spawn_dice()
 	_round.begin_round()
 	_sync_ui()
 
 
+func _on_roster_changed() -> void:
+	_apply_roster_to_round()
+	_reroll_preview_presenter.invalidate_cache()
+
+
 func _on_round_reset() -> void:
 	_score_after_reroll = false
+	_shop_presenter.close()
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_roll_slot.visible = false
@@ -212,22 +263,34 @@ func _on_score_changed(score: int) -> void:
 
 
 func _on_run_completed() -> void:
+	_shop_presenter.close()
 	_sync_ui()
 
 
+func _is_shop_open() -> bool:
+	return _shop_panel.visible
+
+
 func _sync_ui() -> void:
-	_roll_button.disabled = not _round.can_roll() or RunManager.run_finished
+	var shop_open: bool = _is_shop_open()
+	_roll_button.disabled = shop_open or not _round.can_roll() or RunManager.run_finished
 	_next_floor_button.disabled = (
-		not _round.can_advance_floor()
+		shop_open
+		or not _round.can_advance_floor()
 		or not RunManager.can_advance_floor()
 		or RunManager.run_finished
 	)
+	_shop_continue_button.disabled = RunManager.run_finished
 	_update_status()
 
 
 func _update_status() -> void:
 	if RunManager.run_finished:
 		_status_label.text = "5층 클리어! v0.1 완료"
+		return
+
+	if _is_shop_open():
+		_status_label.text = "상점에서 주사위를 교체한 뒤 다음 층으로 이동하세요."
 		return
 
 	match _round.phase:
@@ -242,7 +305,7 @@ func _update_status() -> void:
 				_status_label.text = "Roll을 눌러 선택한 주사위를 다시 굴리세요."
 			elif RunManager.can_advance_floor():
 				_status_label.text = (
-					"목표 달성! Next Floor로 이동하거나, 주사위를 선택해 더 리롤할 수 있습니다."
+					"목표 달성! Next Floor(상점)로 이동하거나, 주사위를 선택해 더 리롤할 수 있습니다."
 				)
 			else:
 				_status_label.text = (

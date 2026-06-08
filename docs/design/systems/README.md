@@ -6,6 +6,7 @@
 |------|------|
 | [hand-scoring-v2.md](hand-scoring-v2.md) | **족보 v2 정본** — 밸런스·bundle tier, 29종 · `hand_calculator.gd` |
 | [dice-resources.md](dice-resources.md) | **주사위 리소스·면 정본** — `DiceResource`, `NumberFace`/`SpecialFace`, `FaceProperty`, 해석·UI |
+| [dice-roster-shop.md](dice-roster-shop.md) | **보유 로스터·상점** — 시작 4기본, 층 간 교체·확장 골격 |
 | [dice-hover-reroll-preview.md](dice-hover-reroll-preview.md) | Hover 리롤 Preview — 주사위별 최고·최저 점수 변화량 표시 |
 | [hand-scoring-v1.md](hand-scoring-v1.md) | 족보 v1 — 레거시 (가치=1) |
 
@@ -29,5 +30,6 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-08 | `dice-roster-shop.md` 추가 — 보유 주사위·상점 골격 |
 | 2026-06-08 | `dice-resources.md` 추가 — TwoEG 면 리소스 구현 정본 |
 | 2026-06-07 | 수정 규칙 — 하단 `## 변경 이력` 표준화 (`날짜 \| 변경`, 최신이 위) |
