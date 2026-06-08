@@ -368,6 +368,7 @@ penta_bundle_count = Σ floor(count / 5)
 | `HandCalculator` | v2 계열·tier·가치 테이블 · step별 청크 하이라이트 (§13.1) |
 | `hand_calculator_spec_test.gd` | **스펙 예시 회귀 테스트** — 문서 예시와 불일치 시 실패 |
 | `hands.json` | id, display_ko, value, tier 규칙 메타 (detect는 코드) |
+| `DiceResource` / 면 해석 | [dice-resources.md](dice-resources.md) — `dice_values` 입력 생성 |
 | `ScorePhasePresenter` | §13 연출 순서·하이라이트 교체 |
 | 층 목표 점수 | v2 점수 스케일에 맞게 재조정 필요 |
 
@@ -377,6 +378,7 @@ penta_bundle_count = Σ floor(count / 5)
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-08 | §14 — `DiceResource` 구현 메모, [dice-resources.md](dice-resources.md) 링크 |
 | 2026-06-08 | §13.4 — 점수 연출·리롤 전 구간 face 표시 강제, set_value 금지 |
 | 2026-06-08 | §13.2 — 리롤 시 결과 주사위 1회 하이라이트 후 족보 재연출 |
 | 2026-06-08 | §13.2 — 족보 step 속도 숫자 합과 동일; 리롤 시 족보만 빠른 재연출 |

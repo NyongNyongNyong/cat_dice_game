@@ -3,6 +3,7 @@
 > **문서 유형:** 시스템 스펙 (UI·계산 규칙)  
 > **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §4·§9 — Push Your Luck, 리롤  
 > **점수 계산:** [hand-scoring-v2.md](hand-scoring-v2.md) — Preview는 **동일 계산기·동일 입력**을 사용  
+> **면·해석:** [dice-resources.md](dice-resources.md) — `compute_from_faces`, `RoundController.dice_faces`  
 > **상태:** v0.1 구현 완료 — `REROLL_READY` phase, Hover Preview, 선택 후 Roll로 단일 리롤  
 > **구현:** `reroll_preview_calculator.gd` · `reroll_preview_result.gd` · `reroll_preview_presenter.gd` · `round_controller.gd` · `run_scene.gd` · `dice.gd`
 
@@ -63,9 +64,11 @@ Preview는 **리롤 비용·칩·남은 리롤 횟수**를 바꾸지 않는다. 
 
 | 포함 (현재 코드) | 미포함 (추후) |
 |------------------|---------------|
-| 현재 주사위 10개 눈금 (`RoundController.dice_values`) | 유물·버프·디버프 |
-| `HandCalculator.evaluate(dice_values)` | `RunState` 모디파이어 스냅샷 |
-| 기본 6면 `[1, 2, 3, 4, 5, 6]` 고정 | 주사위 리소스 `faces` · 카지노 규칙 |
+| 현재 보드 `dice_faces` + 해석 `dice_values` | 유물·버프·디버프 |
+| 슬롯별 `DiceResource.get_faces()` 후보 순회 | 카지노 규칙이 면 목록·해석을 바꾸는 경우 |
+| `RerollPreviewCalculator.compute_from_faces` | `RunState` 모디파이어 스냅샷 |
+| `HandCalculator.evaluate(dice_values)` | — |
+| fallback: `compute(dice_values, …, face_values)` (레거시) | — |
 
 ---
 
@@ -194,15 +197,15 @@ v0.1 구현 (`RerollPreviewPresenter`):
 
 | 항목 | v0.1 구현 |
 |------|-----------|
-| 계산 | `RerollPreviewCalculator.compute()` → `RerollPreviewResult` |
+| 계산 | `compute_from_faces()` (정본) · `compute()` (fallback) → `RerollPreviewResult` |
 | 점수 | `HandCalculator.evaluate()` — [hand-scoring-v2.md](hand-scoring-v2.md) 정본 |
-| 입력 | `RoundController.dice_values` (모디파이어 없음) |
+| 입력 | `RoundController.dice_faces` + 슬롯 `DiceResource` 면 후보 ([dice-resources.md](dice-resources.md)) |
 | 라운드 | `RoundController` — `select_die`, `_reroll_selected_die`, phase 전환 |
 | UI 연동 | `run_scene.gd` — `mouse_entered` / `mouse_exited` / `gui_input`(클릭) |
 | 툴팁 | `RerollPreviewPresenter` — `run_scene` `DiceRow/PopupOverlay` 위에 동적 생성, 주사위 중심 상단 (`offset y: -12`) |
 | 선택 표시 | `dice.gd` — `set_selected` 파란 테두리 |
 | 테스트 | `reroll_preview_calculator_spec_test.gd` — brute-force 대조 |
-| 면 목록 (추후) | 주사위 리소스 `faces` |
+| 면 목록 | `get_dice_resource(i).get_faces()` — [dice-resources.md](dice-resources.md) |
 | 모디파이어 (추후) | `RunState` 스냅샷 — API 도입 시 `compute()` 인자 확장 |
 
 ### 8.1 엣지 케이스
@@ -214,7 +217,7 @@ v0.1 구현 (`RerollPreviewPresenter`):
 | `mouse_exited` | 툴팁 숨김 |
 | 단일 리롤 후 | 선택 해제, 캐시 무효화, SCORING → 점수 연출 → `REROLL_READY` |
 | 보드(눈금) 변경 | 보드 키 불일치 시 캐시 클리어 후 재계산 |
-| 면 1개만 있는 주사위 | `delta_up` = `delta_down` = 0 (계산기 `face_values` 인자) |
+| 면 1개만 있는 주사위 | `delta_up` = `delta_down` = 0 (`get_faces()` 길이 1) |
 | 주사위 잠금(고정) | **미구현** — 추후: Preview 생략 또는 “고정됨” 표시 |
 
 ---
@@ -223,6 +226,7 @@ v0.1 구현 (`RerollPreviewPresenter`):
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-08 | `compute_from_faces`·`DiceResource` 면 후보 반영 — [dice-resources.md](dice-resources.md) 교차 참조 |
 | 2026-06-07 | v0.1 구현 반영 — Next Floor 병행, 상태 문구, 단일 리롤 연출, 캐시·파일 매핑, v0.1 범위 표 |
 | 2026-06-07 | v0.1 구현 완료 — `REROLL_READY`, Hover Preview, 선택+Roll 단일 리롤 |
 | 2026-06-07 | 초안 — Hover 리롤 최고·최저 변화량 규칙·알고리즘·성능 |
