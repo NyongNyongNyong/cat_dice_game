@@ -22,6 +22,7 @@ const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 
 var _dice_views: Array[Control] = []
 var _hovered_dice_index := -1
+var _score_after_reroll := false
 
 
 func _ready() -> void:
@@ -83,26 +84,28 @@ func _on_dice_rolled(values: Array[int]) -> void:
 	_show_dice_faces(_round.dice_faces, values)
 	await _play_dice_face_effects(_round.dice_faces, values)
 	_round.complete_roll_presentation()
-	_show_dice_values(_round.dice_values)
 
 
 func _on_die_rerolled(values: Array[int]) -> void:
+	_score_after_reroll = true
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_clear_dice_selection()
 	_show_dice_faces(_round.dice_faces, values)
 	await _play_dice_face_effects(_round.dice_faces, values)
-	_show_dice_values(_round.dice_values)
 	_reroll_preview_presenter.invalidate_cache()
 
 
 func _on_score_ready(evaluation: HandEvaluation) -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
-	await _score_presenter.play(evaluation)
+	var hands_only := _score_after_reroll
+	_score_after_reroll = false
+	var rerolled_index := _round.last_rerolled_die_index if hands_only else -1
+	await _score_presenter.play(evaluation, hands_only, rerolled_index, _round.dice_faces)
 	_round.complete_score_presentation()
 	RunManager.set_score(evaluation.total_score)
-	_show_dice_values(evaluation.dice_values)
+	_show_dice_faces(_round.dice_faces, evaluation.dice_values)
 	_clear_dice_selection()
 	_reroll_preview_presenter.set_active(_round.can_reroll_preview())
 	_sync_ui()
@@ -113,19 +116,11 @@ func _on_die_selected(index: int) -> void:
 	_sync_ui()
 
 
-func _show_dice_values(values: Array[int]) -> void:
+func _show_dice_faces(faces: Array, values: Array[int]) -> void:
 	_dice_row.visible = true
 	for i in values.size():
-		_dice_views[i].set_value(values[i])
-
-
-func _show_dice_faces(faces: Array[Resource], values: Array[int]) -> void:
-	_dice_row.visible = true
-	for i in values.size():
-		if i < faces.size():
+		if i < faces.size() and faces[i] != null:
 			_dice_views[i].set_face(faces[i], values[i])
-		else:
-			_dice_views[i].set_value(values[i])
 
 
 func _play_dice_face_effects(faces: Array[Resource], values: Array[int]) -> void:
@@ -188,6 +183,7 @@ func _on_next_floor_pressed() -> void:
 
 
 func _on_round_reset() -> void:
+	_score_after_reroll = false
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_roll_slot.visible = false

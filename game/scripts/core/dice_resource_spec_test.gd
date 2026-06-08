@@ -15,6 +15,7 @@ func _init() -> void:
 	_expect_resource_resolves_face_resources()
 	_expect_change_to_highest_property()
 	_expect_change_to_highest_display()
+	_expect_number_face_display()
 	_expect_controller_uses_default_resource()
 	_expect_controller_uses_per_slot_resource()
 	_expect_controller_uses_loadout_resource()
@@ -74,6 +75,12 @@ func _expect_change_to_highest_property() -> void:
 	var only_changer: Array[Resource] = [changer]
 	if die.resolve_face_values(only_changer) != [1]:
 		_fail_array("change to highest fallback", [1], die.resolve_face_values(only_changer))
+
+
+func _expect_number_face_display() -> void:
+	var face: Resource = _number_face(4)
+	if face.get_display_text({"resolved_value": 6}) != "":
+		_fail_string("number face display", "", face.get_display_text({"resolved_value": 6}))
 
 
 func _expect_change_to_highest_display() -> void:
@@ -219,7 +226,6 @@ func _expect_controller_reports_contextual_reroll_preview() -> void:
 func _number_face(value: int) -> Resource:
 	var face: Resource = NumberFaceScript.new()
 	face.value = value
-	face.display_name = str(value)
 	return face
 
 

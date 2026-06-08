@@ -23,8 +23,6 @@ func resolve_number_value(context: Dictionary = {}) -> int:
 
 func get_display_text(context: Dictionary = {}) -> String:
 	var text := display_name
-	if text.is_empty() and is_number():
-		text = str(get_base_number_value())
 	for property in properties:
 		if property != null and property.has_method("get_display_text"):
 			text = property.get_display_text(self, context, text)
