@@ -25,7 +25,7 @@ game/              # Godot 루트 (project.godot)
 
 - **기획:** `docs/gdd-cat-tower-casino.md` — 비전·시스템 방향. §11 미정은 임의 구현 금지.
 - **설계:** `docs/design/` — 현재 구현 스코프·씬·스크립트. 최신: `v0.1-initial-playable.md`.
-- **시스템 스펙:** `docs/design/systems/` — 족보 **v2 정본**: `hand-scoring-v2.md` (`hand_calculator.gd` v2).
+- **시스템 스펙:** `docs/design/systems/` — 족보 **v2 정본**: `hand-scoring-v2.md`; 주사위 면 **정본**: `dice-resources.md`.
 
 ## Git · Feature 워크플로
 
