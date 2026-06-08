@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="DiceResource" format=3 uid="uid://ccm87trd56wo7"]
+
+[ext_resource type="Script" uid="uid://uktkoxxoev5d" path="res://scripts/core/dice_resource.gd" id="1_dice_resource"]
+[ext_resource type="Script" uid="uid://dkmfy4jt6s4qs" path="res://scripts/core/number_face.gd" id="2_number_face"]
+
+[sub_resource type="Resource" id="Resource_face_1"]
+script = ExtResource("2_number_face")
+display_name = "1"
+
+[sub_resource type="Resource" id="Resource_face_2"]
+script = ExtResource("2_number_face")
+value = 2
+display_name = "2"
+
+[sub_resource type="Resource" id="Resource_face_3"]
+script = ExtResource("2_number_face")
+value = 3
+display_name = "3"
+
+[sub_resource type="Resource" id="Resource_face_4"]
+script = ExtResource("2_number_face")
+value = 4
+display_name = "4"
+
+[sub_resource type="Resource" id="Resource_face_5"]
+script = ExtResource("2_number_face")
+value = 5
+display_name = "5"
+
+[sub_resource type="Resource" id="Resource_face_6"]
+script = ExtResource("2_number_face")
+value = 6
+display_name = "6"
+
+[resource]
+script = ExtResource("1_dice_resource")
+faces = Array[Resource]([SubResource("Resource_face_1"), SubResource("Resource_face_2"), SubResource("Resource_face_3"), SubResource("Resource_face_4"), SubResource("Resource_face_5"), SubResource("Resource_face_6")])

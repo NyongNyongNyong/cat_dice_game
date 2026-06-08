@@ -27,7 +27,12 @@ func invalidate_cache() -> void:
 	_clear_cache()
 
 
-func show_preview(dice_view: Control, dice_index: int, dice_values: Array[int]) -> void:
+func show_preview(
+	dice_view: Control,
+	dice_index: int,
+	dice_values: Array[int],
+	face_values: Array[int] = [],
+) -> void:
 	if not _active or dice_values.is_empty():
 		return
 
@@ -36,12 +41,12 @@ func show_preview(dice_view: Control, dice_index: int, dice_values: Array[int]) 
 		_clear_cache()
 		_cache_board_key = board_key
 
-	var cache_key := "%d" % dice_index
+	var cache_key := "%d:%s" % [dice_index, _face_values_cache_key(face_values)]
 	var preview
 	if _cache.has(cache_key):
 		preview = _cache[cache_key]
 	else:
-		preview = PreviewCalculator.compute(dice_values, dice_index)
+		preview = PreviewCalculator.compute(dice_values, dice_index, face_values)
 		_cache[cache_key] = preview
 
 	_label.text = _format_preview(preview)
@@ -101,6 +106,13 @@ func _position_tooltip(dice_view: Control) -> void:
 func _board_cache_key(dice_values: Array[int]) -> String:
 	var parts: PackedStringArray = []
 	for value in dice_values:
+		parts.append(str(value))
+	return ",".join(parts)
+
+
+func _face_values_cache_key(face_values: Array[int]) -> String:
+	var parts: PackedStringArray = []
+	for value in face_values:
 		parts.append(str(value))
 	return ",".join(parts)
 

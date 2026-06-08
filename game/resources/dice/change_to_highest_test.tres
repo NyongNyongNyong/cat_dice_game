@@ -1,0 +1,20 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/dice_resource.gd" id="1_dice_resource"]
+[ext_resource type="Script" path="res://scripts/core/special_face.gd" id="3_special_face"]
+[ext_resource type="Script" path="res://scripts/core/face_properties/change_to_highest_property.gd" id="4_change_to_highest"]
+
+[sub_resource type="Resource" id="Resource_change_to_highest_property"]
+script = ExtResource("4_change_to_highest")
+
+[sub_resource type="Resource" id="Resource_change_to_highest_face"]
+script = ExtResource("3_special_face")
+symbol_id = &"change_to_highest"
+display_name = "Change To Highest"
+properties = Array[Resource]([SubResource("Resource_change_to_highest_property")])
+
+[resource]
+script = ExtResource("1_dice_resource")
+id = &"dice_change_to_highest_test"
+display_name = "Change To Highest Test Die"
+faces = Array[Resource]([SubResource("Resource_change_to_highest_face")])

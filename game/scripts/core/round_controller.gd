@@ -1,6 +1,8 @@
 class_name RoundController
 extends Node
 
+const DEFAULT_DICE_RESOURCE := preload("res://resources/dice/basic_d6.tres")
+
 signal phase_changed(phase: RoundPhase.Phase)
 signal dice_rolled(values: Array[int])
 signal die_selected(index: int)
@@ -8,8 +10,13 @@ signal die_rerolled(values: Array[int])
 signal score_ready(evaluation: HandEvaluation)
 signal round_reset()
 
+@export var default_dice_resource: Resource = DEFAULT_DICE_RESOURCE
+@export var dice_loadout: Resource
+@export var dice_resources: Array[Resource] = []
+
 var phase: RoundPhase.Phase = RoundPhase.Phase.IDLE
 var dice_values: Array[int] = []
+var dice_faces: Array[Resource] = []
 var hand_evaluation: HandEvaluation
 var selected_die_index: int = -1
 
@@ -21,6 +28,7 @@ func begin_round() -> void:
 func reset_round() -> void:
 	phase = RoundPhase.Phase.IDLE
 	dice_values.clear()
+	dice_faces.clear()
 	hand_evaluation = null
 	selected_die_index = -1
 	phase_changed.emit(phase)
@@ -64,6 +72,61 @@ func clear_selection() -> void:
 	selected_die_index = -1
 
 
+func get_face_values(dice_index: int) -> Array[int]:
+	var resource := get_dice_resource(dice_index)
+	if resource.has_method("get_face_values"):
+		return resource.get_face_values()
+	return DEFAULT_DICE_RESOURCE.get_face_values()
+
+
+func get_dice_count() -> int:
+	if dice_loadout != null and dice_loadout.has_method("get_dice_count"):
+		var loadout_count: int = dice_loadout.get_dice_count()
+		if loadout_count > 0:
+			return loadout_count
+	if not dice_resources.is_empty():
+		return dice_resources.size()
+	return RunManager.DICE_COUNT
+
+
+func get_reroll_face_values(dice_index: int) -> Array[int]:
+	var resource := get_dice_resource(dice_index)
+	var candidates: Array[Resource] = []
+	if resource.has_method("get_faces"):
+		candidates = resource.get_faces()
+	else:
+		candidates = DEFAULT_DICE_RESOURCE.get_faces()
+
+	var values: Array[int] = []
+	for candidate in candidates:
+		var context_faces := dice_faces.duplicate()
+		if dice_index >= 0 and dice_index < context_faces.size():
+			context_faces[dice_index] = candidate
+		else:
+			context_faces.append(candidate)
+		values.append(_resolve_face_value(candidate, context_faces))
+	return values
+
+
+func get_dice_resource(dice_index: int) -> Resource:
+	if dice_loadout != null and dice_loadout.has_method("get_dice_resource"):
+		var loadout_resource: Resource = dice_loadout.get_dice_resource(dice_index)
+		if loadout_resource != null:
+			return loadout_resource
+	if dice_index >= 0 and dice_index < dice_resources.size() and dice_resources[dice_index] != null:
+		return dice_resources[dice_index]
+	if default_dice_resource != null:
+		return default_dice_resource
+	return DEFAULT_DICE_RESOURCE
+
+
+func resolve_faces(faces: Array[Resource]) -> Array[int]:
+	var values: Array[int] = []
+	for face in faces:
+		values.append(_resolve_face_value(face, faces))
+	return values
+
+
 func complete_roll_presentation() -> void:
 	if phase != RoundPhase.Phase.ROLLING:
 		return
@@ -79,7 +142,8 @@ func complete_score_presentation() -> void:
 func _roll_all_dice() -> void:
 	_set_phase(RoundPhase.Phase.ROLLING)
 	selected_die_index = -1
-	dice_values = _roll_dice_values()
+	dice_faces = _roll_dice_faces()
+	dice_values = resolve_faces(dice_faces)
 	dice_rolled.emit(dice_values)
 
 
@@ -87,7 +151,8 @@ func _reroll_selected_die() -> void:
 	if selected_die_index < 0 or selected_die_index >= dice_values.size():
 		return
 
-	dice_values[selected_die_index] = randi_range(1, 6)
+	dice_faces[selected_die_index] = _roll_die_face(selected_die_index)
+	dice_values = resolve_faces(dice_faces)
 	selected_die_index = -1
 	die_rerolled.emit(dice_values)
 	_begin_scoring()
@@ -100,10 +165,32 @@ func _begin_scoring() -> void:
 
 
 func _roll_dice_values() -> Array[int]:
-	var values: Array[int] = []
-	for _i in RunManager.DICE_COUNT:
-		values.append(randi_range(1, 6))
-	return values
+	return resolve_faces(_roll_dice_faces())
+
+
+func _roll_dice_faces() -> Array[Resource]:
+	var rolled_faces: Array[Resource] = []
+	for i in get_dice_count():
+		rolled_faces.append(_roll_die_face(i))
+	return rolled_faces
+
+
+func _roll_die_value(dice_index: int) -> int:
+	return _resolve_face_value(_roll_die_face(dice_index))
+
+
+func _roll_die_face(dice_index: int) -> Resource:
+	var resource := get_dice_resource(dice_index)
+	if resource.has_method("roll_face"):
+		return resource.roll_face()
+	return DEFAULT_DICE_RESOURCE.roll_face()
+
+
+func _resolve_face_value(face: Resource, context_faces: Array[Resource] = []) -> int:
+	var resource := DEFAULT_DICE_RESOURCE
+	if resource.has_method("resolve_face_value"):
+		return resource.resolve_face_value(face, context_faces)
+	return 1
 
 
 func _set_phase(next_phase: RoundPhase.Phase) -> void:
