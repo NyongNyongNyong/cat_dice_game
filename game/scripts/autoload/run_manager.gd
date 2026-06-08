@@ -1,24 +1,31 @@
 extends Node
 
+const DiceRosterScript := preload("res://scripts/core/dice_roster.gd")
+
 # hand-scoring-v2 playtest targets (Σ(숫자) × Σ(족보) 스케일)
-const FLOOR_TARGETS: Array[int] = [150, 350, 600, 1000, 1600]
+const FLOOR_TARGETS: Array[int] = [5, 5, 5, 5, 5]
 const MAX_FLOOR: int = 5
 const DICE_COUNT: int = 10
 
 var current_floor: int = 1
-var target_score: int = 150
+var target_score: int = 5
 var current_score: int = 0
 var run_finished: bool = false
+var _dice_roster: RefCounted
 
 signal floor_changed(floor: int, target: int)
 signal score_changed(score: int)
 signal run_completed()
+signal roster_changed()
 
 
 func start_run() -> void:
 	run_finished = false
 	current_floor = 1
 	current_score = 0
+	_dice_roster = DiceRosterScript.new()
+	_dice_roster.reset_to_starting()
+	roster_changed.emit()
 	_apply_floor_target()
 
 
@@ -48,6 +55,31 @@ func advance_floor() -> void:
 	current_floor += 1
 	reset_floor_round()
 	_apply_floor_target()
+
+
+func get_dice_roster() -> RefCounted:
+	return _dice_roster
+
+
+func get_owned_dice() -> Array[Resource]:
+	if _dice_roster == null:
+		return []
+	return _dice_roster.get_owned_dice()
+
+
+func get_owned_dice_count() -> int:
+	if _dice_roster == null:
+		return 0
+	return _dice_roster.get_count()
+
+
+func replace_owned_dice_with_h(slot_index: int) -> bool:
+	if _dice_roster == null:
+		return false
+	if not _dice_roster.replace_with_h_at(slot_index):
+		return false
+	roster_changed.emit()
+	return true
 
 
 func _apply_floor_target() -> void:

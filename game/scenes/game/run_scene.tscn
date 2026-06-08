@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cpq1n7tr7tiu1" path="res://scripts/ui/roll_phase_presenter.gd" id="3_roll"]
 [ext_resource type="Script" uid="uid://fis8x0ebu7il" path="res://scripts/ui/score_phase_presenter.gd" id="4_score"]
 [ext_resource type="Script" path="res://scripts/ui/reroll_preview_presenter.gd" id="5_reroll_preview"]
+[ext_resource type="Script" path="res://scripts/ui/dice_shop_presenter.gd" id="6_dice_shop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header_score"]
 content_margin_left = 20.0
@@ -259,6 +260,29 @@ layout_mode = 2
 disabled = true
 text = "Next Floor"
 
+[node name="ShopPanel" type="PanelContainer" parent="MarginContainer/VBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_left")
+
+[node name="ShopVBox" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ShopTitle" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "상점"
+
+[node name="ShopSlots" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShopContinueButton" type="Button" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "다음 층"
+
 [node name="ScoreOverlay" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -279,3 +303,6 @@ script = ExtResource("4_score")
 
 [node name="RerollPreviewPresenter" type="Node" parent="."]
 script = ExtResource("5_reroll_preview")
+
+[node name="DiceShopPresenter" type="Node" parent="."]
+script = ExtResource("6_dice_shop")

@@ -214,8 +214,8 @@ compute_from_faces(dice_faces, dice_index, candidate_faces)
 |------|----------------|
 | `DiceResource` / `NumberFace` / `SpecialFace` | GDD §5 문양 종류·폭탄 등 콘텐츠 대량 |
 | `FaceProperty` 확장 포인트 | 카지노 규칙·유물이 면 해석에 개입 |
-| 슬롯별 loadout API | 상점·덱 편성 UI |
-| `basic_d6` 기본 10슬롯 | 특수 주사위 기본 loadout |
+| 슬롯별 loadout API | [dice-roster-shop.md](dice-roster-shop.md) — 보유 로스터·상점 (시작 4기본) |
+| `basic_d6` 기본 10슬롯 | 런 로스터가 슬롯 수 결정 (레거시 `DICE_COUNT`는 fallback) |
 
 ---
 
@@ -223,4 +223,5 @@ compute_from_faces(dice_faces, dice_index, candidate_faces)
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-08 | §10 — 보유 로스터·상점 링크 (`dice-roster-shop.md`) |
 | 2026-06-08 | 초안 — TwoEG `dice-resources`·`reroll-face-properties` 구현 정본, UI §13.4 교차 참조 |
