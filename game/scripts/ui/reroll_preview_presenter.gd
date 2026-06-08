@@ -55,6 +55,16 @@ func show_preview(
 	_tooltip.visible = true
 
 
+func show_preview_result(dice_view: Control, preview) -> void:
+	if not _active:
+		return
+
+	_label.text = _format_preview(preview)
+	_tooltip.reset_size()
+	_position_tooltip(dice_view)
+	_tooltip.visible = true
+
+
 func hide_preview() -> void:
 	if _tooltip:
 		_tooltip.visible = false

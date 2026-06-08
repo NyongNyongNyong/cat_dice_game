@@ -2,6 +2,7 @@ class_name RoundController
 extends Node
 
 const DEFAULT_DICE_RESOURCE := preload("res://resources/dice/basic_d6.tres")
+const RerollPreviewCalculator := preload("res://scripts/core/reroll_preview_calculator.gd")
 
 signal phase_changed(phase: RoundPhase.Phase)
 signal dice_rolled(values: Array[int])
@@ -106,6 +107,16 @@ func get_reroll_face_values(dice_index: int) -> Array[int]:
 			context_faces.append(candidate)
 		values.append(_resolve_face_value(candidate, context_faces))
 	return values
+
+
+func get_reroll_preview(dice_index: int):
+	var resource := get_dice_resource(dice_index)
+	var candidates: Array[Resource] = []
+	if resource.has_method("get_faces"):
+		candidates = resource.get_faces()
+	else:
+		candidates = DEFAULT_DICE_RESOURCE.get_faces()
+	return RerollPreviewCalculator.compute_from_faces(dice_faces, dice_index, candidates)
 
 
 func get_dice_resource(dice_index: int) -> Resource:

@@ -1,6 +1,9 @@
 extends SceneTree
 
 const PreviewCalculator := preload("res://scripts/core/reroll_preview_calculator.gd")
+const NumberFaceScript := preload("res://scripts/core/number_face.gd")
+const SpecialFaceScript := preload("res://scripts/core/special_face.gd")
+const ChangeToHighestPropertyScript := preload("res://scripts/core/face_properties/change_to_highest_property.gd")
 
 var _failed := 0
 
@@ -10,6 +13,7 @@ func _init() -> void:
 	_expect_single_face_no_change()
 	_expect_bruteforce_matches([1, 2, 3, 4, 5, 6, 1, 2, 3, 4], 0)
 	_expect_bruteforce_matches([3, 3, 3, 3, 3, 3, 3, 3, 3, 3], 5)
+	_expect_face_property_re_resolves_whole_board()
 
 	if _failed > 0:
 		push_error("Reroll preview spec tests failed: %d" % _failed)
@@ -53,6 +57,39 @@ func _expect_bruteforce_matches(values: Array[int], index: int) -> void:
 		_fail("bruteforce delta_up", max_score - current, preview.delta_up)
 	if preview.delta_down != min_score - current:
 		_fail("bruteforce delta_down", min_score - current, preview.delta_down)
+
+
+func _expect_face_property_re_resolves_whole_board() -> void:
+	var five := _number_face(5)
+	var highest := _highest_face()
+	var dice_faces: Array[Resource] = [five, highest]
+	var candidates: Array[Resource] = [_number_face(1), _number_face(6)]
+
+	var preview = PreviewCalculator.compute_from_faces(dice_faces, 0, candidates)
+	var current := HandCalculator.evaluate([5, 5]).total_score
+	var best := HandCalculator.evaluate([6, 6]).total_score
+	var worst := HandCalculator.evaluate([1, 1]).total_score
+
+	if preview.current_score != current:
+		_fail("face property current score", current, preview.current_score)
+	if preview.delta_up != best - current:
+		_fail("face property delta_up", best - current, preview.delta_up)
+	if preview.delta_down != worst - current:
+		_fail("face property delta_down", worst - current, preview.delta_down)
+
+
+func _number_face(value: int) -> Resource:
+	var face: Resource = NumberFaceScript.new()
+	face.value = value
+	return face
+
+
+func _highest_face() -> Resource:
+	var face: Resource = SpecialFaceScript.new()
+	var property: Resource = ChangeToHighestPropertyScript.new()
+	var properties: Array[Resource] = [property]
+	face.properties = properties
+	return face
 
 
 func _fail(label: String, expected: int, got: int) -> void:

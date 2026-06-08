@@ -155,12 +155,7 @@ func _on_dice_mouse_entered(index: int) -> void:
 	_hovered_dice_index = index
 	if not _round.can_reroll_preview():
 		return
-	_reroll_preview_presenter.show_preview(
-		_dice_views[index],
-		index,
-		_round.dice_values,
-		_round.get_reroll_face_values(index)
-	)
+	_reroll_preview_presenter.show_preview_result(_dice_views[index], _round.get_reroll_preview(index))
 
 
 func _on_dice_mouse_exited() -> void:

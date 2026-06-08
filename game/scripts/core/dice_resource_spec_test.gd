@@ -20,6 +20,7 @@ func _init() -> void:
 	_expect_controller_uses_loadout_resource()
 	_expect_controller_resolves_rolled_faces()
 	_expect_controller_reports_contextual_reroll_values()
+	_expect_controller_reports_contextual_reroll_preview()
 
 	if _failed > 0:
 		push_error("Dice resource spec tests failed: %d" % _failed)
@@ -190,10 +191,43 @@ func _expect_controller_reports_contextual_reroll_values() -> void:
 	controller.free()
 
 
+func _expect_controller_reports_contextual_reroll_preview() -> void:
+	var controller: Node = RoundControllerScript.new()
+	var die: Resource = DiceResourceScript.new()
+	var one := _number_face(1)
+	var six := _number_face(6)
+	var faces: Array[Resource] = [one, six]
+	die.faces = faces
+	controller.default_dice_resource = die
+	var rolled_faces: Array[Resource] = [_number_face(5), _highest_face()]
+	controller.dice_faces = rolled_faces
+
+	var preview = controller.get_reroll_preview(0)
+	var current := HandCalculator.evaluate([5, 5]).total_score
+	var best := HandCalculator.evaluate([6, 6]).total_score
+	var worst := HandCalculator.evaluate([1, 1]).total_score
+
+	if preview.current_score != current:
+		_fail("controller preview current score", current, preview.current_score)
+	if preview.delta_up != best - current:
+		_fail("controller preview delta_up", best - current, preview.delta_up)
+	if preview.delta_down != worst - current:
+		_fail("controller preview delta_down", worst - current, preview.delta_down)
+	controller.free()
+
+
 func _number_face(value: int) -> Resource:
 	var face: Resource = NumberFaceScript.new()
 	face.value = value
 	face.display_name = str(value)
+	return face
+
+
+func _highest_face() -> Resource:
+	var face: Resource = SpecialFaceScript.new()
+	var property: Resource = ChangeToHighestPropertyScript.new()
+	var properties: Array[Resource] = [property]
+	face.properties = properties
 	return face
 
 
