@@ -22,11 +22,10 @@ func has_visual_effect() -> bool:
 	return true
 
 
-func play_visual_effect(dice_view: Control, _face: Resource, context: Dictionary) -> void:
+func play_visual_effect(dice_view: Control, _face: Resource, _context: Dictionary) -> void:
 	if dice_view == null:
 		return
 
-	var resolved_value: int = context.get("resolved_value", 1)
 	dice_view.pivot_offset = dice_view.size * 0.5
 
 	var tween := dice_view.create_tween()
@@ -34,7 +33,4 @@ func play_visual_effect(dice_view: Control, _face: Resource, context: Dictionary
 	tween.tween_property(dice_view, "rotation_degrees", dice_view.rotation_degrees + 360.0, 0.42)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await tween.finished
-
-	if dice_view.has_method("set_value"):
-		dice_view.set_value(resolved_value)
 	dice_view.rotation_degrees = 0.0

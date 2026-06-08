@@ -3,16 +3,23 @@ extends Node
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 
-const HAND_STEP_DELAY := 0.2
 const NUMBER_STEP_DELAY := 0.04
-const HAND_POPUP_DURATION := 0.55
 const NUMBER_POPUP_DURATION := 0.28
+const REROLL_HAND_STEP_DELAY := 0.02
+const REROLL_HAND_POPUP_DURATION := 0.18
+const REROLL_FOCUS_MOVE_DURATION := 0.08
+const REROLL_FOCUS_HOLD_DURATION := 0.05
+const REROLL_FOCUS_RETURN_DURATION := 0.08
+const REROLL_REVEAL_HOLD := 0.06
 const POPUP_RISE := 32.0
-const FOCUS_MOVE_DURATION := 0.22
-const FOCUS_HOLD_DURATION := 0.16
-const FOCUS_RETURN_DURATION := 0.2
 const FOCUS_GAP := 10.0
 const FOCUS_SCALE := Vector2(1.22, 1.22)
+
+var _hand_step_delay := NUMBER_STEP_DELAY
+var _hand_popup_duration := NUMBER_POPUP_DURATION
+var _focus_move_duration := 0.1
+var _focus_hold_duration := 0.08
+var _focus_return_duration := 0.1
 
 signal presentation_finished()
 
@@ -23,6 +30,7 @@ var _left_value: Label
 var _right_value: Label
 var _status_label: Label
 var _dice_values: Array[int] = []
+var _dice_faces: Array = []
 
 
 func setup(
@@ -43,24 +51,113 @@ func set_dice_views(dice_views: Array[Control]) -> void:
 	_dice_views = dice_views
 
 
-func play(evaluation: HandEvaluation) -> void:
+func play(
+	evaluation: HandEvaluation,
+	hands_only: bool = false,
+	rerolled_die_index: int = -1,
+	dice_faces: Array = [],
+) -> void:
 	_dice_row.visible = true
 	_clear_popups()
-	_reset_score_board()
+	_apply_timing_profile(hands_only)
 	_dice_values = evaluation.dice_values.duplicate()
+	_dice_faces = dice_faces.duplicate()
 
-	for dice in _dice_views:
-		dice.show_placeholder()
+	if hands_only:
+		for dice in _dice_views:
+			dice.set_dimmed(true)
+	else:
+		for dice in _dice_views:
+			dice.show_placeholder()
+		for i in evaluation.dice_values.size():
+			_apply_face_to_view(i, evaluation.dice_values[i])
+			_dice_views[i].set_dimmed(true)
 
-	for i in evaluation.dice_values.size():
-		_dice_views[i].set_value(evaluation.dice_values[i])
-		_dice_views[i].set_dimmed(true)
+	if hands_only:
+		_prepare_hand_reroll_board(evaluation)
+		if rerolled_die_index >= 0:
+			await _play_reroll_reveal(rerolled_die_index)
+		await _play_hand_steps(evaluation.steps, true)
+	else:
+		_reset_score_board()
+		await _play_number_sum(evaluation.dice_values)
+		await _play_hand_steps(evaluation.steps, false)
 
-	await _play_number_sum(evaluation.dice_values)
-	await _play_hand_steps(evaluation.steps)
 	_clear_highlights()
 	_clear_popups()
+	_restore_all_dice_faces()
 	presentation_finished.emit()
+
+
+func _apply_timing_profile(hands_only: bool) -> void:
+	if hands_only:
+		_hand_step_delay = REROLL_HAND_STEP_DELAY
+		_hand_popup_duration = REROLL_HAND_POPUP_DURATION
+		_focus_move_duration = REROLL_FOCUS_MOVE_DURATION
+		_focus_hold_duration = REROLL_FOCUS_HOLD_DURATION
+		_focus_return_duration = REROLL_FOCUS_RETURN_DURATION
+	else:
+		_hand_step_delay = NUMBER_STEP_DELAY
+		_hand_popup_duration = NUMBER_POPUP_DURATION
+		_focus_move_duration = 0.1
+		_focus_hold_duration = 0.08
+		_focus_return_duration = 0.1
+
+
+func _prepare_hand_reroll_board(evaluation: HandEvaluation) -> void:
+	_left_value.text = str(evaluation.number_sum)
+	_right_value.text = "0"
+
+
+func _play_reroll_reveal(die_index: int) -> void:
+	if die_index < 0 or die_index >= _dice_views.size():
+		return
+
+	_status_label.text = "리롤 결과"
+	_clear_highlights()
+	for i in _dice_views.size():
+		_dice_views[i].set_dimmed(i != die_index)
+	var rerolled: Control = _dice_views[die_index]
+	rerolled.set_highlighted(true)
+	await _pulse_dice_in_place([rerolled])
+	await get_tree().create_timer(REROLL_REVEAL_HOLD).timeout
+
+	for dice in _dice_views:
+		dice.set_highlighted(false)
+		dice.set_dimmed(true)
+
+
+func _apply_face_to_view(index: int, resolved_value: int) -> void:
+	if index >= _dice_views.size():
+		return
+	if index < _dice_faces.size() and _dice_faces[index] != null:
+		_dice_views[index].set_face(_dice_faces[index], resolved_value)
+
+
+func _apply_face_to_dice(dice: Control, index: int) -> void:
+	if index < _dice_faces.size() and _dice_faces[index] != null:
+		dice.set_face(_dice_faces[index], _dice_values[index])
+
+
+func _restore_all_dice_faces() -> void:
+	for i in _dice_values.size():
+		_apply_face_to_view(i, _dice_values[i])
+
+
+func _pulse_dice_in_place(dice_views: Array) -> void:
+	var tween := create_tween()
+	tween.set_parallel(true)
+	for dice in dice_views:
+		dice.pivot_offset = dice.size * 0.5
+		tween.tween_property(dice, "scale", FOCUS_SCALE, _focus_hold_duration)\
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(dice, "scale", Vector2.ONE, _focus_hold_duration)\
+			.set_delay(_focus_hold_duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	await tween.finished
+	for dice in dice_views:
+		if is_instance_valid(dice):
+			dice.scale = Vector2.ONE
+			dice.pivot_offset = Vector2.ZERO
 
 
 func _play_number_sum(values: Array[int]) -> void:
@@ -74,7 +171,7 @@ func _play_number_sum(values: Array[int]) -> void:
 		_dice_views[i].set_highlighted(true)
 		running += values[i]
 		_left_value.text = str(running)
-		await _show_points_popup("+%d" % values[i], [i])
+		await _show_points_popup("+%d" % values[i], [i], NUMBER_POPUP_DURATION)
 		await get_tree().create_timer(NUMBER_STEP_DELAY).timeout
 
 	_clear_highlights()
@@ -82,10 +179,11 @@ func _play_number_sum(values: Array[int]) -> void:
 		dice.set_dimmed(true)
 
 
-func _play_hand_steps(steps: Array[HandStep]) -> void:
+func _play_hand_steps(steps: Array[HandStep], reroll: bool) -> void:
 	var hand_running := 0
-	_right_value.text = "0"
-	_status_label.text = "족보를 계산하는 중..."
+	if not reroll:
+		_right_value.text = "0"
+	_status_label.text = "족보를 다시 계산하는 중..." if reroll else "족보를 계산하는 중..."
 
 	for step in steps:
 		_apply_highlights(step.highlight_indices)
@@ -93,7 +191,7 @@ func _play_hand_steps(steps: Array[HandStep]) -> void:
 		hand_running += step.points_added
 		_right_value.text = str(hand_running)
 		await _show_hand_popup(step.display_ko, step.points_added, step.highlight_indices)
-		await get_tree().create_timer(HAND_STEP_DELAY).timeout
+		await get_tree().create_timer(_hand_step_delay).timeout
 
 
 func _apply_highlights(indices: Array[int]) -> void:
@@ -135,7 +233,7 @@ func _play_focus_dice(indices: Array[int]) -> void:
 		clone.position = local_position
 		clone.size = original_rect.size
 		clone.pivot_offset = original_rect.size * 0.5
-		clone.set_value(_dice_values[idx])
+		_apply_face_to_dice(clone, idx)
 		clone.set_dimmed(false)
 		clone.set_highlighted(false)
 		_popup_layer.add_child(clone)
@@ -152,8 +250,7 @@ func _play_focus_dice(indices: Array[int]) -> void:
 		return
 
 	for item in focus_items:
-		var original: Control = item["original"]
-		original.visible = false
+		_hide_dice_for_focus(item["original"])
 
 	await _move_focus_items(focus_items, _target_positions_for_focus(focus_items))
 	for item in focus_items:
@@ -161,15 +258,26 @@ func _play_focus_dice(indices: Array[int]) -> void:
 		clone.set_highlighted(true)
 
 	await _pulse_focus_items(focus_items)
-	await get_tree().create_timer(FOCUS_HOLD_DURATION).timeout
+	await get_tree().create_timer(_focus_hold_duration).timeout
 	await _return_focus_items(focus_items)
 
 	for item in focus_items:
-		var original: Control = item["original"]
+		_show_dice_after_focus(item["original"], item["index"])
 		var clone: Control = item["clone"]
-		original.visible = true
 		if is_instance_valid(clone):
 			clone.queue_free()
+
+
+func _hide_dice_for_focus(dice: Control) -> void:
+	# visible=false면 HBox가 재배치되어 나머지 주사위 위치가 흔들린다. 슬롯은 유지하고 투명 처리만 한다.
+	dice.modulate.a = 0.0
+	dice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _show_dice_after_focus(dice: Control, index: int) -> void:
+	dice.modulate.a = 1.0
+	dice.mouse_filter = Control.MOUSE_FILTER_STOP
+	_apply_face_to_dice(dice, index)
 
 
 func _target_positions_for_focus(focus_items: Array[Dictionary]) -> Array[Vector2]:
@@ -192,7 +300,7 @@ func _move_focus_items(focus_items: Array[Dictionary], target_positions: Array[V
 	tween.set_parallel(true)
 	for i in focus_items.size():
 		var clone: Control = focus_items[i]["clone"]
-		tween.tween_property(clone, "position", target_positions[i], FOCUS_MOVE_DURATION)\
+		tween.tween_property(clone, "position", target_positions[i], _focus_move_duration)\
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await tween.finished
 
@@ -202,10 +310,10 @@ func _pulse_focus_items(focus_items: Array[Dictionary]) -> void:
 	tween.set_parallel(true)
 	for item in focus_items:
 		var clone: Control = item["clone"]
-		tween.tween_property(clone, "scale", FOCUS_SCALE, FOCUS_HOLD_DURATION)\
+		tween.tween_property(clone, "scale", FOCUS_SCALE, _focus_hold_duration)\
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(clone, "scale", Vector2.ONE, FOCUS_HOLD_DURATION)\
-			.set_delay(FOCUS_HOLD_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(clone, "scale", Vector2.ONE, _focus_hold_duration)\
+			.set_delay(_focus_hold_duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	await tween.finished
 
 
@@ -215,7 +323,7 @@ func _return_focus_items(focus_items: Array[Dictionary]) -> void:
 	for item in focus_items:
 		var clone: Control = item["clone"]
 		clone.set_highlighted(false)
-		tween.tween_property(clone, "position", item["start_position"], FOCUS_RETURN_DURATION)\
+		tween.tween_property(clone, "position", item["start_position"], _focus_return_duration)\
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 
@@ -244,10 +352,10 @@ func _show_hand_popup(hand_name: String, points: int, highlight_indices: Array[i
 	points_label.add_theme_constant_override("outline_size", 4)
 	popup.add_child(points_label)
 
-	await _animate_popup(popup, highlight_indices, HAND_POPUP_DURATION)
+	await _animate_popup(popup, highlight_indices, _hand_popup_duration)
 
 
-func _show_points_popup(text: String, highlight_indices: Array[int]) -> void:
+func _show_points_popup(text: String, highlight_indices: Array[int], duration: float = NUMBER_POPUP_DURATION) -> void:
 	var popup := Label.new()
 	popup.text = text
 	popup.add_theme_font_size_override("font_size", 26)
@@ -259,7 +367,7 @@ func _show_points_popup(text: String, highlight_indices: Array[int]) -> void:
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	popup.z_index = 10
 
-	await _animate_popup(popup, highlight_indices, NUMBER_POPUP_DURATION)
+	await _animate_popup(popup, highlight_indices, duration)
 
 
 func _animate_popup(popup: Control, highlight_indices: Array[int], duration: float) -> void:

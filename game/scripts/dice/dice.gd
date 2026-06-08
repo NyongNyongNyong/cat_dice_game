@@ -45,20 +45,12 @@ var _selected: bool = false
 
 func set_face(face: Resource, resolved_value: int) -> void:
 	_face = face
-	_face_value = resolved_value
 	_face_display_text = ""
-	if face != null and face.has_method("get_display_text"):
+	_face_value = 0
+	if _uses_pip_layout(face):
+		_face_value = face.get_base_number_value()
+	elif face != null and face.has_method("get_display_text"):
 		_face_display_text = face.get_display_text({"resolved_value": resolved_value})
-	_show_placeholder = false
-	_highlighted = false
-	_dimmed = false
-	queue_redraw()
-
-
-func set_value(face_value: int) -> void:
-	_face = null
-	_face_value = face_value
-	_face_display_text = ""
 	_show_placeholder = false
 	_highlighted = false
 	_dimmed = false
@@ -111,12 +103,19 @@ func _draw() -> void:
 	if _show_placeholder:
 		return
 
+	if _uses_pip_layout(_face):
+		_draw_pips()
+	elif not _face_display_text.is_empty():
+		_draw_face_text(_face_display_text)
+
+
+func _uses_pip_layout(face: Resource) -> bool:
+	return face != null and face.has_method("is_number") and face.is_number()
+
+
+func _draw_pips() -> void:
 	var pip_color := DIM_PIP_COLOR if _dimmed else PIP_COLOR
 	var pip_radius := minf(size.x, size.y) * PIP_RADIUS_RATIO
-	if not _face_display_text.is_empty():
-		_draw_face_text(_face_display_text)
-		return
-
 	for pos: Vector2 in PIP_LAYOUTS.get(_face_value, []):
 		var center := Vector2(pos.x * size.x, pos.y * size.y)
 		draw_circle(center, pip_radius, pip_color)

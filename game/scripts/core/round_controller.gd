@@ -20,6 +20,7 @@ var dice_values: Array[int] = []
 var dice_faces: Array[Resource] = []
 var hand_evaluation: HandEvaluation
 var selected_die_index: int = -1
+var last_rerolled_die_index: int = -1
 
 
 func begin_round() -> void:
@@ -32,6 +33,7 @@ func reset_round() -> void:
 	dice_faces.clear()
 	hand_evaluation = null
 	selected_die_index = -1
+	last_rerolled_die_index = -1
 	phase_changed.emit(phase)
 	round_reset.emit()
 
@@ -153,6 +155,7 @@ func complete_score_presentation() -> void:
 func _roll_all_dice() -> void:
 	_set_phase(RoundPhase.Phase.ROLLING)
 	selected_die_index = -1
+	last_rerolled_die_index = -1
 	dice_faces = _roll_dice_faces()
 	dice_values = resolve_faces(dice_faces)
 	dice_rolled.emit(dice_values)
@@ -162,6 +165,7 @@ func _reroll_selected_die() -> void:
 	if selected_die_index < 0 or selected_die_index >= dice_values.size():
 		return
 
+	last_rerolled_die_index = selected_die_index
 	dice_faces[selected_die_index] = _roll_die_face(selected_die_index)
 	dice_values = resolve_faces(dice_faces)
 	selected_die_index = -1
