@@ -3,6 +3,7 @@ extends Control
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 
 @onready var _floor_label: Label = $MarginContainer/VBox/Header/FloorLabel
+@onready var _gold_label: Label = $MarginContainer/VBox/Header/GoldLabel
 @onready var _target_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow/TargetScoreLabel
 @onready var _current_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow/CurrentScoreLabel
 @onready var _status_label: Label = $MarginContainer/VBox/StatusLabel
@@ -27,6 +28,7 @@ const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 var _dice_views: Array[Control] = []
 var _hovered_dice_index := -1
 var _score_after_reroll := false
+var _last_round_gold_earned := 0
 
 
 func _ready() -> void:
@@ -54,6 +56,7 @@ func _setup_round_flow() -> void:
 
 	RunManager.floor_changed.connect(_on_floor_changed)
 	RunManager.score_changed.connect(_on_score_changed)
+	RunManager.gold_changed.connect(_on_gold_changed)
 	RunManager.run_completed.connect(_on_run_completed)
 	RunManager.roster_changed.connect(_on_roster_changed)
 
@@ -202,6 +205,7 @@ func _open_shop() -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_clear_dice_selection()
+	_last_round_gold_earned = RunManager.collect_round_gold()
 	_shop_presenter.open(
 		RunManager.get_dice_roster(),
 		RunManager.get_shop_replace_offer_id()
@@ -260,11 +264,17 @@ func _on_round_phase_changed(_phase: RoundPhase.Phase) -> void:
 func _on_floor_changed(floor: int, target: int) -> void:
 	_floor_label.text = "층: %d" % floor
 	_target_label.text = "목표: %d" % target
+	_last_round_gold_earned = 0
 	_sync_ui()
 
 
 func _on_score_changed(score: int) -> void:
-	_current_label.text = "점수: %d" % score
+	_current_label.text = "칩: %d" % score
+	_sync_ui()
+
+
+func _on_gold_changed(amount: int) -> void:
+	_gold_label.text = "골드: %d" % amount
 	_sync_ui()
 
 
@@ -278,6 +288,7 @@ func _is_shop_open() -> bool:
 
 
 func _sync_ui() -> void:
+	_gold_label.text = "골드: %d" % RunManager.gold
 	var shop_open: bool = _is_shop_open()
 	_roll_button.disabled = shop_open or not _round.can_roll() or RunManager.run_finished
 	_next_floor_button.disabled = (
@@ -296,7 +307,12 @@ func _update_status() -> void:
 		return
 
 	if _is_shop_open():
-		_status_label.text = "상점에서 주사위를 교체한 뒤 다음 층으로 이동하세요."
+		if _last_round_gold_earned > 0:
+			_status_label.text = (
+				"+%d 골드 획득! 상점에서 주사위를 교체한 뒤 다음 층으로 이동하세요." % _last_round_gold_earned
+			)
+		else:
+			_status_label.text = "상점에서 주사위를 교체한 뒤 다음 층으로 이동하세요."
 		return
 
 	match _round.phase:
@@ -305,14 +321,22 @@ func _update_status() -> void:
 		RoundPhase.Phase.ROLLING:
 			_status_label.text = "주사위를 굴리는 중..."
 		RoundPhase.Phase.SCORING:
-			_status_label.text = "점수를 계산하는 중..."
+			_status_label.text = "칩을 계산하는 중..."
 		RoundPhase.Phase.REROLL_READY:
 			if _round.selected_die_index >= 0:
-				_status_label.text = "Roll을 눌러 선택한 주사위를 다시 굴리세요."
+				if RunManager.has_met_chip_target() and not RunManager.can_afford_reroll():
+					_status_label.text = "골드가 부족해 리롤할 수 없습니다. 선택을 해제하거나 Next Floor로 이동하세요."
+				else:
+					_status_label.text = "Roll을 눌러 선택한 주사위를 다시 굴리세요."
 			elif RunManager.can_advance_floor():
-				_status_label.text = (
-					"목표 달성! Next Floor(상점)로 이동하거나, 주사위를 선택해 더 리롤할 수 있습니다."
-				)
+				if RunManager.can_afford_reroll():
+					_status_label.text = (
+						"목표 달성! 리롤 1골드 — 더 높은 구간을 노리거나 Next Floor(상점)로 이동하세요."
+					)
+				else:
+					_status_label.text = (
+						"목표 달성! 골드가 부족해 리롤할 수 없습니다. Next Floor로 골드를 확보하세요."
+					)
 			else:
 				_status_label.text = (
 					"주사위에 마우스를 올려 리롤 효과를 확인하고, 클릭해 선택하세요."
