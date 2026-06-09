@@ -134,7 +134,7 @@ theme_override_constants/separation = 40
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_font_sizes/font_size = 36
-text = "목표: 50"
+text = "목표: 10"
 
 [node name="CurrentScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow" unique_id=716763979]
 layout_mode = 2
@@ -269,24 +269,59 @@ text = "Next Floor"
 [node name="ShopPanel" type="PanelContainer" parent="MarginContainer/VBox"]
 visible = false
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_left")
 
 [node name="ShopVBox" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
 
 [node name="ShopTitle" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 24
 text = "상점"
+
+[node name="ShopOfferPanel" type="PanelContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_roll_slot")
+
+[node name="ShopOfferVBox" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ShopOfferHeading" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 14
+text = "교체 오퍼"
+
+[node name="ShopOfferName" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_font_sizes/font_size = 20
+text = "H 주사위"
+
+[node name="ShopOfferHint" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.4, 0.35, 1)
+theme_override_font_sizes/font_size = 14
+text = "아래 슬롯을 선택해 교체하세요."
+
+[node name="ShopRosterHeading" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 14
+text = "보유 주사위"
 
 [node name="ShopSlots" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="ShopContinueButton" type="Button" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
-custom_minimum_size = Vector2(160, 44)
+custom_minimum_size = Vector2(200, 44)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "다음 층"
 
 [node name="ScoreOverlay" type="Control" parent="."]

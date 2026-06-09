@@ -16,6 +16,9 @@ const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 @onready var _roll_button: Button = $MarginContainer/VBox/Buttons/RollButton
 @onready var _next_floor_button: Button = $MarginContainer/VBox/Buttons/NextFloorButton
 @onready var _shop_panel: PanelContainer = $MarginContainer/VBox/ShopPanel
+@onready var _shop_offer_name: Label = (
+	$MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox/ShopOfferName
+)
 @onready var _shop_slots: VBoxContainer = $MarginContainer/VBox/ShopPanel/ShopVBox/ShopSlots
 @onready var _shop_continue_button: Button = $MarginContainer/VBox/ShopPanel/ShopVBox/ShopContinueButton
 @onready var _dice_popup_layer: Control = $MarginContainer/VBox/DiceRow/PopupOverlay
@@ -32,10 +35,10 @@ var _last_round_gold_earned := 0
 
 
 func _ready() -> void:
+	_setup_round_flow()
 	RunManager.start_run()
 	_apply_roster_to_round()
 	_spawn_dice()
-	_setup_round_flow()
 	_round.begin_round()
 	_sync_ui()
 
@@ -45,7 +48,7 @@ func _setup_round_flow() -> void:
 	_score_presenter.setup(_dice_row, _popup_overlay, _left_value, _right_value, _status_label)
 	_score_presenter.set_dice_views(_dice_views)
 	_reroll_preview_presenter.setup(_dice_popup_layer)
-	_shop_presenter.setup(_shop_panel, _shop_slots, _shop_continue_button)
+	_shop_presenter.setup(_shop_panel, _shop_offer_name, _shop_slots, _shop_continue_button)
 
 	_round.phase_changed.connect(_on_round_phase_changed)
 	_round.dice_rolled.connect(_on_dice_rolled)
@@ -288,6 +291,9 @@ func _is_shop_open() -> bool:
 
 
 func _sync_ui() -> void:
+	_floor_label.text = "층: %d" % RunManager.current_floor
+	_target_label.text = "목표: %d" % RunManager.target_score
+	_current_label.text = "칩: %d" % RunManager.current_score
 	_gold_label.text = "골드: %d" % RunManager.gold
 	var shop_open: bool = _is_shop_open()
 	_roll_button.disabled = shop_open or not _round.can_roll() or RunManager.run_finished
