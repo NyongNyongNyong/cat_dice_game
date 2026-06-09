@@ -42,7 +42,7 @@ func can_roll() -> bool:
 	if phase == RoundPhase.Phase.IDLE:
 		return true
 	if phase == RoundPhase.Phase.REROLL_READY:
-		return selected_die_index >= 0
+		return selected_die_index >= 0 and RunManager.can_afford_reroll()
 	return false
 
 
@@ -163,6 +163,8 @@ func _roll_all_dice() -> void:
 
 func _reroll_selected_die() -> void:
 	if selected_die_index < 0 or selected_die_index >= dice_values.size():
+		return
+	if not RunManager.try_spend_reroll_gold():
 		return
 
 	last_rerolled_die_index = selected_die_index

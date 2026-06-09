@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "interval_ratio": 0.5,
+  "reroll_cost": 1,
+  "gdd_ref": "§10.2",
+  "spec_ref": "docs/design/systems/gold-economy.md",
+  "note": "런타임 로드는 추후. 현재 gold_calculator.gd 상수와 동기화."
+}
