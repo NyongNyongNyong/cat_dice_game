@@ -24,7 +24,7 @@
 ## Task 2. 골드 계산기·단위 테스트
 
 **목적:**
-- 골드 획득 공식 v1 구현 및 예시 검증
+- 골드 획득 공식 v2 구현 및 예시 검증
 
 **수정 예상 파일:**
 - `game/scripts/core/gold_calculator.gd`
@@ -34,7 +34,7 @@
 - `hand_calculator.gd`, `hand-scoring-v2.md`
 
 **완료 조건:**
-- `T=100` 예시 표 전 행 통과
+- `T=5`, `r=2` 예시 표 전 행 통과
 - `S < T` → 0
 
 ---

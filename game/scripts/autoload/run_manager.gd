@@ -4,12 +4,12 @@ const DiceRosterScript := preload("res://scripts/core/dice_roster.gd")
 const GoldCalculator := preload("res://scripts/core/gold_calculator.gd")
 
 # hand-scoring-v2 playtest targets (Σ(숫자) × Σ(족보) 스케일)
-const FLOOR_TARGETS: Array[int] = [5, 5, 5, 5, 5]
+const FLOOR_TARGETS: Array[int] = [10, 20, 40, 80, 160]
 const MAX_FLOOR: int = 5
 const DICE_COUNT: int = 10
 
 var current_floor: int = 1
-var target_score: int = 5
+var target_score: int = 10
 var current_score: int = 0
 var gold: int = 0
 var run_finished: bool = false

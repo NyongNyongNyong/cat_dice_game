@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "interval_ratio": 0.5,
+  "version": 2,
+  "threshold_ratio": 2.0,
   "reroll_cost": 1,
   "gdd_ref": "§10.2",
   "spec_ref": "docs/design/systems/gold-economy.md",
