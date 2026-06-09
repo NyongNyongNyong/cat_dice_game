@@ -42,7 +42,8 @@
 | `resolve_face_value(face, context_faces)` | 보드 맥락으로 면 1개 → 정수 |
 | `resolve_face_values(context_faces)` | 보드 전체 → `Array[int]` |
 
-**기본 데이터:** `game/resources/dice/basic_d6.tres` — `NumberFace` value 1~6 각 1면.
+**카탈로그 정본:** [dice-catalog.md](dice-catalog.md) — `game/data/dice/dice_defs.json` (v2, 면 6개 필수).  
+**레거시 fallback:** `game/resources/dice/basic_d6.tres` — `RoundController` 기본 리소스·에디터 참고용.
 
 ### 2.2 `DiceLoadoutResource`
 
@@ -54,12 +55,14 @@
 
 `RoundController.get_dice_resource(index)` 우선순위: **loadout 슬롯** → `dice_resources[index]` → `default_dice_resource` → `basic_d6.tres`.
 
-### 2.3 테스트용 에셋
+### 2.3 카탈로그 주사위 예
 
-| 파일 | 용도 |
-|------|------|
-| `change_to_highest_test.tres` | `SpecialFace` 1면만 — `ChangeToHighestProperty` 검증 |
-| `change_to_highest_test_loadout.tres` | 위 주사위를 loadout에 장착 |
+| id | 면 | 비고 |
+|----|-----|------|
+| `dice_basic` | 1,2,3,4,5,6 | 시작·기본 |
+| `dice_triple_h` | H,H,H,1,1,1 | 상점 오퍼 MVP |
+
+레거시 `.tres` (`change_to_highest_test.tres` 등)는 회귀·에디터 참고용; 신규 주사위는 JSON 카탈로그에 추가.
 
 ---
 
@@ -223,5 +226,6 @@ compute_from_faces(dice_faces, dice_index, candidate_faces)
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-09 | 카탈로그 정본 링크 (`dice-catalog.md`), `dice_triple_h` 6면 |
 | 2026-06-08 | §10 — 보유 로스터·상점 링크 (`dice-roster-shop.md`) |
 | 2026-06-08 | 초안 — TwoEG `dice-resources`·`reroll-face-properties` 구현 정본, UI §13.4 교차 참조 |

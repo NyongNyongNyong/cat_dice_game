@@ -1,45 +1,60 @@
 {
-  "version": 1,
+  "version": 2,
+  "required_face_count": 6,
   "dice": [
     {
       "id": "dice_basic",
       "display_ko": "기본 주사위",
-      "rarity": "starter",
+      "display_name": "Basic Die",
       "faces": [
-        { "symbol_id": "pip", "count": 1 },
-        { "symbol_id": "pip", "count": 2 },
-        { "symbol_id": "pip", "count": 3 },
-        { "symbol_id": "pip", "count": 4 },
-        { "symbol_id": "pip", "count": 5 },
-        { "symbol_id": "pip", "count": 6 }
+        { "kind": "number", "value": 1 },
+        { "kind": "number", "value": 2 },
+        { "kind": "number", "value": 3 },
+        { "kind": "number", "value": 4 },
+        { "kind": "number", "value": 5 },
+        { "kind": "number", "value": 6 }
+      ]
+    },
+    {
+      "id": "dice_triple_h",
+      "display_ko": "H 주사위",
+      "display_name": "Triple H Die",
+      "faces": [
+        { "kind": "special", "property_id": "change_to_highest" },
+        { "kind": "special", "property_id": "change_to_highest" },
+        { "kind": "special", "property_id": "change_to_highest" },
+        { "kind": "number", "value": 1 },
+        { "kind": "number", "value": 1 },
+        { "kind": "number", "value": 1 }
       ]
     },
     {
       "id": "dice_bomb",
       "display_ko": "폭탄 주사위",
-      "rarity": "common",
+      "display_name": "Bomb Die",
       "faces": [
-        { "symbol_id": "pip", "count": 1 },
-        { "symbol_id": "pip", "count": 2 },
-        { "symbol_id": "pip", "count": 3 },
-        { "symbol_id": "bomb", "count": 1 },
-        { "symbol_id": "bomb", "count": 2 },
-        { "symbol_id": "bomb", "count": 3 }
-      ]
+        { "kind": "number", "value": 1 },
+        { "kind": "number", "value": 2 },
+        { "kind": "number", "value": 3 },
+        { "kind": "number", "value": 1 },
+        { "kind": "number", "value": 2 },
+        { "kind": "number", "value": 3 }
+      ],
+      "note": "bomb 면 효과 미구현. 추후 special+bomb property로 교체 예정."
     },
     {
       "id": "dice_golden",
       "display_ko": "황금 주사위",
-      "rarity": "uncommon",
+      "display_name": "Golden Die",
       "faces": [
-        { "symbol_id": "pip", "count": 2 },
-        { "symbol_id": "pip", "count": 2 },
-        { "symbol_id": "pip", "count": 3 },
-        { "symbol_id": "pip", "count": 3 },
-        { "symbol_id": "pip", "count": 4 },
-        { "symbol_id": "pip", "count": 4 }
+        { "kind": "number", "value": 2 },
+        { "kind": "number", "value": 2 },
+        { "kind": "number", "value": 3 },
+        { "kind": "number", "value": 3 },
+        { "kind": "number", "value": 4 },
+        { "kind": "number", "value": 4 }
       ],
-      "note": "GDD 예시만. 효과는 추후 effect 훅"
+      "note": "GDD 예시. 효과 훅 추후."
     }
   ]
 }

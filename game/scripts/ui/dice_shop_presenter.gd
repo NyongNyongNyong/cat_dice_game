@@ -4,10 +4,12 @@ signal continue_pressed
 signal replace_requested(slot_index: int)
 
 const DiceRosterScript := preload("res://scripts/core/dice_roster.gd")
+const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
 
 var _panel: PanelContainer
 var _slots_container: VBoxContainer
 var _continue_button: Button
+var _offer_dice_id: String = ""
 
 
 func setup(panel: PanelContainer, slots_container: VBoxContainer, continue_button: Button) -> void:
@@ -17,7 +19,8 @@ func setup(panel: PanelContainer, slots_container: VBoxContainer, continue_butto
 	_continue_button.pressed.connect(_on_continue_pressed)
 
 
-func open(roster: RefCounted) -> void:
+func open(roster: RefCounted, offer_dice_id: String) -> void:
+	_offer_dice_id = offer_dice_id
 	_rebuild_slots(roster)
 	_panel.visible = true
 
@@ -48,7 +51,9 @@ func _rebuild_slots(roster: RefCounted) -> void:
 		row.add_child(label)
 
 		var replace_button := Button.new()
-		replace_button.text = "H 주사위로 교체"
+		var catalog = CatalogService.shared()
+		replace_button.text = "%s로 교체" % catalog.get_display_name(_offer_dice_id)
+		replace_button.disabled = not catalog.has_dice(_offer_dice_id)
 		replace_button.pressed.connect(_on_replace_pressed.bind(i))
 		row.add_child(replace_button)
 

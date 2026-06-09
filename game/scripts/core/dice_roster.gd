@@ -1,17 +1,21 @@
 class_name DiceRoster
 extends RefCounted
 
-const BASIC_D6 := preload("res://resources/dice/basic_d6.tres")
-const CHANGE_TO_HIGHEST_DIE := preload("res://resources/dice/change_to_highest_test.tres")
-const STARTING_DICE_COUNT := 4
+const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
+const SHOP_REPLACE_OFFER_ID := "dice_triple_h"
 
 var _owned: Array[Resource] = []
 
 
 func reset_to_starting() -> void:
 	_owned.clear()
-	for _i in STARTING_DICE_COUNT:
-		_owned.append(BASIC_D6)
+	var catalog = CatalogService.shared()
+	for dice_id in catalog.get_starter_owned_ids():
+		var die: Resource = catalog.get_dice(dice_id)
+		if die == null:
+			push_error("DiceRoster: unknown starter dice_id '%s'" % dice_id)
+			continue
+		_owned.append(die)
 
 
 func get_owned_dice() -> Array[Resource]:
@@ -35,9 +39,12 @@ func replace_at(index: int, replacement: Resource) -> bool:
 	return true
 
 
-func replace_with_h_at(index: int) -> bool:
-	return replace_at(index, CHANGE_TO_HIGHEST_DIE)
+func replace_at_index(index: int, dice_id: String) -> bool:
+	var replacement: Resource = CatalogService.shared().get_dice(dice_id)
+	if replacement == null:
+		return false
+	return replace_at(index, replacement)
 
 
-func get_h_replacement_resource() -> Resource:
-	return CHANGE_TO_HIGHEST_DIE
+func get_shop_replace_offer_id() -> String:
+	return SHOP_REPLACE_OFFER_ID
