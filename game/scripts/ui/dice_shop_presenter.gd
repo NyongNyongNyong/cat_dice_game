@@ -6,6 +6,8 @@ signal replace_requested(slot_index: int)
 const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
 
 const ROW_BUTTON_MIN := Vector2(88, 36)
+const SHOP_SLOT_TEXT_COLOR := Color(0.18, 0.15, 0.12, 1)
+const SHOP_SLOT_FONT_SIZE := 16
 
 var _panel: PanelContainer
 var _offer_name_label: Label
@@ -72,6 +74,8 @@ func _rebuild_slots(roster: RefCounted) -> void:
 		if die != null and die.get("display_name"):
 			die_name = str(die.display_name)
 		label.text = "슬롯 %d · %s" % [i + 1, die_name]
+		label.add_theme_color_override("font_color", SHOP_SLOT_TEXT_COLOR)
+		label.add_theme_font_size_override("font_size", SHOP_SLOT_FONT_SIZE)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		label.clip_text = true
 		row.add_child(label)
