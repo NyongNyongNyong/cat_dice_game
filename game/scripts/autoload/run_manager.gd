@@ -73,13 +73,19 @@ func get_owned_dice_count() -> int:
 	return _dice_roster.get_count()
 
 
-func replace_owned_dice_with_h(slot_index: int) -> bool:
+func replace_owned_dice_at(slot_index: int, dice_id: String) -> bool:
 	if _dice_roster == null:
 		return false
-	if not _dice_roster.replace_with_h_at(slot_index):
+	if not _dice_roster.replace_at_index(slot_index, dice_id):
 		return false
 	roster_changed.emit()
 	return true
+
+
+func get_shop_replace_offer_id() -> String:
+	if _dice_roster == null:
+		return "dice_triple_h"
+	return _dice_roster.get_shop_replace_offer_id()
 
 
 func _apply_floor_target() -> void:

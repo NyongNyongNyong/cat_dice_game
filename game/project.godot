@@ -12,6 +12,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]
 
+DiceCatalog="*res://scripts/autoload/dice_catalog.gd"
 RunManager="*res://scripts/autoload/run_manager.gd"
 
 [display]

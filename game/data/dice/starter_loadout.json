@@ -1,19 +1,12 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "starter_default",
   "display_ko": "런 시작 편성",
   "owned_dice_ids": [
     "dice_basic",
     "dice_basic",
     "dice_basic",
-    "dice_basic",
-    "dice_basic",
-    "dice_basic",
-    "dice_basic",
-    "dice_basic",
-    "dice_basic",
     "dice_basic"
   ],
-  "floor_active_count": 10,
-  "note": "GDD §4.2: 층마다 보유 중 10개 선택. MVP는 시작 10개 전부 basic"
+  "note": "DiceCatalog + DiceRoster가 정본. 슬롯 수 = owned_dice_ids 길이."
 }

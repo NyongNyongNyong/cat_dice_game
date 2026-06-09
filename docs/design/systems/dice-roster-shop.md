@@ -2,7 +2,8 @@
 
 > **문서 유형:** 시스템 스펙  
 > **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §3·§4.1 — 런 동안 주사위 수집·성장  
-> **면·리소스:** [dice-resources.md](dice-resources.md) — `DiceResource`, `change_to_highest_test.tres`  
+> **카탈로그:** [dice-catalog.md](dice-catalog.md) — `dice_defs.json`, id 기반 보유·교체  
+> **면·리소스:** [dice-resources.md](dice-resources.md) — `DiceResource`  
 > **상태:** v0.1 골격 (교체 1종만)  
 > **구현:** `dice_roster.gd` · `run_manager.gd` · `dice_shop_presenter.gd` · `run_scene.gd`
 
@@ -25,7 +26,7 @@
 
 ### 시작
 
-- 런 `start_run()` 시 로스터 **기본 주사위 4개** (`basic_d6.tres`).
+- 런 `start_run()` 시 `starter_loadout.json` id 목록으로 로스터 초기화 (v1: `dice_basic` × 4).
 - 주사위 개수 = 로스터 `size` (고정 10 아님).
 
 ### 라운드
@@ -41,7 +42,7 @@
 
 | 오퍼 | 동작 |
 |------|------|
-| **H 주사위로 교체** | 슬롯 `i`의 `DiceResource`를 `change_to_highest_test.tres`로 교체 |
+| **오퍼 교체** | 슬롯 `i`를 카탈로그 id `dice_triple_h` (H,H,H,1,1,1)로 교체 |
 | **다음 층** | 상점 닫기 → `advance_floor()` → 로스터 반영 → 새 라운드 |
 
 - 성장·추가 오퍼: **미구현** (UI·API 자리만 확장 가능).
@@ -59,7 +60,7 @@
 |------|------|
 | 상점 제목 | `상점` |
 | 슬롯 행 | `슬롯 N: {DiceResource.display_name}` |
-| 교체 버튼 | `H 주사위로 교체` |
+| 교체 버튼 | `{display_ko}로 교체` (오퍼 id 기준) |
 | 진행 버튼 | `다음 층` |
 | 상태 문구 | 상점 중: `상점에서 주사위를 교체한 뒤 다음 층으로 이동하세요.` |
 
@@ -70,7 +71,7 @@
 ## 계산 방식
 
 - 점수·족보·리롤 Preview: 변경 없음. `dice_faces` / `resolve_faces`는 로스터의 `DiceResource`를 그대로 사용.
-- H 주사위 교체 후 Preview는 해당 슬롯 `get_faces()` 후보(1면) 기준.
+- `dice_triple_h` 교체 후 Preview는 해당 슬롯 `get_faces()` **6면** 후보 기준.
 
 ---
 
@@ -101,7 +102,7 @@
 
 - [ ] 런 시작 시 기본 주사위 **4개**만 굴린다.
 - [ ] 목표 달성 후 Next Floor → **상점**이 열린다.
-- [ ] 상점에서 슬롯별 **H 주사위로 교체**가 로스터에 반영된다.
+- [x] 상점에서 슬롯별 **카탈로그 id 교체**(`dice_triple_h`)가 로스터에 반영된다.
 - [ ] 다음 층 시작 시 교체된 주사위로 굴림·점수·H 면 표시가 동작한다.
 - [ ] 성장·추가는 UI/코드에 오퍼 확장 지점만 있고 동작은 없다.
 
@@ -113,7 +114,7 @@
 |------|------|
 | 로스터 | `game/scripts/core/dice_roster.gd` |
 | 상점 UI | `game/scripts/ui/dice_shop_presenter.gd` |
-| H 주사위 | `game/resources/dice/change_to_highest_test.tres` |
+| 카탈로그 | `game/data/dice/dice_defs.json` · `dice_catalog_service.gd` |
 | 테스트 | `game/scripts/core/dice_roster_spec_test.gd` |
 
 `RunManager.DICE_COUNT`(10)는 레거시 fallback; 로스터가 있으면 `dice_resources.size()` 우선.
@@ -124,4 +125,5 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-09 | 카탈로그 id 교체 — `dice_triple_h`, H 전용 API 제거 |
 | 2026-06-08 | 초안 — 보유 로스터·상점 골격, H 교체 MVP |

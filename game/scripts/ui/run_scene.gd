@@ -202,14 +202,20 @@ func _open_shop() -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_clear_dice_selection()
-	_shop_presenter.open(RunManager.get_dice_roster())
+	_shop_presenter.open(
+		RunManager.get_dice_roster(),
+		RunManager.get_shop_replace_offer_id()
+	)
 	_sync_ui()
 
 
 func _on_shop_replace_requested(slot_index: int) -> void:
-	if RunManager.replace_owned_dice_with_h(slot_index):
+	if RunManager.replace_owned_dice_at(slot_index, RunManager.get_shop_replace_offer_id()):
 		_apply_roster_to_round()
-		_shop_presenter.open(RunManager.get_dice_roster())
+		_shop_presenter.open(
+			RunManager.get_dice_roster(),
+			RunManager.get_shop_replace_offer_id()
+		)
 		_reroll_preview_presenter.invalidate_cache()
 	_sync_ui()
 

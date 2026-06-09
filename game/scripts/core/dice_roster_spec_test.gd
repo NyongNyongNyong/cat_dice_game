@@ -1,14 +1,17 @@
 extends SceneTree
 
 const DiceRosterScript := preload("res://scripts/core/dice_roster.gd")
-const DiceResourceScript := preload("res://scripts/core/dice_resource.gd")
+const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
 
 var _failed := 0
 
 
 func _init() -> void:
+	CatalogService.reset_for_tests()
+	CatalogService.shared().reload()
+
 	_expect_starting_roster()
-	_expect_replace_with_h()
+	_expect_replace_with_catalog_id()
 
 	if _failed > 0:
 		push_error("Dice roster spec tests failed: %d" % _failed)
@@ -27,22 +30,28 @@ func _expect_starting_roster() -> void:
 	var die: Resource = roster.get_dice_resource(0)
 	if die == null or not die.has_method("get_face_count"):
 		_fail_bool("starting die resource", true, die != null)
+	elif die.get_face_count() != 6:
+		_fail("starting die face count", 6, die.get_face_count())
 
 
-func _expect_replace_with_h() -> void:
+func _expect_replace_with_catalog_id() -> void:
 	var roster: RefCounted = DiceRosterScript.new()
 	roster.reset_to_starting()
 
-	if not roster.replace_with_h_at(1):
-		_fail_bool("replace with h", true, false)
+	if not roster.replace_at_index(1, "dice_triple_h"):
+		_fail_bool("replace triple h", true, false)
 
 	var replaced: Resource = roster.get_dice_resource(1)
-	var h_die: Resource = roster.get_h_replacement_resource()
-	if replaced != h_die:
-		_fail_bool("replaced resource is h die", true, replaced == h_die)
+	var triple_h: Resource = CatalogService.shared().get_dice("dice_triple_h")
+	if replaced != triple_h:
+		_fail_bool("replaced resource is triple h die", true, replaced == triple_h)
+	if replaced != null and replaced.get_face_count() != 6:
+		_fail("replaced face count", 6, replaced.get_face_count())
 
-	if roster.replace_with_h_at(99):
+	if roster.replace_at_index(99, "dice_triple_h"):
 		_fail_bool("replace invalid index", false, true)
+	if roster.replace_at_index(0, "dice_missing"):
+		_fail_bool("replace unknown id", false, true)
 
 
 func _fail(label: String, expected, actual) -> void:
