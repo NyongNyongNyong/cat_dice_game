@@ -1,11 +1,25 @@
 extends Control
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
+const TARGET_PROGRESS_COLORS: Array[Color] = [
+	Color(0.26, 0.63, 0.52, 1.0),
+	Color(0.95, 0.55, 0.18, 1.0),
+	Color(0.93, 0.78, 0.22, 1.0),
+	Color(0.25, 0.58, 0.9, 1.0),
+	Color(0.55, 0.38, 0.88, 1.0),
+	Color(0.9, 0.28, 0.45, 1.0),
+]
+const TARGET_PROGRESS_FULL_DURATION := 0.38
+const TARGET_PROGRESS_PARTIAL_MIN_DURATION := 0.16
+const TARGET_PROGRESS_SEGMENT_PAUSE := 0.08
+const TARGET_PROGRESS_MAX_SEGMENTS := 24
+const TARGET_REWARD_FLOAT_DURATION := 0.62
 
 @onready var _floor_label: Label = $MarginContainer/VBox/Header/FloorLabel
 @onready var _gold_label: Label = $MarginContainer/VBox/Header/GoldLabel
-@onready var _target_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow/TargetScoreLabel
-@onready var _current_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow/CurrentScoreLabel
+@onready var _target_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow/TargetScoreLabel
+@onready var _current_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow/CurrentScoreLabel
+@onready var _target_progress_bar: ProgressBar = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/TargetProgressBar
 @onready var _status_label: Label = $MarginContainer/VBox/StatusLabel
 @onready var _roll_slot: Control = $MarginContainer/VBox/RollPhaseSlot
 @onready var _dice_row: Control = $MarginContainer/VBox/DiceRow
@@ -28,6 +42,8 @@ const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 var _dice_views: Array[Control] = []
 var _hovered_dice_index := -1
 var _score_after_reroll := false
+var _is_animating_target_progress := false
+var _target_progress_tween: Tween
 
 
 func _ready() -> void:
@@ -136,8 +152,11 @@ func _on_score_ready(evaluation: HandEvaluation) -> void:
 	_score_after_reroll = false
 	var rerolled_index := _round.last_rerolled_die_index if hands_only else -1
 	await _score_presenter.play(evaluation, hands_only, rerolled_index, _round.dice_faces)
-	_round.complete_score_presentation()
+	_is_animating_target_progress = true
 	RunManager.set_score(evaluation.total_score)
+	await _animate_target_progress(evaluation.total_score)
+	_is_animating_target_progress = false
+	_round.complete_score_presentation()
 	_show_dice_faces(_round.dice_faces, evaluation.dice_values)
 	_clear_dice_selection()
 	_reroll_preview_presenter.set_active(_can_hover_dice_faces())
@@ -235,6 +254,9 @@ func _on_roster_changed() -> void:
 
 func _on_round_reset() -> void:
 	_score_after_reroll = false
+	_is_animating_target_progress = false
+	if _target_progress_tween != null:
+		_target_progress_tween.kill()
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_roll_slot.visible = false
@@ -276,6 +298,8 @@ func _sync_ui() -> void:
 	_target_label.text = "목표: %d" % RunManager.target_score
 	_current_label.text = "칩: %d" % RunManager.current_score
 	_gold_label.text = "골드: %d" % RunManager.gold
+	if not _is_animating_target_progress:
+		_update_target_progress()
 	_roll_button.disabled = not _round.can_roll() or RunManager.run_finished
 	_next_floor_button.disabled = (
 		not _round.can_advance_floor()
@@ -284,6 +308,134 @@ func _sync_ui() -> void:
 	)
 	_reroll_preview_presenter.set_active(_can_hover_dice_faces())
 	_update_status()
+
+
+func _update_target_progress() -> void:
+	var segments := _build_target_progress_segments(RunManager.current_score)
+	if segments.is_empty():
+		_apply_target_progress_segment(0, maxi(RunManager.target_score, 1), 0)
+		return
+
+	var last_segment: Dictionary = segments.back()
+	_apply_target_progress_segment(
+		int(last_segment["color_index"]),
+		int(last_segment["max_value"]),
+		int(last_segment["value"]),
+	)
+
+
+func _animate_target_progress(score: int) -> void:
+	if _target_progress_tween != null:
+		_target_progress_tween.kill()
+
+	var segments := _build_target_progress_segments(score)
+	if segments.is_empty():
+		_apply_target_progress_segment(0, maxi(RunManager.target_score, 1), 0)
+		return
+
+	for i in segments.size():
+		var segment: Dictionary = segments[i]
+		var color_index := int(segment["color_index"])
+		var max_value := int(segment["max_value"])
+		var value := int(segment["value"])
+		_apply_target_progress_segment(color_index, max_value, 0)
+		if value <= 0:
+			continue
+
+		_target_progress_tween = create_tween()
+		_target_progress_tween.set_trans(Tween.TRANS_CUBIC)
+		_target_progress_tween.set_ease(Tween.EASE_OUT)
+		var fill_ratio := clampf(float(value) / float(max_value), 0.0, 1.0)
+		var duration := lerpf(
+			TARGET_PROGRESS_PARTIAL_MIN_DURATION,
+			TARGET_PROGRESS_FULL_DURATION,
+			fill_ratio
+		)
+		_target_progress_tween.tween_property(_target_progress_bar, "value", float(value), duration)
+		await _target_progress_tween.finished
+
+		if value >= max_value:
+			_show_target_reward_float(color_index + 1)
+
+		if value >= max_value and i < segments.size() - 1:
+			await get_tree().create_timer(TARGET_PROGRESS_SEGMENT_PAUSE).timeout
+
+
+func _build_target_progress_segments(score: int) -> Array[Dictionary]:
+	var target := maxi(RunManager.target_score, 1)
+	if score <= 0:
+		return []
+
+	var segments: Array[Dictionary] = []
+	var lower := 0
+	var upper := target
+	var color_index := 0
+	while lower < score and segments.size() < TARGET_PROGRESS_MAX_SEGMENTS:
+		var segment_max := maxi(upper - lower, 1)
+		var segment_value := clampi(score - lower, 0, segment_max)
+		segments.append({
+			"color_index": color_index,
+			"max_value": segment_max,
+			"value": segment_value,
+		})
+
+		lower = upper
+		upper = int(round(float(upper) * GoldCalculator.DEFAULT_THRESHOLD_RATIO))
+		if upper <= lower:
+			upper = lower + target
+		color_index += 1
+
+	return segments
+
+
+func _apply_target_progress_segment(color_index: int, max_value: int, value: int) -> void:
+	_target_progress_bar.max_value = float(maxi(max_value, 1))
+	_target_progress_bar.value = clampf(float(value), 0.0, _target_progress_bar.max_value)
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = TARGET_PROGRESS_COLORS[color_index % TARGET_PROGRESS_COLORS.size()]
+	fill_style.corner_radius_top_left = 6
+	fill_style.corner_radius_top_right = 6
+	fill_style.corner_radius_bottom_right = 6
+	fill_style.corner_radius_bottom_left = 6
+	_target_progress_bar.add_theme_stylebox_override("fill", fill_style)
+	# TODO: Add a stronger over-target burst when a full extra segment completes.
+
+
+func _show_target_reward_float(reward_amount: int) -> void:
+	var reward_label := Label.new()
+	reward_label.text = "+%d 골드" % reward_amount
+	reward_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	reward_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reward_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	reward_label.custom_minimum_size = Vector2(96, 28)
+	reward_label.size = reward_label.custom_minimum_size
+	reward_label.pivot_offset = reward_label.size * 0.5
+	reward_label.add_theme_font_size_override("font_size", 22)
+	reward_label.add_theme_color_override("font_color", Color(0.98, 0.72, 0.18, 1.0))
+	reward_label.add_theme_color_override("font_outline_color", Color(0.18, 0.12, 0.04, 1.0))
+	reward_label.add_theme_constant_override("outline_size", 4)
+	add_child(reward_label)
+
+	var start_position := (
+		_target_progress_bar.global_position
+		+ Vector2((_target_progress_bar.size.x - reward_label.size.x) * 0.5, -32.0)
+	)
+	reward_label.global_position = start_position
+	reward_label.modulate = Color(1, 1, 1, 0)
+	reward_label.scale = Vector2(0.92, 0.92)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(reward_label, "global_position", start_position + Vector2(0, -34), TARGET_REWARD_FLOAT_DURATION)\
+		.set_trans(Tween.TRANS_CUBIC)\
+		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(reward_label, "scale", Vector2(1.08, 1.08), 0.16)\
+		.set_trans(Tween.TRANS_BACK)\
+		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(reward_label, "modulate:a", 1.0, 0.12)
+	tween.tween_property(reward_label, "modulate:a", 0.0, 0.2)\
+		.set_delay(TARGET_REWARD_FLOAT_DURATION - 0.2)
+	tween.finished.connect(reward_label.queue_free)
 
 
 func _can_hover_dice_faces() -> bool:

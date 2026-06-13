@@ -23,6 +23,20 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_target_progress_bg"]
+bg_color = Color(0.86, 0.86, 0.88, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_target_progress_fill"]
+bg_color = Color(0.26, 0.63, 0.52, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_roll_slot"]
 content_margin_left = 20.0
 content_margin_top = 20.0
@@ -142,21 +156,34 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_header_score")
 
-[node name="ScoreHeaderRow" type="HBoxContainer" parent="MarginContainer/VBox/Header/ScoreHeaderPanel" unique_id=1499307373]
+[node name="ScoreHeaderStack" type="VBoxContainer" parent="MarginContainer/VBox/Header/ScoreHeaderPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ScoreHeaderRow" type="HBoxContainer" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack" unique_id=1499307373]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="TargetScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow" unique_id=1132366468]
+[node name="TargetScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow" unique_id=1132366468]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_font_sizes/font_size = 36
 text = "목표: 10"
 
-[node name="CurrentScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderRow" unique_id=716763979]
+[node name="CurrentScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow" unique_id=716763979]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_font_sizes/font_size = 36
 text = "칩: 0"
+
+[node name="TargetProgressBar" type="ProgressBar" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 10.0
+show_percentage = false
+theme_override_styles/background = SubResource("StyleBoxFlat_target_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_target_progress_fill")
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/VBox" unique_id=1293270232]
 layout_mode = 2
