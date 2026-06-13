@@ -64,6 +64,7 @@ func _setup_round_flow() -> void:
 		_dice_row, _popup_overlay, _left_value, _right_value, _status_label, _active_hands_presenter
 	)
 	_score_presenter.set_dice_views(_dice_views)
+	_roll_presenter.set_dice_views(_dice_views)
 	_reroll_preview_presenter.setup(_dice_popup_layer)
 
 	_round.phase_changed.connect(_on_round_phase_changed)
@@ -105,6 +106,7 @@ func _spawn_dice() -> void:
 
 	_show_roster_previews()
 	_score_presenter.set_dice_views(_dice_views)
+	_roll_presenter.set_dice_views(_dice_views)
 
 
 func _show_roster_previews() -> void:
@@ -130,8 +132,7 @@ func _on_roll_pressed() -> void:
 func _on_dice_rolled(values: Array[int]) -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
-	await _roll_presenter.play(values)
-	_show_dice_faces(_round.dice_faces, values)
+	await _roll_presenter.play_roll(_round.dice_faces, values, _get_roll_face_candidates())
 	await _play_dice_face_effects(_round.dice_faces, values)
 	_round.complete_roll_presentation()
 
@@ -141,7 +142,12 @@ func _on_die_rerolled(values: Array[int]) -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
 	_clear_dice_selection()
-	_show_dice_faces(_round.dice_faces, values)
+	await _roll_presenter.play_reroll(
+		_round.last_rerolled_die_index,
+		_round.dice_faces,
+		values,
+		_get_roll_face_candidates()
+	)
 	await _play_dice_face_effects(_round.dice_faces, values)
 
 
@@ -173,6 +179,17 @@ func _show_dice_faces(faces: Array, values: Array[int]) -> void:
 	for i in values.size():
 		if i < faces.size() and faces[i] != null and i < _dice_views.size():
 			_dice_views[i].set_face(faces[i], values[i])
+
+
+func _get_roll_face_candidates() -> Array:
+	var candidates_by_die: Array = []
+	for i in _dice_views.size():
+		var resource := _round.get_dice_resource(i)
+		if resource != null and resource.has_method("get_faces"):
+			candidates_by_die.append(resource.get_faces())
+		else:
+			candidates_by_die.append([])
+	return candidates_by_die
 
 
 func _play_dice_face_effects(faces: Array[Resource], values: Array[int]) -> void:
