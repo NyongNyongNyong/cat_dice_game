@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://cpq1n7tr7tiu1" path="res://scripts/ui/roll_phase_presenter.gd" id="3_roll"]
 [ext_resource type="Script" uid="uid://fis8x0ebu7il" path="res://scripts/ui/score_phase_presenter.gd" id="4_score"]
 [ext_resource type="Script" path="res://scripts/ui/reroll_preview_presenter.gd" id="5_reroll_preview"]
-[ext_resource type="Script" path="res://scripts/ui/dice_shop_presenter.gd" id="6_dice_shop"]
+[ext_resource type="Script" path="res://scripts/ui/active_hands_presenter.gd" id="6_active_hands"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header_score"]
 content_margin_left = 20.0
@@ -71,6 +71,22 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_active_hands"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.96, 0.94, 0.98, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.62, 0.58, 0.78, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [node name="RunScene" type="Control" unique_id=1643140968]
 layout_mode = 3
 anchors_preset = 15
@@ -98,7 +114,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 32
 theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 32
+theme_override_constants/margin_right = 268
 theme_override_constants/margin_bottom = 24
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer" unique_id=1628202544]
@@ -266,69 +282,49 @@ layout_mode = 2
 disabled = true
 text = "Next Floor"
 
-[node name="ShopPanel" type="PanelContainer" parent="MarginContainer/VBox"]
-visible = false
-layout_mode = 2
-size_flags_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_left")
+[node name="ActiveHandsSidebar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -252.0
+offset_top = 24.0
+offset_right = -32.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_active_hands")
 
-[node name="ShopVBox" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel"]
+[node name="VBox" type="VBoxContainer" parent="ActiveHandsSidebar"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 
-[node name="ShopTitle" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+[node name="Title" type="Label" parent="ActiveHandsSidebar/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
-theme_override_font_sizes/font_size = 24
-text = "상점"
+theme_override_colors/font_color = Color(0.38, 0.34, 0.52, 1)
+theme_override_font_sizes/font_size = 18
+text = "활성 족보"
+horizontal_alignment = 1
 
-[node name="ShopOfferPanel" type="PanelContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
+[node name="ActiveHandsScroll" type="ScrollContainer" parent="ActiveHandsSidebar/VBox"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_roll_slot")
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="ShopOfferVBox" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel"]
+[node name="ActiveHandsList" type="VBoxContainer" parent="ActiveHandsSidebar/VBox/ActiveHandsScroll"]
 layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="ShopOfferHeading" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
-theme_override_font_sizes/font_size = 14
-text = "교체 오퍼"
-
-[node name="ShopOfferName" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
-theme_override_font_sizes/font_size = 20
-text = "H 주사위"
-
-[node name="ShopOfferHint" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox/ShopOfferPanel/ShopOfferVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.4, 0.35, 1)
-theme_override_font_sizes/font_size = 14
-text = "아래 슬롯을 선택해 교체하세요."
-
-[node name="ShopRosterHeading" type="Label" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
-theme_override_font_sizes/font_size = 14
-text = "보유 주사위"
-
-[node name="ShopSlots" type="VBoxContainer" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
-layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
-
-[node name="ShopContinueButton" type="Button" parent="MarginContainer/VBox/ShopPanel/ShopVBox"]
-custom_minimum_size = Vector2(200, 44)
-layout_mode = 2
-size_flags_horizontal = 4
-text = "다음 층"
 
 [node name="ScoreOverlay" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -236.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -345,5 +341,5 @@ script = ExtResource("4_score")
 [node name="RerollPreviewPresenter" type="Node" parent="."]
 script = ExtResource("5_reroll_preview")
 
-[node name="DiceShopPresenter" type="Node" parent="."]
-script = ExtResource("6_dice_shop")
+[node name="ActiveHandsPresenter" type="Node" parent="."]
+script = ExtResource("6_active_hands")

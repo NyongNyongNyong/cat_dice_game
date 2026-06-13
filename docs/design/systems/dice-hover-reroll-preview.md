@@ -13,35 +13,37 @@
 
 플레이어가 특정 주사위를 리롤할지 판단할 수 있도록 돕는다.
 
-플레이어는 Hover만으로 아래를 빠르게 파악할 수 있어야 한다.
-
-- 이 주사위를 굴리면 **얼마나 좋아질 수 있는가?**
-- 이 주사위를 굴리면 **얼마나 망할 수 있는가?**
+플레이어는 Hover만으로 **이 주사위의 6면(또는 면 목록)** 을 빠르게 확인할 수 있어야 한다.
 
 ---
 
-## 2. 표시 정보
+## 2. 표시 정보 (Hover)
 
-주사위에 **Hover** 시 해당 주사위 근처(또는 툴팁)에 변화량만 표시한다.
+주사위에 **Hover** 시 해당 슬롯의 **`DiceResource.get_faces()`** 전체를 툴팁에 표시한다.
 
-표기 예 (화살표 포함):
+**활성 Phase:** `IDLE`(굴리기 전) · `REROLL_READY`(굴린 후) — 동일 UI·동일 데이터.
 
-```text
-▲ +440  ▼ -170
-```
-
-표기 예 (화살표 생략 허용):
-
-```text
-+440  -170
-```
-
-| 표기 | 의미 |
+| 항목 | 규칙 |
 |------|------|
-| `▲ +N` / `+N` | 현재 점수 대비 **최고** 결과 시 증가량 |
-| `▼ -N` / `-N` | 현재 점수 대비 **최저** 결과 시 감소량 |
+| **내용** | 해당 주사위의 면 전체 (기본 6면) |
+| **표현** | 미니 `dice.tscn` — pip·문양(`H` 등). 아라비아 숫자 텍스트 금지 |
+| **점수 델타** | Hover에 **표시하지 않음** (`▲ +N ▼ -N` 제거) |
+| **해석 컨텍스트** | 굴린 후: `RoundController.dice_faces`. 굴리기 전: 슬롯 `get_faces()` |
 
-양수·음수 기호는 **현재 점수와의 차이**를 나타낸다. `+440`은 최대 440점 상승 가능, `-170`은 최대 170점 하락 가능을 뜻한다.
+예: `dice_triple_h` Hover → `H H H 1 1 1` 미니 6개.
+
+`RerollPreviewCalculator`(최고/최저 변화량)는 코드에 유지하나 Hover UI에는 연결하지 않는다.
+
+### 2.1 굴리기 전 슬롯 표시 (Roster Preview)
+
+`IDLE` 등 굴림 전에도 각 슬롯 주사위 위젯에 **타입 식별용 면**을 표시한다 ([dice-resources.md](dice-resources.md) `get_roster_preview_face()`).
+
+| 주사위 종류 | 표시 면 |
+|-------------|---------|
+| 특수면 포함 (예: `dice_triple_h`) | **첫 특수면** (`H` 등) |
+| 숫자만 (예: `dice_basic`) | **최고 pip** (d6 → 6) |
+
+Hover 6면 툴팁과 별개로, 슬롯 위젯만 미리보기 면 1개를 고정 표시한다. Roll 후에는 실제 굴림 결과 면으로 교체된다.
 
 ---
 
@@ -136,14 +138,15 @@ Hover만으로 플레이어가 직관적으로 판단할 수 있게 한다.
 
 ### 6.1 Phase (`RoundPhase`)
 
-| Phase | Preview | Roll 버튼 | Next Floor |
-|-------|---------|-----------|------------|
-| IDLE | 비표시 | 활성 (10개 전부 굴림) | 비활성 |
+| Phase | 6면 Hover | Roll 버튼 | Next Floor |
+|-------|-----------|-----------|------------|
+| IDLE | **활성** (면 목록만) | 활성 (10개 전부 굴림) | 비활성 |
 | ROLLING | 비표시 | 비활성 | 비활성 |
 | SCORING | 비표시 | 비활성 | 비활성 |
-| REROLL_READY | 활성 | 선택 시만 활성 (단일 리롤) | 목표 달성 시 활성 |
+| REROLL_READY | **활성** (면 목록만) | 선택 시만 활성 (단일 리롤) | 목표 달성 시 활성 |
 
-`RoundController.can_reroll_preview()` · `can_advance_floor()` 모두 `REROLL_READY`일 때만 true.
+`RoundController.can_reroll_preview()` · `can_advance_floor()`는 `REROLL_READY`일 때만 true.  
+6면 Hover는 `run_scene._can_hover_dice_faces()` — `IDLE`·`REROLL_READY`에서 활성.
 
 ### 6.2 플레이 흐름 (v0.1)
 
@@ -156,7 +159,7 @@ REROLL_READY: Hover Preview · 클릭(선택) · Roll(단일 리롤) 또는 Next
 | 단계 | 동작 |
 |------|------|
 | **Roll** (IDLE) | 10개 전부 굴림 (`RollPhasePresenter` 연출) → 점수 연출 → `REROLL_READY` |
-| **Hover** (REROLL_READY) | 주사위 위 툴팁에 `▲ +N  ▼ -N` 표시. `mouse_exited` 시 숨김 |
+| **Hover** (`IDLE` · `REROLL_READY`) | 주사위 위 6면 미니 툴팁. `mouse_exited` 시 숨김 |
 | **클릭** | 해당 주사위 **선택** — 파란 테두리 (`dice.gd` `set_selected`) |
 | **Roll** (선택 후) | 선택 주사위 1개만 `randi_range(1, 6)` 리롤 — **굴림 연출 없이** 눈금 즉시 갱신 → 점수 **재계산·연출** → `REROLL_READY` |
 | **Next Floor** (목표 달성 시) | 리롤과 **병행 가능**. 층 이동 시 라운드 리셋 → `IDLE` |
@@ -226,6 +229,7 @@ v0.1 구현 (`RerollPreviewPresenter`):
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-09 | IDLE Hover·roster preview 슬롯 표시 — §2.1, Phase 표 갱신 |
 | 2026-06-08 | `compute_from_faces`·`DiceResource` 면 후보 반영 — [dice-resources.md](dice-resources.md) 교차 참조 |
 | 2026-06-07 | v0.1 구현 반영 — Next Floor 병행, 상태 문구, 단일 리롤 연출, 캐시·파일 매핑, v0.1 범위 표 |
 | 2026-06-07 | v0.1 구현 완료 — `REROLL_READY`, Hover Preview, 선택+Roll 단일 리롤 |

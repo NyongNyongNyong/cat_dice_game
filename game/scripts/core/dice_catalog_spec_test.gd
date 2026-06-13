@@ -12,6 +12,7 @@ func _init() -> void:
 
 	_expect_basic_die(catalog)
 	_expect_triple_h_die(catalog)
+	_expect_roster_preview_faces(catalog)
 	_expect_starter_loadout(catalog)
 	_expect_unknown_id_returns_null(catalog)
 
@@ -62,6 +63,20 @@ func _expect_triple_h_die(catalog) -> void:
 		_fail_array("triple h change to highest", [2, 5, 5], mixed_values)
 
 
+func _expect_roster_preview_faces(catalog) -> void:
+	var basic: Resource = catalog.get_dice("dice_basic")
+	var basic_face: Resource = basic.get_roster_preview_face()
+	if basic_face == null or not basic_face.is_number() or basic_face.get_base_number_value() != 6:
+		_fail_bool("basic roster preview is pip 6", true, false)
+
+	var triple_h: Resource = catalog.get_dice("dice_triple_h")
+	var h_face: Resource = triple_h.get_roster_preview_face()
+	if h_face == null or h_face.is_number():
+		_fail_bool("triple h roster preview is special", true, false)
+	if h_face.get_display_text({}) != "H":
+		_fail_string("triple h roster preview display", "H", h_face.get_display_text({}))
+
+
 func _expect_starter_loadout(catalog) -> void:
 	var starter: Array = catalog.get_starter_owned_ids()
 	if starter.size() != 4:
@@ -91,6 +106,13 @@ func _fail(label: String, expected: int, actual: int) -> void:
 func _fail_bool(label: String, expected: bool, actual: bool) -> void:
 	_failed += 1
 	push_error("%s: expected %s got %s" % [label, str(expected), str(actual)])
+
+
+func _fail_string(label: String, expected: String, actual: String) -> void:
+	if expected == actual:
+		return
+	_failed += 1
+	push_error("%s: expected %s got %s" % [label, expected, actual])
 
 
 func _fail_array(label: String, expected: Array, actual: Array) -> void:

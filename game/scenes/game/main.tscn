@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://main_scene_v01"]
 
-[ext_resource type="PackedScene" uid="uid://cla4r52ff0leu" path="res://scenes/game/run_scene.tscn" id="1_run"]
+[ext_resource type="Script" path="res://scripts/ui/main.gd" id="1_main"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -9,16 +9,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_main")
 
 [node name="UI" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="RunScene" parent="UI" instance=ExtResource("1_run")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

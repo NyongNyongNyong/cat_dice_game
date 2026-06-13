@@ -1,2 +1,5 @@
 # Headless / agent logs (repo root --log-file)
 .godot/
+
+# Local editor config
+.obsidian/

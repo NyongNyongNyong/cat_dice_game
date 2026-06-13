@@ -42,11 +42,18 @@ func _expect_replace_with_catalog_id() -> void:
 		_fail_bool("replace triple h", true, false)
 
 	var replaced: Resource = roster.get_dice_resource(1)
-	var triple_h: Resource = CatalogService.shared().get_dice("dice_triple_h")
-	if replaced != triple_h:
-		_fail_bool("replaced resource is triple h die", true, replaced == triple_h)
+	if replaced == null or str(replaced.id) != "dice_triple_h":
+		_fail_bool("replaced resource is triple h die", true, false)
 	if replaced != null and replaced.get_face_count() != 6:
 		_fail("replaced face count", 6, replaced.get_face_count())
+
+	var faces: Array[Resource] = replaced.get_faces()
+	var number_face_count := 0
+	for face in faces:
+		if face != null and face.has_method("is_number") and face.is_number():
+			number_face_count += 1
+	if number_face_count != 3:
+		_fail("triple h number faces", 3, number_face_count)
 
 	if roster.replace_at_index(99, "dice_triple_h"):
 		_fail_bool("replace invalid index", false, true)

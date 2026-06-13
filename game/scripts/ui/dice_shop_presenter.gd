@@ -9,7 +9,6 @@ const ROW_BUTTON_MIN := Vector2(88, 36)
 const SHOP_SLOT_TEXT_COLOR := Color(0.18, 0.15, 0.12, 1)
 const SHOP_SLOT_FONT_SIZE := 16
 
-var _panel: PanelContainer
 var _offer_name_label: Label
 var _slots_container: VBoxContainer
 var _continue_button: Button
@@ -17,31 +16,24 @@ var _offer_dice_id: String = ""
 
 
 func setup(
-	panel: PanelContainer,
 	offer_name_label: Label,
 	slots_container: VBoxContainer,
-	continue_button: Button
+	continue_button: Button,
 ) -> void:
-	_panel = panel
 	_offer_name_label = offer_name_label
 	_slots_container = slots_container
 	_continue_button = continue_button
 	_continue_button.pressed.connect(_on_continue_pressed)
 
 
-func open(roster: RefCounted, offer_dice_id: String) -> void:
+func refresh(roster: RefCounted, offer_dice_id: String) -> void:
 	_offer_dice_id = offer_dice_id
 	_update_offer_label()
 	_rebuild_slots(roster)
-	_panel.visible = true
 
 
-func close() -> void:
-	_panel.visible = false
-
-
-func is_open() -> bool:
-	return _panel != null and _panel.visible
+func open(roster: RefCounted, offer_dice_id: String) -> void:
+	refresh(roster, offer_dice_id)
 
 
 func _update_offer_label() -> void:

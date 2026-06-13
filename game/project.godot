@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 DiceCatalog="*res://scripts/autoload/dice_catalog.gd"
 RunManager="*res://scripts/autoload/run_manager.gd"
+GameFlow="*res://scripts/ui/game_flow.gd"
 
 [display]
 
