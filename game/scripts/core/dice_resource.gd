@@ -59,6 +59,44 @@ func resolve_face_values(context_faces: Array[Resource]) -> Array[int]:
 	return values
 
 
+func get_roster_preview_face() -> Resource:
+	var all_faces := get_faces()
+	if all_faces.is_empty():
+		return null
+
+	var best_number: Resource = null
+	var best_value := -1
+	var first_special: Resource = null
+
+	for face in all_faces:
+		if face == null:
+			continue
+		if face.has_method("is_number") and face.is_number():
+			var pip_value: int = face.get_base_number_value()
+			if pip_value > best_value:
+				best_value = pip_value
+				best_number = face
+		elif first_special == null:
+			first_special = face
+
+	if first_special != null:
+		return first_special
+	if best_number != null:
+		return best_number
+	return all_faces[0]
+
+
+func get_roster_preview_value(context_faces: Array[Resource] = []) -> int:
+	var preview_face := get_roster_preview_face()
+	if preview_face == null:
+		return 1
+
+	var ctx := context_faces
+	if ctx.is_empty():
+		ctx = get_faces()
+	return resolve_face_value(preview_face, ctx)
+
+
 func _fallback_face_values() -> Array[int]:
 	if face_values.is_empty():
 		return [1]

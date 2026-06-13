@@ -41,6 +41,8 @@
 | `roll_face()` | `get_faces()` 중 균등 랜덤 1개 |
 | `resolve_face_value(face, context_faces)` | 보드 맥락으로 면 1개 → 정수 |
 | `resolve_face_values(context_faces)` | 보드 전체 → `Array[int]` |
+| `get_roster_preview_face()` | **굴리기 전** 슬롯 표시용 면 — 특수면 1개 있으면 그중 첫 특수면, 없으면 **최고 pip** `NumberFace` |
+| `get_roster_preview_value(context_faces?)` | 위 면을 `resolve_face_value`로 해석한 값 (컨텍스트 없으면 `get_faces()` 사용) |
 
 **카탈로그 정본:** [dice-catalog.md](dice-catalog.md) — `game/data/dice/dice_defs.json` (v2, 면 6개 필수).  
 **레거시 fallback:** `game/resources/dice/basic_d6.tres` — `RoundController` 기본 리소스·에디터 참고용.
@@ -226,6 +228,7 @@ compute_from_faces(dice_faces, dice_index, candidate_faces)
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-09 | `get_roster_preview_face()` / `get_roster_preview_value()` — 굴림 전 슬롯 표시 |
 | 2026-06-09 | 카탈로그 정본 링크 (`dice-catalog.md`), `dice_triple_h` 6면 |
 | 2026-06-08 | §10 — 보유 로스터·상점 링크 (`dice-roster-shop.md`) |
 | 2026-06-08 | 초안 — TwoEG `dice-resources`·`reroll-face-properties` 구현 정본, UI §13.4 교차 참조 |

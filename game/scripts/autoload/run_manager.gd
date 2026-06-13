@@ -13,6 +13,7 @@ var target_score: int = 10
 var current_score: int = 0
 var gold: int = 0
 var run_finished: bool = false
+var shop_entry_gold_earned: int = 0
 var _dice_roster: RefCounted
 
 signal floor_changed(floor: int, target: int)
@@ -67,6 +68,14 @@ func try_spend_reroll_gold() -> bool:
 	return true
 
 
+func is_run_started() -> bool:
+	return _dice_roster != null
+
+
+func enter_shop() -> void:
+	shop_entry_gold_earned = collect_round_gold()
+
+
 func collect_round_gold() -> int:
 	var earned: int = GoldCalculator.calculate_reward(current_score, target_score)
 	if earned <= 0:
@@ -86,6 +95,7 @@ func advance_floor() -> void:
 		return
 
 	current_floor += 1
+	shop_entry_gold_earned = 0
 	reset_floor_round()
 	_apply_floor_target()
 

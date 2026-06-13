@@ -19,6 +19,11 @@ func _init() -> void:
 	_expect_hand_count([1, 1, 1, 2, 2, 2, 3, 3, 4, 4], "full_house", 2, "1112223344 full house")
 	_expect_hand_count([3, 4, 3, 3, 4, 6, 2, 1, 4, 5], "full_house", 1, "3433462145 full house")
 
+	_expect_summary([1, 1, 3, 3], [
+		{"hand_id": "pair", "count": 2},
+		{"hand_id": "two_pair", "count": 1},
+	], "1133 active hands")
+
 	if _failed > 0:
 		push_error("Spec tests failed: %d" % _failed)
 	quit(_failed)
@@ -40,3 +45,22 @@ func _expect_hand_count(values: Array[int], hand_id: String, expected: int, labe
 	if count != expected:
 		_failed += 1
 		push_error("%s: %s count expected %d got %d" % [label, hand_id, expected, count])
+
+
+func _expect_summary(values: Array[int], expected_rows: Array, label: String) -> void:
+	var summaries := HandCalculator.summarize_steps(HandCalculator.evaluate(values).steps)
+	if summaries.size() != expected_rows.size():
+		_failed += 1
+		push_error(
+			"%s: summary size expected %d got %d" % [label, expected_rows.size(), summaries.size()]
+		)
+		return
+
+	for i in expected_rows.size():
+		var row: Dictionary = expected_rows[i]
+		var got: Dictionary = summaries[i]
+		if got.get("hand_id") != row.get("hand_id") or int(got.get("count")) != int(row.get("count")):
+			_failed += 1
+			push_error(
+				"%s: row %d expected %s got %s" % [label, i, str(row), str(got)]
+			)

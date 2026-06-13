@@ -29,8 +29,10 @@ var _dice_views: Array[Control] = []
 var _left_value: Label
 var _right_value: Label
 var _status_label: Label
+var _active_hands_presenter: Node
 var _dice_values: Array[int] = []
 var _dice_faces: Array = []
+var _hand_steps_seen: Array[HandStep] = []
 
 
 func setup(
@@ -39,12 +41,14 @@ func setup(
 	left_value: Label,
 	right_value: Label,
 	status_label: Label,
+	active_hands_presenter: Node = null,
 ) -> void:
 	_dice_row = dice_row
 	_popup_layer = popup_layer
 	_left_value = left_value
 	_right_value = right_value
 	_status_label = status_label
+	_active_hands_presenter = active_hands_presenter
 
 
 func set_dice_views(dice_views: Array[Control]) -> void:
@@ -107,6 +111,7 @@ func _apply_timing_profile(hands_only: bool) -> void:
 func _prepare_hand_reroll_board(evaluation: HandEvaluation) -> void:
 	_left_value.text = str(evaluation.number_sum)
 	_right_value.text = "0"
+	_reset_active_hands_list()
 
 
 func _play_reroll_reveal(die_index: int) -> void:
@@ -183,6 +188,7 @@ func _play_hand_steps(steps: Array[HandStep], reroll: bool) -> void:
 	var hand_running := 0
 	if not reroll:
 		_right_value.text = "0"
+	_reset_active_hands_list()
 	_status_label.text = "족보를 다시 계산하는 중..." if reroll else "족보를 계산하는 중..."
 
 	for step in steps:
@@ -190,6 +196,7 @@ func _play_hand_steps(steps: Array[HandStep], reroll: bool) -> void:
 		await _play_focus_dice(step.highlight_indices)
 		hand_running += step.points_added
 		_right_value.text = str(hand_running)
+		_append_active_hand_step(step)
 		await _show_hand_popup(step.display_ko, step.points_added, step.highlight_indices)
 		await get_tree().create_timer(_hand_step_delay).timeout
 
@@ -420,3 +427,21 @@ func _clear_popups() -> void:
 func _reset_score_board() -> void:
 	_left_value.text = "0"
 	_right_value.text = "0"
+	_reset_active_hands_list()
+
+
+func clear_active_hands() -> void:
+	_reset_active_hands_list()
+
+
+func _reset_active_hands_list() -> void:
+	_hand_steps_seen.clear()
+	if _active_hands_presenter != null and _active_hands_presenter.has_method("clear"):
+		_active_hands_presenter.clear()
+
+
+func _append_active_hand_step(step: HandStep) -> void:
+	_hand_steps_seen.append(step)
+	if _active_hands_presenter == null or not _active_hands_presenter.has_method("show_summaries"):
+		return
+	_active_hands_presenter.show_summaries(HandCalculator.summarize_steps(_hand_steps_seen))

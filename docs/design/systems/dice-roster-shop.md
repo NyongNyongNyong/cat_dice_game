@@ -5,7 +5,7 @@
 > **카탈로그:** [dice-catalog.md](dice-catalog.md) — `dice_defs.json`, id 기반 보유·교체  
 > **면·리소스:** [dice-resources.md](dice-resources.md) — `DiceResource`  
 > **상태:** v0.1 골격 (교체 1종만)  
-> **구현:** `dice_roster.gd` · `run_manager.gd` · `dice_shop_presenter.gd` · `run_scene.gd`
+> **구현:** `dice_roster.gd` · `run_manager.gd` · `dice_shop_presenter.gd` · `shop_scene.tscn` · `game_flow.gd`
 
 ---
 
@@ -36,14 +36,14 @@
 ### 상점 진입
 
 - `REROLL_READY` + `RunManager.can_advance_floor()` (목표 점수 달성).
-- **Next Floor** 클릭 → 상점 패널 표시 (즉시 층 이동하지 않음).
+- **Next Floor** 클릭 → **상점 씬**으로 전환 (`GameFlow.show_shop()`). 즉시 층 이동하지 않음.
 
 ### 상점 (MVP)
 
 | 오퍼 | 동작 |
 |------|------|
 | **오퍼 교체** | 슬롯 `i`를 카탈로그 id `dice_triple_h` (H,H,H,1,1,1)로 교체 |
-| **다음 층** | 상점 닫기 → `advance_floor()` → 로스터 반영 → 새 라운드 |
+| **다음 층** | 상점 씬에서 `advance_floor()` → RunScene 복귀 |
 
 - 성장·추가 오퍼: **미구현** (UI·API 자리만 확장 가능).
 - 교체는 슬롯당 여러 번 가능 (이미 H여도 동일 리소스로 재설정 가능).
@@ -58,6 +58,7 @@
 
 | 위치 | 내용 |
 |------|------|
+| 상점 씬 | [shop-scene.md](shop-scene.md) — Full Rect, ScrollContainer |
 | 상점 제목 | `상점` |
 | 슬롯 행 | `슬롯 N · {display_name}` — 어두운 글자색 (`#2E2620` 계열), 밝은 패널 배경 대비 |
 | 교체 버튼 | `교체` (오퍼 이름은 상단 패널에 표시) |
@@ -81,7 +82,7 @@
 |------|------|
 | 목표 미달성 | 상점 진입 불가 (Next Floor 비활성) |
 | 5층 클리어 후 | 상점 없음, 런 종료 |
-| 상점 표시 중 | Roll·리롤·Preview 비활성 |
+| 상점 표시 중 | RunScene 언로드 — Roll·리롤 불가 |
 | 빈 로스터 | `start_run`이 항상 4개로 초기화 — 발생하지 않음 |
 
 ---
@@ -92,7 +93,8 @@
 |--------|------|
 | `RunManager` | `DiceRoster` 보유, `roster_changed` |
 | `RoundController` | `dice_resources` ← 로스터 |
-| `run_scene` | 상점 플로우, `_spawn_dice()` 개수 동적 |
+| `run_scene` | Next Floor → `GameFlow.show_shop()` |
+| `shop_scene` | 교체 UI·다음 층 |
 | `hand-scoring-v2` | **미변경** (족보·공식) |
 | `dice-hover-reroll-preview` | **미변경** (슬롯별 리소스 이미 지원) |
 
@@ -113,7 +115,7 @@
 | 항목 | 경로 |
 |------|------|
 | 로스터 | `game/scripts/core/dice_roster.gd` |
-| 상점 UI | `game/scripts/ui/dice_shop_presenter.gd` |
+| 상점 UI | `shop_scene.tscn` · `dice_shop_presenter.gd` |
 | 카탈로그 | `game/data/dice/dice_defs.json` · `dice_catalog_service.gd` |
 | 테스트 | `game/scripts/core/dice_roster_spec_test.gd` |
 
@@ -125,6 +127,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-09 | 상점 독립 씬 — [shop-scene.md](shop-scene.md) |
 | 2026-06-09 | 슬롯 행 동적 라벨 글자색·크기 — 밝은 배경에서 가독성 |
 | 2026-06-09 | 상점 UI — 오퍼 패널·슬롯 행·교체 버튼 레이아웃 |
 | 2026-06-09 | 카탈로그 id 교체 — `dice_triple_h`, H 전용 API 제거 |

@@ -35,7 +35,7 @@
 ### 보유 로스터
 
 - `DiceRoster.reset_to_starting()` → `starter_loadout.json`의 `owned_dice_ids` 순서대로 슬롯 채움.
-- 슬롯 `i`는 카탈로그의 `DiceResource` **참조**(동일 id는 동일 템플릿 공유).
+- 슬롯 `i`는 카탈로그 템플릿의 **`duplicate(true)`** — 슬롯별 독립 인스턴스, 면 정의는 동일.
 
 ### 상점 교체 (MVP)
 

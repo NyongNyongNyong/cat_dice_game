@@ -11,7 +11,7 @@ func reset_to_starting() -> void:
 	_owned.clear()
 	var catalog = CatalogService.shared()
 	for dice_id in catalog.get_starter_owned_ids():
-		var die: Resource = catalog.get_dice(dice_id)
+		var die: Resource = _copy_catalog_dice(dice_id)
 		if die == null:
 			push_error("DiceRoster: unknown starter dice_id '%s'" % dice_id)
 			continue
@@ -40,10 +40,17 @@ func replace_at(index: int, replacement: Resource) -> bool:
 
 
 func replace_at_index(index: int, dice_id: String) -> bool:
-	var replacement: Resource = CatalogService.shared().get_dice(dice_id)
+	var replacement: Resource = _copy_catalog_dice(dice_id)
 	if replacement == null:
 		return false
 	return replace_at(index, replacement)
+
+
+func _copy_catalog_dice(dice_id: String) -> Resource:
+	var template: Resource = CatalogService.shared().get_dice(dice_id)
+	if template == null:
+		return null
+	return template.duplicate(true)
 
 
 func get_shop_replace_offer_id() -> String:

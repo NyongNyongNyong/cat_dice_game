@@ -89,6 +89,28 @@ static func evaluate(dice_values: Array[int]) -> HandEvaluation:
 	return result
 
 
+static func summarize_steps(steps: Array[HandStep]) -> Array[Dictionary]:
+	var order: Array[String] = []
+	var counts: Dictionary = {}
+	var display_names: Dictionary = {}
+
+	for step in steps:
+		if not counts.has(step.hand_id):
+			order.append(step.hand_id)
+			display_names[step.hand_id] = step.display_ko
+			counts[step.hand_id] = 0
+		counts[step.hand_id] = int(counts[step.hand_id]) + 1
+
+	var summaries: Array[Dictionary] = []
+	for hand_id in order:
+		summaries.append({
+			"hand_id": hand_id,
+			"display_ko": display_names[hand_id],
+			"count": counts[hand_id],
+		})
+	return summaries
+
+
 static func _sum_step_points(steps: Array[HandStep]) -> int:
 	var total := 0
 	for step in steps:
