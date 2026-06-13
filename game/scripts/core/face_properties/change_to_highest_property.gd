@@ -2,14 +2,28 @@ class_name ChangeToHighestProperty
 extends "res://scripts/core/face_properties/face_property.gd"
 
 
+func get_resolve_priority() -> int:
+	return 100
+
+
 func resolve_number_value(face: Resource, context: Dictionary, current_value: int) -> int:
 	var highest := current_value
-	for candidate in context.get("faces", []):
+	var context_faces: Array = context.get("faces", [])
+	var context_values: Array = context.get("values", [])
+	var dice_index: int = int(context.get("dice_index", -1))
+
+	for i in context_faces.size():
+		if i == dice_index:
+			continue
+		var candidate = context_faces[i]
 		if candidate == face or candidate == null:
 			continue
 		if not candidate.has_method("is_number") or not candidate.is_number():
 			continue
-		highest = maxi(highest, candidate.get_base_number_value())
+		if i < context_values.size():
+			highest = maxi(highest, int(context_values[i]))
+		else:
+			highest = maxi(highest, candidate.get_base_number_value())
 
 	return maxi(highest, 1)
 

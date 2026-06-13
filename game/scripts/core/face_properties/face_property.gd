@@ -2,6 +2,10 @@ class_name FaceProperty
 extends Resource
 
 
+func get_resolve_priority() -> int:
+	return 0
+
+
 func resolve_number_value(_face: Resource, _context: Dictionary, current_value: int) -> int:
 	return current_value
 

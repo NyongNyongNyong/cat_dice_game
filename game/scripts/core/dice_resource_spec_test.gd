@@ -7,6 +7,31 @@ const ChangeToHighestPropertyScript := preload("res://scripts/core/face_properti
 const DiceLoadoutResourceScript := preload("res://scripts/core/dice_loadout_resource.gd")
 const RoundControllerScript := preload("res://scripts/core/round_controller.gd")
 
+
+class PrioritySetValueProperty:
+	extends Resource
+
+	var priority := 0
+	var next_value := 1
+
+
+	func _init(resolve_priority: int = 0, value: int = 1) -> void:
+		priority = resolve_priority
+		next_value = value
+
+
+	func get_resolve_priority() -> int:
+		return priority
+
+
+	func resolve_number_value(
+		_face: Resource,
+		_context: Dictionary,
+		_current_value: int
+	) -> int:
+		return next_value
+
+
 var _failed := 0
 
 
@@ -14,6 +39,7 @@ func _init() -> void:
 	_expect_resource_reports_face_values()
 	_expect_resource_resolves_face_resources()
 	_expect_change_to_highest_property()
+	_expect_change_to_highest_runs_after_lower_priority_properties()
 	_expect_change_to_highest_display()
 	_expect_number_face_display()
 	_expect_controller_uses_default_resource()
@@ -75,6 +101,24 @@ func _expect_change_to_highest_property() -> void:
 	var only_changer: Array[Resource] = [changer]
 	if die.resolve_face_values(only_changer) != [1]:
 		_fail_array("change to highest fallback", [1], die.resolve_face_values(only_changer))
+
+
+func _expect_change_to_highest_runs_after_lower_priority_properties() -> void:
+	var die: Resource = DiceResourceScript.new()
+	var boosted_number := _number_face(2)
+	var boost_property: Resource = PrioritySetValueProperty.new(50, 6)
+	var boost_properties: Array[Resource] = [boost_property]
+	boosted_number.properties = boost_properties
+
+	var highest := _highest_face()
+	var faces: Array[Resource] = [boosted_number, highest]
+
+	if die.resolve_face_values(faces) != [6, 6]:
+		_fail_array(
+			"change to highest priority values",
+			[6, 6],
+			die.resolve_face_values(faces)
+		)
 
 
 func _expect_number_face_display() -> void:
