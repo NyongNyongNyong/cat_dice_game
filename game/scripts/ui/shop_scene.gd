@@ -1,21 +1,20 @@
 extends Control
 
-@onready var _floor_label: Label = $MarginContainer/RootVBox/Header/FloorLabel
-@onready var _gold_label: Label = $MarginContainer/RootVBox/Header/GoldLabel
-@onready var _status_label: Label = $MarginContainer/RootVBox/StatusLabel
-@onready var _offer_container: HBoxContainer = (
-	$MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox/OfferRow
-)
-@onready var _slots_container: GridContainer = (
-	$MarginContainer/RootVBox/Scroll/ScrollContent/RosterSlots
-)
-@onready var _continue_button: Button = $MarginContainer/RootVBox/Footer/ContinueButton
-@onready var _popup_overlay: Control = $MarginContainer/RootVBox/PopupOverlay
-@onready var _shop_presenter: Node = $DiceShopPresenter
-@onready var _hover_presenter: Node = $RerollPreviewPresenter
+@onready var _floor_label: Label = %FloorLabel
+@onready var _gold_label: Label = %GoldLabel
+@onready var _status_label: Label = %StatusLabel
+@onready var _offer_container: HBoxContainer = %OfferRow
+@onready var _slots_container: GridContainer = %RosterSlots
+@onready var _continue_button: Button = %ContinueButton
+@onready var _popup_overlay: Control = %PopupOverlay
+@onready var _shop_presenter: Node = %DiceShopPresenter
+@onready var _hover_presenter: Node = %RerollPreviewPresenter
 
 
 func _ready() -> void:
+	if not RunManager.is_run_started():
+		RunManager.start_run()
+
 	_hover_presenter.setup(_popup_overlay)
 	_hover_presenter.set_active(true)
 	_shop_presenter.setup(

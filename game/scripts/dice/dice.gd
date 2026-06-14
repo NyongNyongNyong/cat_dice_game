@@ -75,6 +75,19 @@ func clear_selection() -> void:
 	queue_redraw()
 
 
+func copy_visual_state_from(source: Control) -> void:
+	if source == null:
+		return
+	_face_value = int(source.get("_face_value"))
+	_face = source.get("_face")
+	_face_display_text = str(source.get("_face_display_text"))
+	_show_placeholder = bool(source.get("_show_placeholder"))
+	_highlighted = bool(source.get("_highlighted"))
+	_dimmed = bool(source.get("_dimmed"))
+	_selected = false
+	queue_redraw()
+
+
 func set_highlighted(on: bool) -> void:
 	_highlighted = on
 	queue_redraw()

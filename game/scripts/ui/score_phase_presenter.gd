@@ -17,9 +17,12 @@ const FOCUS_SCALE := Vector2(1.22, 1.22)
 
 var _hand_step_delay := NUMBER_STEP_DELAY
 var _hand_popup_duration := NUMBER_POPUP_DURATION
+var _number_step_delay := NUMBER_STEP_DELAY
+var _number_popup_duration := NUMBER_POPUP_DURATION
 var _focus_move_duration := 0.1
 var _focus_hold_duration := 0.08
 var _focus_return_duration := 0.1
+var _speed_multiplier := 1.0
 
 signal presentation_finished()
 
@@ -55,6 +58,10 @@ func set_dice_views(dice_views: Array[Control]) -> void:
 	_dice_views = dice_views
 
 
+func set_speed_multiplier(multiplier: float) -> void:
+	_speed_multiplier = maxf(multiplier, 1.0)
+
+
 func play(
 	evaluation: HandEvaluation,
 	hands_only: bool = false,
@@ -81,11 +88,11 @@ func play(
 		_prepare_hand_reroll_board(evaluation)
 		if rerolled_die_index >= 0:
 			await _play_reroll_reveal(rerolled_die_index)
-		await _play_hand_steps(evaluation.steps, true)
+		await _play_hand_multiplier(evaluation, true)
 	else:
 		_reset_score_board()
 		await _play_number_sum(evaluation.dice_values)
-		await _play_hand_steps(evaluation.steps, false)
+		await _play_hand_multiplier(evaluation, false)
 
 	_clear_highlights()
 	_clear_popups()
@@ -95,17 +102,21 @@ func play(
 
 func _apply_timing_profile(hands_only: bool) -> void:
 	if hands_only:
-		_hand_step_delay = REROLL_HAND_STEP_DELAY
-		_hand_popup_duration = REROLL_HAND_POPUP_DURATION
-		_focus_move_duration = REROLL_FOCUS_MOVE_DURATION
-		_focus_hold_duration = REROLL_FOCUS_HOLD_DURATION
-		_focus_return_duration = REROLL_FOCUS_RETURN_DURATION
+		_hand_step_delay = _scaled_duration(REROLL_HAND_STEP_DELAY)
+		_hand_popup_duration = _scaled_duration(REROLL_HAND_POPUP_DURATION)
+		_number_step_delay = _scaled_duration(NUMBER_STEP_DELAY)
+		_number_popup_duration = _scaled_duration(NUMBER_POPUP_DURATION)
+		_focus_move_duration = _scaled_duration(REROLL_FOCUS_MOVE_DURATION)
+		_focus_hold_duration = _scaled_duration(REROLL_FOCUS_HOLD_DURATION)
+		_focus_return_duration = _scaled_duration(REROLL_FOCUS_RETURN_DURATION)
 	else:
-		_hand_step_delay = NUMBER_STEP_DELAY
-		_hand_popup_duration = NUMBER_POPUP_DURATION
-		_focus_move_duration = 0.1
-		_focus_hold_duration = 0.08
-		_focus_return_duration = 0.1
+		_hand_step_delay = _scaled_duration(NUMBER_STEP_DELAY)
+		_hand_popup_duration = _scaled_duration(NUMBER_POPUP_DURATION)
+		_number_step_delay = _scaled_duration(NUMBER_STEP_DELAY)
+		_number_popup_duration = _scaled_duration(NUMBER_POPUP_DURATION)
+		_focus_move_duration = _scaled_duration(0.1)
+		_focus_hold_duration = _scaled_duration(0.08)
+		_focus_return_duration = _scaled_duration(0.1)
 
 
 func _prepare_hand_reroll_board(evaluation: HandEvaluation) -> void:
@@ -125,7 +136,7 @@ func _play_reroll_reveal(die_index: int) -> void:
 	var rerolled: Control = _dice_views[die_index]
 	rerolled.set_highlighted(true)
 	await _pulse_dice_in_place([rerolled])
-	await get_tree().create_timer(REROLL_REVEAL_HOLD).timeout
+	await get_tree().create_timer(_scaled_duration(REROLL_REVEAL_HOLD)).timeout
 
 	for dice in _dice_views:
 		dice.set_highlighted(false)
@@ -176,8 +187,8 @@ func _play_number_sum(values: Array[int]) -> void:
 		_dice_views[i].set_highlighted(true)
 		running += values[i]
 		_left_value.text = str(running)
-		await _show_points_popup("+%d" % values[i], [i], NUMBER_POPUP_DURATION)
-		await get_tree().create_timer(NUMBER_STEP_DELAY).timeout
+		await _show_points_popup("+%d" % values[i], [i], _number_popup_duration)
+		await get_tree().create_timer(_number_step_delay).timeout
 
 	_clear_highlights()
 	for dice in _dice_views:
@@ -199,6 +210,15 @@ func _play_hand_steps(steps: Array[HandStep], reroll: bool) -> void:
 		_append_active_hand_step(step)
 		await _show_hand_popup(step.display_ko, step.points_added, step.highlight_indices)
 		await get_tree().create_timer(_hand_step_delay).timeout
+
+
+func _play_hand_multiplier(evaluation: HandEvaluation, reroll: bool) -> void:
+	if evaluation.steps.is_empty():
+		_right_value.text = str(evaluation.hand_value_sum)
+		_status_label.text = "기본 배수 x%d" % evaluation.hand_value_sum
+		await get_tree().create_timer(_hand_step_delay).timeout
+		return
+	await _play_hand_steps(evaluation.steps, reroll)
 
 
 func _apply_highlights(indices: Array[int]) -> void:
@@ -396,6 +416,10 @@ func _animate_popup(popup: Control, highlight_indices: Array[int], duration: flo
 	await tween.finished
 	if is_instance_valid(popup):
 		popup.queue_free()
+
+
+func _scaled_duration(duration: float) -> float:
+	return maxf(duration / _speed_multiplier, 0.01)
 
 
 func _anchor_above_dice(indices: Array[int]) -> Vector2:

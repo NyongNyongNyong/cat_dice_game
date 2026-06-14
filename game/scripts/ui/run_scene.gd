@@ -1,6 +1,7 @@
 extends Control
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
+const DICE_SLOT_SCENE := preload("res://scenes/ui/dice_slot.tscn")
 const GoldCalculator := preload("res://scripts/core/gold_calculator.gd")
 const TARGET_PROGRESS_COLORS: Array[Color] = [
 	Color(0.26, 0.63, 0.52, 1.0),
@@ -15,36 +16,41 @@ const TARGET_PROGRESS_PARTIAL_MIN_DURATION := 0.16
 const TARGET_PROGRESS_SEGMENT_PAUSE := 0.08
 const TARGET_PROGRESS_MAX_SEGMENTS := 24
 const TARGET_REWARD_FLOAT_DURATION := 0.62
+const FACE_PREVIEW_HOVER_DELAY := 0.32
 
-@onready var _floor_label: Label = $MarginContainer/VBox/Header/FloorLabel
-@onready var _gold_label: Label = $MarginContainer/VBox/Header/GoldLabel
-@onready var _target_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow/TargetScoreLabel
-@onready var _current_label: Label = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow/CurrentScoreLabel
-@onready var _target_progress_bar: ProgressBar = $MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/TargetProgressBar
-@onready var _status_label: Label = $MarginContainer/VBox/StatusLabel
-@onready var _roll_slot: Control = $MarginContainer/VBox/RollPhaseSlot
-@onready var _dice_row: Control = $MarginContainer/VBox/DiceRow
-@onready var _dice_container: HBoxContainer = $MarginContainer/VBox/DiceRow/CenterContainer/DiceContainer
-@onready var _popup_overlay: Control = $ScoreOverlay
-@onready var _left_value: Label = $MarginContainer/VBox/ScoreBoard/LeftPanel/VBox/LeftValue
-@onready var _right_value: Label = $MarginContainer/VBox/ScoreBoard/RightPanel/VBox/RightValue
-@onready var _roll_button: Button = $MarginContainer/VBox/Buttons/RollButton
-@onready var _next_floor_button: Button = $MarginContainer/VBox/Buttons/NextFloorButton
-@onready var _dice_popup_layer: Control = $MarginContainer/VBox/DiceRow/PopupOverlay
-@onready var _round: RoundController = $RoundController
-@onready var _roll_presenter: RollPhasePresenter = $RollPhasePresenter
-@onready var _score_presenter: ScorePhasePresenter = $ScorePhasePresenter
-@onready var _reroll_preview_presenter: Node = $RerollPreviewPresenter
-@onready var _active_hands_list: VBoxContainer = (
-	$ActiveHandsSidebar/VBox/ActiveHandsScroll/ActiveHandsList
-)
-@onready var _active_hands_presenter: Node = $ActiveHandsPresenter
+@onready var _floor_label: Label = %FloorLabel
+@onready var _gold_label: Label = %GoldLabel
+@onready var _target_label: Label = %TargetScoreLabel
+@onready var _current_label: Label = %CurrentScoreLabel
+@onready var _target_progress_bar: ProgressBar = %TargetProgressBar
+@onready var _target_progress_value_label: Label = %ProgressValueLabel
+@onready var _status_label: Label = %StatusLabel
+@onready var _dice_row: Control = %DiceRow
+@onready var _dice_container: HBoxContainer = %DiceContainer
+@onready var _popup_overlay: Control = %ScoreOverlay
+@onready var _left_value: Label = %LeftValue
+@onready var _right_value: Label = %RightValue
+@onready var _roll_lever: RollLever = %RollLever
+@onready var _next_floor_button: Button = %NextFloorButton
+@onready var _dice_popup_layer: Control = %PopupOverlay
+@onready var _round: RoundController = %RoundController
+@onready var _roll_presenter: RollPhasePresenter = %RollPhasePresenter
+@onready var _score_presenter: ScorePhasePresenter = %ScorePhasePresenter
+@onready var _reroll_preview_presenter: Node = %RerollPreviewPresenter
+@onready var _active_hands_list: VBoxContainer = %ActiveHandsList
+@onready var _active_hands_presenter: Node = %ActiveHandsPresenter
 
 var _dice_views: Array[Control] = []
+var _dice_slots: Array = []
 var _hovered_dice_index := -1
+var _face_preview_request_id := 0
+var _position_swap_source_index := -1
 var _score_after_reroll := false
+var _lever_speed_multiplier := 0.0
+var _lever_loop_running := false
 var _is_animating_target_progress := false
 var _target_progress_tween: Tween
+var _roll_slot: Control
 
 
 func _ready() -> void:
@@ -59,10 +65,11 @@ func _ready() -> void:
 
 
 func _setup_round_flow() -> void:
+	_roll_slot = _dice_row
 	_roll_presenter.setup(_roll_slot, _dice_row)
 	_active_hands_presenter.setup(_active_hands_list)
 	_score_presenter.setup(
-		_dice_row, _popup_overlay, _left_value, _right_value, _status_label, _active_hands_presenter
+		_dice_row, _popup_overlay, _left_value, _right_value, _status_label
 	)
 	_score_presenter.set_dice_views(_dice_views)
 	_roll_presenter.set_dice_views(_dice_views)
@@ -77,11 +84,12 @@ func _setup_round_flow() -> void:
 
 	RunManager.floor_changed.connect(_on_floor_changed)
 	RunManager.score_changed.connect(_on_score_changed)
+	RunManager.chips_changed.connect(_on_chips_changed)
 	RunManager.gold_changed.connect(_on_gold_changed)
 	RunManager.run_completed.connect(_on_run_completed)
 	RunManager.roster_changed.connect(_on_roster_changed)
 
-	_roll_button.pressed.connect(_on_roll_pressed)
+	_roll_lever.speed_changed.connect(_on_roll_lever_speed_changed)
 	_next_floor_button.pressed.connect(_on_next_floor_pressed)
 
 
@@ -94,15 +102,23 @@ func _spawn_dice() -> void:
 	for child in _dice_container.get_children():
 		child.queue_free()
 	_dice_views.clear()
+	_dice_slots.clear()
 
 	var dice_count := _round.get_dice_count()
 	for i in dice_count:
+		var slot = DICE_SLOT_SCENE.instantiate()
+		slot.set_slot_index(i)
+		_dice_container.add_child(slot)
+		slot.mouse_entered.connect(_on_dice_mouse_entered.bind(i))
+		slot.mouse_exited.connect(_on_dice_mouse_exited)
+		slot.clicked.connect(_on_dice_slot_clicked)
+		slot.drag_started.connect(_on_dice_slot_drag_started)
+		slot.drop_requested.connect(_on_dice_slot_drop_requested)
+		_dice_slots.append(slot)
+
 		var dice: Control = DICE_SCENE.instantiate()
-		_dice_container.add_child(dice)
+		slot.set_dice_view(dice)
 		dice.show_placeholder()
-		dice.mouse_entered.connect(_on_dice_mouse_entered.bind(i))
-		dice.mouse_exited.connect(_on_dice_mouse_exited)
-		dice.gui_input.connect(_on_dice_gui_input.bind(i))
 		_dice_views.append(dice)
 
 	_show_roster_previews()
@@ -124,10 +140,38 @@ func _show_roster_previews() -> void:
 		_dice_views[i].set_face(preview_face, preview_value)
 
 
-func _on_roll_pressed() -> void:
-	if not _round.can_roll() or RunManager.run_finished:
+func _on_roll_lever_speed_changed(multiplier: float) -> void:
+	if RunManager.run_finished:
 		return
-	_round.roll()
+	_lever_speed_multiplier = multiplier
+	_apply_lever_speed()
+	if _lever_speed_multiplier > 0.0:
+		_set_position_swap_source(-1)
+		_run_lever_loop()
+	_sync_ui()
+
+
+func _run_lever_loop() -> void:
+	if _lever_loop_running:
+		return
+	_lever_loop_running = true
+
+	while _lever_speed_multiplier > 0.0 and _round.can_roll() and not RunManager.run_finished:
+		_round.roll()
+		while _round.phase == RoundPhase.Phase.ROLLING or _round.phase == RoundPhase.Phase.SCORING:
+			await _round.phase_changed
+		await get_tree().process_frame
+
+	_lever_loop_running = false
+	_sync_ui()
+
+
+func _apply_lever_speed() -> void:
+	var speed := maxf(_lever_speed_multiplier, 1.0)
+	if _roll_presenter.has_method("set_speed_multiplier"):
+		_roll_presenter.set_speed_multiplier(speed)
+	if _score_presenter.has_method("set_speed_multiplier"):
+		_score_presenter.set_speed_multiplier(speed)
 
 
 func _on_dice_rolled(values: Array[int]) -> void:
@@ -160,8 +204,11 @@ func _on_score_ready(evaluation: HandEvaluation) -> void:
 	var rerolled_index := _round.last_rerolled_die_index if hands_only else -1
 	await _score_presenter.play(evaluation, hands_only, rerolled_index, _round.dice_faces)
 	_is_animating_target_progress = true
-	RunManager.set_score(evaluation.total_score)
-	await _animate_target_progress(evaluation.total_score)
+	var previous_score := RunManager.current_score
+	RunManager.add_score(evaluation.total_score)
+	if _active_hands_presenter.has_method("add_roll"):
+		_active_hands_presenter.add_roll(evaluation)
+	await _animate_target_progress(previous_score, RunManager.current_score)
 	_is_animating_target_progress = false
 	_round.complete_score_presentation()
 	_show_dice_faces(_round.dice_faces, evaluation.dice_values)
@@ -209,15 +256,90 @@ func _play_dice_face_effects(faces: Array[Resource], values: Array[int]) -> void
 func _update_dice_selection(index: int) -> void:
 	for i in _dice_views.size():
 		_dice_views[i].set_selected(i == index)
+	for i in _dice_slots.size():
+		_dice_slots[i].set_selected(i == index)
 
 
 func _clear_dice_selection() -> void:
 	for dice in _dice_views:
 		dice.clear_selection()
+	for slot in _dice_slots:
+		slot.set_selected(false)
+
+
+func _set_position_swap_source(index: int) -> void:
+	_position_swap_source_index = index
+	if _position_swap_source_index < 0:
+		_clear_dice_selection()
+		return
+	_update_dice_selection(_position_swap_source_index)
+
+
+func _can_reposition_dice() -> bool:
+	return (
+		not RunManager.run_finished
+		and _round.phase == RoundPhase.Phase.IDLE
+		and _is_lever_stopped()
+	)
+
+
+func _handle_position_click(index: int) -> void:
+	if not _can_reposition_dice():
+		return
+	if index < 0 or index >= _dice_views.size():
+		return
+
+	if _position_swap_source_index < 0:
+		_set_position_swap_source(index)
+		return
+	if _position_swap_source_index == index:
+		_set_position_swap_source(-1)
+		return
+
+	var source_index := _position_swap_source_index
+	_set_position_swap_source(-1)
+	if RunManager.swap_owned_dice(source_index, index):
+		_sync_ui()
+
+
+func _on_dice_slot_clicked(index: int) -> void:
+	if _can_reposition_dice():
+		_handle_position_click(index)
+		return
+	if not _round.can_reroll_preview():
+		return
+	_round.select_die(index)
+
+
+func _on_dice_slot_drag_started(index: int) -> void:
+	_face_preview_request_id += 1
+	_reroll_preview_presenter.hide_preview()
+	if _can_reposition_dice():
+		_set_position_swap_source(index)
+
+
+func _on_dice_slot_drop_requested(from_index: int, to_index: int) -> void:
+	if not _can_reposition_dice():
+		return
+	if from_index < 0 or from_index >= _dice_views.size():
+		return
+	if to_index < 0 or to_index >= _dice_views.size():
+		return
+
+	_set_position_swap_source(-1)
+	if RunManager.swap_owned_dice(from_index, to_index):
+		_sync_ui()
 
 
 func _on_dice_mouse_entered(index: int) -> void:
 	_hovered_dice_index = index
+	_face_preview_request_id += 1
+	var request_id := _face_preview_request_id
+	await get_tree().create_timer(FACE_PREVIEW_HOVER_DELAY).timeout
+	if request_id != _face_preview_request_id:
+		return
+	if _hovered_dice_index != index:
+		return
 	if not _can_hover_dice_faces():
 		return
 	var resource := _round.get_dice_resource(index)
@@ -233,19 +355,8 @@ func _on_dice_mouse_entered(index: int) -> void:
 
 func _on_dice_mouse_exited() -> void:
 	_hovered_dice_index = -1
+	_face_preview_request_id += 1
 	_reroll_preview_presenter.hide_preview()
-
-
-func _on_dice_gui_input(event: InputEvent, index: int) -> void:
-	if not _round.can_reroll_preview():
-		return
-	if not event is InputEventMouseButton:
-		return
-	var mouse_event := event as InputEventMouseButton
-	if not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
-		return
-
-	_round.select_die(index)
 
 
 func _on_next_floor_pressed() -> void:
@@ -260,6 +371,7 @@ func _on_next_floor_pressed() -> void:
 func _open_shop() -> void:
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
+	_position_swap_source_index = -1
 	_clear_dice_selection()
 	RunManager.enter_shop()
 	GameFlow.show_shop()
@@ -267,27 +379,33 @@ func _open_shop() -> void:
 
 func _on_roster_changed() -> void:
 	_apply_roster_to_round()
+	if _position_swap_source_index >= _dice_views.size():
+		_set_position_swap_source(-1)
 	_show_roster_previews()
 
 
 func _on_round_reset() -> void:
 	_score_after_reroll = false
+	_position_swap_source_index = -1
 	_is_animating_target_progress = false
 	if _target_progress_tween != null:
 		_target_progress_tween.kill()
 	_reroll_preview_presenter.set_active(false)
 	_reroll_preview_presenter.hide_preview()
-	_roll_slot.visible = false
+	_clear_dice_selection()
 	_dice_row.visible = true
 	_show_roster_previews()
 	_left_value.text = "0"
 	_right_value.text = "0"
 	_left_value.scale = Vector2.ONE
 	_score_presenter.clear_active_hands()
+	_active_hands_presenter.clear()
 	_sync_ui()
 
 
 func _on_round_phase_changed(_phase: RoundPhase.Phase) -> void:
+	if not _can_reposition_dice():
+		_set_position_swap_source(-1)
 	_sync_ui()
 
 
@@ -298,12 +416,16 @@ func _on_floor_changed(floor: int, target: int) -> void:
 
 
 func _on_score_changed(score: int) -> void:
-	_current_label.text = "칩: %d" % score
+	_current_label.text = "점수: %d" % score
+	_sync_ui()
+
+
+func _on_chips_changed(_chips: int) -> void:
 	_sync_ui()
 
 
 func _on_gold_changed(amount: int) -> void:
-	_gold_label.text = "골드: %d" % amount
+	_gold_label.text = "골드: %d · 칩: %d" % [amount, RunManager.chips]
 	_sync_ui()
 
 
@@ -314,11 +436,17 @@ func _on_run_completed() -> void:
 func _sync_ui() -> void:
 	_floor_label.text = "층: %d" % RunManager.current_floor
 	_target_label.text = "목표: %d" % RunManager.target_score
-	_current_label.text = "칩: %d" % RunManager.current_score
-	_gold_label.text = "골드: %d" % RunManager.gold
+	_current_label.text = "점수: %d" % RunManager.current_score
+	_gold_label.text = "골드: %d · 칩: %d" % [RunManager.gold, RunManager.chips]
 	if not _is_animating_target_progress:
 		_update_target_progress()
-	_roll_button.disabled = not _round.can_roll() or RunManager.run_finished
+	if _roll_lever.has_method("set_disabled"):
+		_roll_lever.set_disabled(
+			RunManager.run_finished or (not _round.can_roll() and not _lever_loop_running)
+		)
+	for slot in _dice_slots:
+		if slot.has_method("set_drag_enabled"):
+			slot.set_drag_enabled(_can_reposition_dice())
 	_next_floor_button.disabled = (
 		not _round.can_advance_floor()
 		or not RunManager.can_advance_floor()
@@ -342,41 +470,61 @@ func _update_target_progress() -> void:
 	)
 
 
-func _animate_target_progress(score: int) -> void:
+func _animate_target_progress(from_score: int, to_score: int) -> void:
 	if _target_progress_tween != null:
 		_target_progress_tween.kill()
 
-	var segments := _build_target_progress_segments(score)
-	if segments.is_empty():
-		_apply_target_progress_segment(0, maxi(RunManager.target_score, 1), 0)
+	if to_score <= from_score:
+		_update_target_progress()
 		return
+
+	var segments := _build_target_progress_segments(to_score)
+	var start_segment := _build_target_progress_segment(from_score)
+	if start_segment.is_empty():
+		_apply_target_progress_segment(0, maxi(RunManager.target_score, 1), 0)
+	else:
+		_apply_target_progress_segment(
+			int(start_segment["color_index"]),
+			int(start_segment["max_value"]),
+			int(start_segment["value"]),
+		)
 
 	for i in segments.size():
 		var segment: Dictionary = segments[i]
 		var color_index := int(segment["color_index"])
 		var max_value := int(segment["max_value"])
-		var value := int(segment["value"])
-		_apply_target_progress_segment(color_index, max_value, 0)
-		if value <= 0:
+		var lower := int(segment["lower"])
+		var upper := int(segment["upper"])
+		var start_value := clampi(from_score - lower, 0, max_value)
+		var end_value := clampi(to_score - lower, 0, max_value)
+		if end_value <= start_value:
 			continue
 
+		_apply_target_progress_segment(color_index, max_value, start_value)
 		_target_progress_tween = create_tween()
 		_target_progress_tween.set_trans(Tween.TRANS_CUBIC)
 		_target_progress_tween.set_ease(Tween.EASE_OUT)
-		var fill_ratio := clampf(float(value) / float(max_value), 0.0, 1.0)
+		var fill_ratio := clampf(float(end_value - start_value) / float(max_value), 0.0, 1.0)
 		var duration := lerpf(
 			TARGET_PROGRESS_PARTIAL_MIN_DURATION,
 			TARGET_PROGRESS_FULL_DURATION,
 			fill_ratio
+		) / maxf(_lever_speed_multiplier, 1.0)
+		_target_progress_tween.tween_method(
+			Callable(self, "_set_target_progress_value"),
+			float(start_value),
+			float(end_value),
+			duration
 		)
-		_target_progress_tween.tween_property(_target_progress_bar, "value", float(value), duration)
 		await _target_progress_tween.finished
 
-		if value >= max_value:
+		if from_score < upper and to_score >= upper:
 			_show_target_reward_float(color_index + 1)
 
-		if value >= max_value and i < segments.size() - 1:
-			await get_tree().create_timer(TARGET_PROGRESS_SEGMENT_PAUSE).timeout
+		if end_value >= max_value and i < segments.size() - 1:
+			await get_tree().create_timer(
+				TARGET_PROGRESS_SEGMENT_PAUSE / maxf(_lever_speed_multiplier, 1.0)
+			).timeout
 
 
 func _build_target_progress_segments(score: int) -> Array[Dictionary]:
@@ -393,6 +541,8 @@ func _build_target_progress_segments(score: int) -> Array[Dictionary]:
 		var segment_value := clampi(score - lower, 0, segment_max)
 		segments.append({
 			"color_index": color_index,
+			"lower": lower,
+			"upper": upper,
 			"max_value": segment_max,
 			"value": segment_value,
 		})
@@ -406,9 +556,35 @@ func _build_target_progress_segments(score: int) -> Array[Dictionary]:
 	return segments
 
 
+func _build_target_progress_segment(score: int) -> Dictionary:
+	var target := maxi(RunManager.target_score, 1)
+	var lower := 0
+	var upper := target
+	var color_index := 0
+	var clamped_score := maxi(score, 0)
+	while color_index < TARGET_PROGRESS_MAX_SEGMENTS:
+		var segment_max := maxi(upper - lower, 1)
+		var segment_value := clampi(clamped_score - lower, 0, segment_max)
+		if clamped_score <= upper or color_index == TARGET_PROGRESS_MAX_SEGMENTS - 1:
+			return {
+				"color_index": color_index,
+				"lower": lower,
+				"upper": upper,
+				"max_value": segment_max,
+				"value": segment_value,
+			}
+
+		lower = upper
+		upper = int(round(float(upper) * GoldCalculator.DEFAULT_THRESHOLD_RATIO))
+		if upper <= lower:
+			upper = lower + target
+		color_index += 1
+	return {}
+
+
 func _apply_target_progress_segment(color_index: int, max_value: int, value: int) -> void:
 	_target_progress_bar.max_value = float(maxi(max_value, 1))
-	_target_progress_bar.value = clampf(float(value), 0.0, _target_progress_bar.max_value)
+	_set_target_progress_value(float(value))
 	var fill_style := StyleBoxFlat.new()
 	fill_style.bg_color = TARGET_PROGRESS_COLORS[color_index % TARGET_PROGRESS_COLORS.size()]
 	fill_style.corner_radius_top_left = 6
@@ -417,6 +593,14 @@ func _apply_target_progress_segment(color_index: int, max_value: int, value: int
 	fill_style.corner_radius_bottom_left = 6
 	_target_progress_bar.add_theme_stylebox_override("fill", fill_style)
 	# TODO: Add a stronger over-target burst when a full extra segment completes.
+
+
+func _set_target_progress_value(value: float) -> void:
+	_target_progress_bar.value = clampf(value, 0.0, _target_progress_bar.max_value)
+	_target_progress_value_label.text = "%d/%d" % [
+		int(round(_target_progress_bar.value)),
+		int(round(_target_progress_bar.max_value)),
+	]
 
 
 func _show_target_reward_float(reward_amount: int) -> void:
@@ -466,6 +650,10 @@ func _can_hover_dice_faces() -> bool:
 			return false
 
 
+func _is_lever_stopped() -> bool:
+	return _lever_speed_multiplier <= 0.0
+
+
 func _get_face_hover_context(index: int) -> Array[Resource]:
 	if not _round.dice_faces.is_empty() and index < _round.dice_faces.size():
 		return _round.dice_faces
@@ -482,27 +670,17 @@ func _update_status() -> void:
 
 	match _round.phase:
 		RoundPhase.Phase.IDLE:
-			_status_label.text = "Roll을 눌러 주사위를 굴리세요. 마우스를 올리면 6면을 확인할 수 있습니다."
+			_status_label.text = "레버를 아래로 당기면 칩을 하나씩 써서 계속 굴립니다."
 		RoundPhase.Phase.ROLLING:
 			_status_label.text = "주사위를 굴리는 중..."
 		RoundPhase.Phase.SCORING:
-			_status_label.text = "칩을 계산하는 중..."
+			_status_label.text = "점수를 계산하는 중..."
 		RoundPhase.Phase.REROLL_READY:
-			if _round.selected_die_index >= 0:
-				if RunManager.has_met_chip_target() and not RunManager.can_afford_reroll():
-					_status_label.text = "골드가 부족해 리롤할 수 없습니다. 선택을 해제하거나 Next Floor로 이동하세요."
-				else:
-					_status_label.text = "Roll을 눌러 선택한 주사위를 다시 굴리세요."
-			elif RunManager.can_advance_floor():
-				if RunManager.can_afford_reroll():
-					_status_label.text = (
-						"목표 달성! 리롤 1골드 — 더 높은 구간을 노리거나 Next Floor(상점)로 이동하세요."
-					)
-				else:
-					_status_label.text = (
-						"목표 달성! 골드가 부족해 리롤할 수 없습니다. Next Floor로 골드를 확보하세요."
-					)
+			if RunManager.can_advance_floor():
+				_status_label.text = "목표 달성! 더 굴리거나 Next Floor(상점)로 이동하세요."
+			elif RunManager.chips > 0:
+				_status_label.text = "레버를 아래로 당기면 남은 칩으로 계속 굴립니다."
 			else:
 				_status_label.text = (
-					"주사위에 마우스를 올려 면을 확인하고, 클릭해 선택하세요."
+					"칩을 모두 썼습니다. 목표에 못 미쳤다면 다음 구조 조정이 필요합니다."
 				)

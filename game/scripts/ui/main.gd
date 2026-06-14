@@ -3,7 +3,7 @@ extends Control
 const RUN_SCENE := preload("res://scenes/game/run_scene.tscn")
 const SHOP_SCENE := preload("res://scenes/game/shop_scene.tscn")
 
-@onready var _ui: Control = $UI
+@onready var _ui: Control = %UI
 
 
 func _ready() -> void:

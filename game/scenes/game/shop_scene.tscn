@@ -60,12 +60,14 @@ layout_mode = 2
 theme_override_constants/separation = 16
 
 [node name="FloorLabel" type="Label" parent="MarginContainer/RootVBox/Header"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
 theme_override_font_sizes/font_size = 20
 text = "상점 · 층 1"
 
 [node name="GoldLabel" type="Label" parent="MarginContainer/RootVBox/Header"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.72, 0.55, 0.12, 1)
@@ -74,6 +76,7 @@ text = "골드: 0"
 horizontal_alignment = 2
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/RootVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 14
@@ -106,6 +109,7 @@ theme_override_font_sizes/font_size = 13
 text = "구매 가능"
 
 [node name="OfferRow" type="HBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
 size_flags_horizontal = 3
@@ -117,12 +121,14 @@ theme_override_font_sizes/font_size = 13
 text = "보유 주사위"
 
 [node name="RosterSlots" type="GridContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 6
 columns = 2
 
 [node name="PopupOverlay" type="Control" parent="MarginContainer/RootVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 
@@ -131,12 +137,15 @@ layout_mode = 2
 alignment = 1
 
 [node name="ContinueButton" type="Button" parent="MarginContainer/RootVBox/Footer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
 text = "다음 층"
 
 [node name="DiceShopPresenter" type="Node" parent="."]
+unique_name_in_owner = true
 script = ExtResource("2_presenter")
 
 [node name="RerollPreviewPresenter" type="Node" parent="."]
+unique_name_in_owner = true
 script = ExtResource("3_hover")

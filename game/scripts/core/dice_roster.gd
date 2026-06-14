@@ -45,6 +45,20 @@ func replace_at_index(index: int, dice_id: String) -> bool:
 	return replace_at(index, replacement)
 
 
+func swap_indices(first_index: int, second_index: int) -> bool:
+	if first_index < 0 or first_index >= _owned.size():
+		return false
+	if second_index < 0 or second_index >= _owned.size():
+		return false
+	if first_index == second_index:
+		return true
+
+	var first_die := _owned[first_index]
+	_owned[first_index] = _owned[second_index]
+	_owned[second_index] = first_die
+	return true
+
+
 func _copy_catalog_dice(dice_id: String) -> Resource:
 	var template: Resource = CatalogService.shared().get_dice(dice_id)
 	if template == null:

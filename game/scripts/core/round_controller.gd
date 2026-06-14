@@ -39,15 +39,13 @@ func reset_round() -> void:
 
 
 func can_roll() -> bool:
-	if phase == RoundPhase.Phase.IDLE:
-		return true
-	if phase == RoundPhase.Phase.REROLL_READY:
-		return selected_die_index >= 0 and RunManager.can_afford_reroll()
+	if phase == RoundPhase.Phase.IDLE or phase == RoundPhase.Phase.REROLL_READY:
+		return RunManager.can_spend_chip()
 	return false
 
 
 func can_reroll_preview() -> bool:
-	return phase == RoundPhase.Phase.REROLL_READY
+	return false
 
 
 func can_advance_floor() -> bool:
@@ -55,10 +53,8 @@ func can_advance_floor() -> bool:
 
 
 func roll() -> void:
-	if phase == RoundPhase.Phase.IDLE:
+	if phase == RoundPhase.Phase.IDLE or phase == RoundPhase.Phase.REROLL_READY:
 		_roll_all_dice()
-	elif phase == RoundPhase.Phase.REROLL_READY:
-		_reroll_selected_die()
 
 
 func select_die(index: int) -> void:
@@ -153,6 +149,8 @@ func complete_score_presentation() -> void:
 
 
 func _roll_all_dice() -> void:
+	if not RunManager.try_spend_chip():
+		return
 	_set_phase(RoundPhase.Phase.ROLLING)
 	selected_die_index = -1
 	last_rerolled_die_index = -1

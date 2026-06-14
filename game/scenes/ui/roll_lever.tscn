@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://roll_lever_scene_v01"]
+
+[ext_resource type="Script" path="res://scripts/ui/roll_lever.gd" id="1_lever"]
+
+[node name="RollLever" type="Control"]
+custom_minimum_size = Vector2(260, 160)
+layout_mode = 2
+script = ExtResource("1_lever")

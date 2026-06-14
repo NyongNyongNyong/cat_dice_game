@@ -4,23 +4,22 @@ var _failed := 0
 
 
 func _init() -> void:
-	# hand-scoring-v2.md documented examples
-	_expect_hand_sum([1, 1, 2, 2], 9, "1122 §3")
-	_expect_hand_sum([1, 1, 1, 1, 1], 31, "11111 §2.1")
-	_expect_hand_sum([1, 2, 3, 4, 5, 6], 16, "123456 §8.3")
-	_expect_hand_sum([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], 77, "1122334455 §8.3/§12")
+	# Pachinko-chip-flow: activate only the single highest-value hand once.
+	_expect_hand_sum([1, 1, 2, 2], 5, "1122 best pair stair")
+	_expect_hand_sum([1, 1, 1, 1, 1], 16, "11111 best penta")
+	_expect_hand_sum([1, 2, 3, 4, 5, 6], 16, "123456 best straight")
+	_expect_hand_sum([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], 30, "1122334455 best stair")
+	_expect_hand_sum([1, 2, 3, 4], 1, "1234 default multiplier")
 
 	_expect_hand_count([1, 2, 3, 4, 5, 6], "straight_6", 1, "123456 straight")
-	_expect_hand_count([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], "straight_5", 2, "1122334455 straight")
+	_expect_hand_count([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], "straight_5", 0, "1122334455 straight")
 	_expect_hand_count([1, 1, 2, 2, 3, 3, 4, 4, 5, 5], "pair_stair_5", 1, "1122334455 stair")
 
-	# hand-scoring-v2.md §9 Full House
 	_expect_hand_count([1, 1, 1, 2, 2], "full_house", 1, "11122 full house")
-	_expect_hand_count([1, 1, 1, 2, 2, 2, 3, 3, 4, 4], "full_house", 2, "1112223344 full house")
-	_expect_hand_count([3, 4, 3, 3, 4, 6, 2, 1, 4, 5], "full_house", 1, "3433462145 full house")
+	_expect_hand_count([1, 1, 1, 2, 2, 2, 3, 3, 4, 4], "full_house", 0, "1112223344 full house")
+	_expect_hand_count([3, 4, 3, 3, 4, 6, 2, 1, 4, 5], "full_house", 0, "3433462145 full house")
 
 	_expect_summary([1, 1, 3, 3], [
-		{"hand_id": "pair", "count": 2},
 		{"hand_id": "two_pair", "count": 1},
 	], "1133 active hands")
 
