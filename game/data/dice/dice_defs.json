@@ -29,6 +29,32 @@
 	  ]
 	},
 	{
+	  "id": "dice_triple_l",
+	  "display_ko": "L 주사위",
+	  "display_name": "Triple L Die",
+	  "faces": [
+		{ "kind": "special", "property_id": "change_to_lowest" },
+		{ "kind": "special", "property_id": "change_to_lowest" },
+		{ "kind": "special", "property_id": "change_to_lowest" },
+		{ "kind": "number", "value": 3 },
+		{ "kind": "number", "value": 3 },
+		{ "kind": "number", "value": 3 }
+	  ]
+	},
+	{
+	  "id": "dice_triple_v",
+	  "display_ko": "V 주사위",
+	  "display_name": "Triple V Die",
+	  "faces": [
+		{ "kind": "special", "property_id": "change_to_missing" },
+		{ "kind": "special", "property_id": "change_to_missing" },
+		{ "kind": "special", "property_id": "change_to_missing" },
+		{ "kind": "number", "value": 2 },
+		{ "kind": "number", "value": 2 },
+		{ "kind": "number", "value": 2 }
+	  ]
+	},
+	{
 	  "id": "dice_bomb",
 	  "display_ko": "폭탄 주사위",
 	  "display_name": "Bomb Die",

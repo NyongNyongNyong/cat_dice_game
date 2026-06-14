@@ -15,6 +15,12 @@ const DiceResourceScript := preload("res://scripts/core/dice_resource.gd")
 const ChangeToHighestPropertyScript := preload(
 	"res://scripts/core/face_properties/change_to_highest_property.gd"
 )
+const ChangeToLowestPropertyScript := preload(
+	"res://scripts/core/face_properties/change_to_lowest_property.gd"
+)
+const ChangeToMissingPropertyScript := preload(
+	"res://scripts/core/face_properties/change_to_missing_property.gd"
+)
 
 static var _shared = null
 
@@ -214,6 +220,10 @@ func _build_property(property_id: String) -> Resource:
 	match property_id:
 		"change_to_highest":
 			return ChangeToHighestPropertyScript.new()
+		"change_to_lowest":
+			return ChangeToLowestPropertyScript.new()
+		"change_to_missing":
+			return ChangeToMissingPropertyScript.new()
 		_:
 			push_error("DiceCatalog: unknown property_id '%s'" % property_id)
 			return null

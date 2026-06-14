@@ -2,6 +2,7 @@ extends Node
 
 const DiceRosterScript := preload("res://scripts/core/dice_roster.gd")
 const GoldCalculator := preload("res://scripts/core/gold_calculator.gd")
+const ShopOfferService := preload("res://scripts/core/shop_offer_service.gd")
 
 # hand-scoring-v2 playtest targets (Σ(숫자) × Σ(족보) 스케일)
 const FLOOR_TARGETS: Array[int] = [10, 20, 40, 80, 160]
@@ -125,10 +126,37 @@ func replace_owned_dice_at(slot_index: int, dice_id: String) -> bool:
 	return true
 
 
-func get_shop_replace_offer_id() -> String:
+func get_shop_offers() -> Array[Dictionary]:
+	return ShopOfferService.shared().get_offers()
+
+
+func get_shop_offer_price(dice_id: String) -> int:
+	return ShopOfferService.shared().get_price(dice_id)
+
+
+func can_afford_shop_offer(dice_id: String) -> bool:
+	return gold >= get_shop_offer_price(dice_id)
+
+
+func try_purchase_shop_replace(dice_id: String, slot_index: int) -> bool:
 	if _dice_roster == null:
-		return "dice_triple_h"
-	return _dice_roster.get_shop_replace_offer_id()
+		return false
+
+	var price: int = get_shop_offer_price(dice_id)
+	if price <= 0 or gold < price:
+		return false
+	if get_shop_offer(dice_id).is_empty():
+		return false
+	if not replace_owned_dice_at(slot_index, dice_id):
+		return false
+
+	gold -= price
+	gold_changed.emit(gold)
+	return true
+
+
+func get_shop_offer(dice_id: String) -> Dictionary:
+	return ShopOfferService.shared().get_offer(dice_id)
 
 
 func _apply_floor_target() -> void:

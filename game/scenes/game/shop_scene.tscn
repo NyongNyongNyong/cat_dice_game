@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://shop_scene_v01"]
+[gd_scene load_steps=5 format=3 uid="uid://shop_scene_v01"]
 
 [ext_resource type="Script" path="res://scripts/ui/shop_scene.gd" id="1_shop"]
 [ext_resource type="Script" path="res://scripts/ui/dice_shop_presenter.gd" id="2_presenter"]
+[ext_resource type="Script" path="res://scripts/ui/reroll_preview_presenter.gd" id="3_hover"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_offer"]
 content_margin_left = 16.0
@@ -82,7 +83,7 @@ text = "상점"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 18
-text = "주사위를 교체한 뒤 다음 층으로 이동하세요."
+text = "구매할 주사위를 클릭한 뒤 교체할 슬롯을 클릭하세요."
 autowrap_mode = 3
 
 [node name="Scroll" type="ScrollContainer" parent="MarginContainer/RootVBox"]
@@ -101,26 +102,24 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_offer")
 
 [node name="OfferVBox" type="VBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 10
 
 [node name="OfferHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 14
-text = "교체 오퍼"
+text = "구매 가능 주사위"
 
-[node name="OfferName" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
+[node name="OfferRow" type="HBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
-theme_override_font_sizes/font_size = 22
-text = "H 주사위"
-autowrap_mode = 3
+theme_override_constants/separation = 12
+size_flags_horizontal = 3
 
 [node name="OfferHint" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.4, 0.35, 1)
 theme_override_font_sizes/font_size = 14
-text = "아래 슬롯을 선택해 교체하세요."
+text = "주사위 클릭 → 보유 슬롯 클릭으로 교체. 마우스를 올리면 6면을 확인할 수 있습니다."
 autowrap_mode = 3
 
 [node name="RosterHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
@@ -133,6 +132,10 @@ text = "보유 주사위"
 layout_mode = 2
 theme_override_constants/separation = 8
 
+[node name="PopupOverlay" type="Control" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+mouse_filter = 2
+
 [node name="Footer" type="HBoxContainer" parent="MarginContainer/RootVBox"]
 layout_mode = 2
 alignment = 1
@@ -144,3 +147,6 @@ text = "다음 층"
 
 [node name="DiceShopPresenter" type="Node" parent="."]
 script = ExtResource("2_presenter")
+
+[node name="RerollPreviewPresenter" type="Node" parent="."]
+script = ExtResource("3_hover")
