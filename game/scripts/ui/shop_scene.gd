@@ -6,7 +6,7 @@ extends Control
 @onready var _offer_container: HBoxContainer = (
 	$MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox/OfferRow
 )
-@onready var _slots_container: VBoxContainer = (
+@onready var _slots_container: GridContainer = (
 	$MarginContainer/RootVBox/Scroll/ScrollContent/RosterSlots
 )
 @onready var _continue_button: Button = $MarginContainer/RootVBox/Footer/ContinueButton
@@ -43,7 +43,7 @@ func _refresh_shop() -> void:
 
 
 func _sync_header() -> void:
-	_floor_label.text = "층: %d" % RunManager.current_floor
+	_floor_label.text = "상점 · 층 %d" % RunManager.current_floor
 	_gold_label.text = "골드: %d" % RunManager.gold
 	_continue_button.disabled = RunManager.run_finished
 
@@ -52,10 +52,10 @@ func _set_default_status() -> void:
 	var earned := RunManager.shop_entry_gold_earned
 	if earned > 0:
 		_status_label.text = (
-			"+%d 골드 획득! 구매할 주사위를 클릭한 뒤 교체할 슬롯을 클릭하세요." % earned
+			"+%d 골드! 구매 주사위 → 보유 슬롯 클릭 (Hover: 6면)" % earned
 		)
 	else:
-		_status_label.text = "구매할 주사위를 클릭한 뒤 교체할 슬롯을 클릭하세요."
+		_status_label.text = "구매 주사위 클릭 → 보유 슬롯 클릭 (Hover: 6면)"
 
 
 func _set_status(message: String) -> void:

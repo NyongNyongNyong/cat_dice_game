@@ -7,16 +7,17 @@ signal selection_changed(has_offer: bool)
 const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 
-const DICE_VIEW_SIZE := Vector2(56, 56)
-const ROW_SEPARATION := 12
-const OFFER_SEPARATION := 16
+const DICE_VIEW_SIZE := Vector2(44, 44)
+const ROW_SEPARATION := 8
+const OFFER_SEPARATION := 8
 const SHOP_SLOT_TEXT_COLOR := Color(0.18, 0.15, 0.12, 1)
-const SHOP_SLOT_FONT_SIZE := 16
+const SHOP_SLOT_FONT_SIZE := 14
+const SHOP_HEADING_FONT_SIZE := 12
 const OFFER_PRICE_COLOR := Color(0.72, 0.55, 0.12, 1)
 const OFFER_DISABLED_COLOR := Color(0.55, 0.5, 0.45, 1)
 
 var _offer_container: HBoxContainer
-var _roster_container: VBoxContainer
+var _roster_container: GridContainer
 var _continue_button: Button
 var _hover_presenter: Node
 
@@ -28,7 +29,7 @@ var _offer_ids: Array[String] = []
 
 func setup(
 	offer_container: HBoxContainer,
-	roster_container: VBoxContainer,
+	roster_container: GridContainer,
 	continue_button: Button,
 	hover_presenter: Node = null,
 ) -> void:
@@ -86,16 +87,16 @@ func _make_offer_card(dice_id: String, price: int, can_afford: bool, catalog) ->
 	style.bg_color = Color(0.98, 0.96, 0.92, 1.0)
 	style.border_color = Color(0.72, 0.66, 0.52, 1.0)
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.content_margin_left = 10.0
-	style.content_margin_top = 10.0
-	style.content_margin_right = 10.0
-	style.content_margin_bottom = 10.0
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 6.0
+	style.content_margin_top = 6.0
+	style.content_margin_right = 6.0
+	style.content_margin_bottom = 6.0
 	card.add_theme_stylebox_override("panel", style)
 
 	var vbox := VBoxContainer.new()
 	vbox.layout_mode = 2
-	vbox.add_theme_constant_override("separation", 6)
+	vbox.add_theme_constant_override("separation", 4)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	card.add_child(vbox)
 
@@ -123,7 +124,7 @@ func _make_offer_card(dice_id: String, price: int, can_afford: bool, catalog) ->
 		"font_color",
 		OFFER_PRICE_COLOR if can_afford else OFFER_DISABLED_COLOR
 	)
-	price_label.add_theme_font_size_override("font_size", 14)
+	price_label.add_theme_font_size_override("font_size", SHOP_HEADING_FONT_SIZE)
 	vbox.add_child(price_label)
 
 	card.gui_input.connect(_on_offer_gui_input.bind(dice_id, can_afford))
@@ -145,8 +146,8 @@ func _rebuild_roster(roster: RefCounted) -> void:
 
 		var label := Label.new()
 		label.layout_mode = 2
-		label.text = "슬롯 %d" % [i + 1]
-		label.custom_minimum_size = Vector2(64, 0)
+		label.text = "%d" % [i + 1]
+		label.custom_minimum_size = Vector2(28, 0)
 		label.add_theme_color_override("font_color", SHOP_SLOT_TEXT_COLOR)
 		label.add_theme_font_size_override("font_size", SHOP_SLOT_FONT_SIZE)
 		row.add_child(label)
