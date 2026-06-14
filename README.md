@@ -7,6 +7,7 @@
 | 구분 | 링크 |
 |------|------|
 | 기획 | [게임 기획 문서](docs/gdd-cat-tower-casino.md) |
+| 백로그 | [할 일·아이디어](docs/backlog.md) |
 | 설계 | [설계 문서](docs/design/README.md) · [v0.1 초기 플레이어블](docs/design/v0.1-initial-playable.md) |
 | 시스템 스펙 | [족보 계산 v2](docs/design/systems/hand-scoring-v2.md) (정본) |
 | 참고 | [데이터 계층](docs/data-hierarchy.md) · [Godot 폴더 상세](docs/godot-project-layout.md) |
