@@ -29,19 +29,20 @@ ShopScene (Control, Full Rect)
   Background (ColorRect, Full Rect)
   MarginContainer (Full Rect)
     RootVBox
-      Header (층, 골드)
-      Title / StatusLabel
+      Header (상점·층, 골드)
+      StatusLabel
       ScrollContainer (expand)
         ScrollContent (VBox)
           OfferPanel
           RosterHeading
-          RosterSlots (동적)
+          RosterSlots (GridContainer 2열, 동적)
       Footer — ContinueButton
   DiceShopPresenter (Node)
 ```
 
 - **Container 기반** 레이아웃만 사용. 절대 좌표 배치 금지.
-- 상품·슬롯 목록은 `ScrollContainer` 내부.
+- 상품·슬롯 목록은 `ScrollContainer` 내부 (콘텐츠가 720p 뷰포트를 넘을 때만 스크롤).
+- v0.1 compact: 주사위 위젯 44px, 보유 슬롯 2열 그리드, 여백·제목 축소.
 
 ---
 
@@ -88,4 +89,5 @@ ShopScene (Control, Full Rect)
 | 날짜 | 변경 |
 |------|------|
 | 2026-06-09 | 초안 — 독립 shop_scene, GameFlow, Main 셸 |
+| 2026-06-09 | compact — 720p 무스크롤 목표, 2열 로스터·44px dice |
 | 2026-06-09 | AC 반영 — 구현 완료 체크 |
