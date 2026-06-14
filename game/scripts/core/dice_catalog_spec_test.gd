@@ -12,6 +12,8 @@ func _init() -> void:
 
 	_expect_basic_die(catalog)
 	_expect_triple_h_die(catalog)
+	_expect_triple_l_die(catalog)
+	_expect_triple_v_die(catalog)
 	_expect_roster_preview_faces(catalog)
 	_expect_starter_loadout(catalog)
 	_expect_unknown_id_returns_null(catalog)
@@ -63,6 +65,44 @@ func _expect_triple_h_die(catalog) -> void:
 		_fail_array("triple h change to highest", [2, 5, 5], mixed_values)
 
 
+func _expect_triple_l_die(catalog) -> void:
+	var die: Resource = catalog.get_dice("dice_triple_l")
+	if die == null:
+		_fail_bool("triple l die exists", true, false)
+		return
+
+	var faces: Array[Resource] = die.get_faces()
+	var trio: Array[Resource] = [faces[3], faces[4], faces[5]]
+	if die.resolve_face_values(trio) != [3, 3, 3]:
+		_fail_array("triple l number faces", [3, 3, 3], die.resolve_face_values(trio))
+
+	var mixed_faces: Array[Resource] = []
+	mixed_faces.append(_make_number_face(2))
+	mixed_faces.append(_make_number_face(5))
+	mixed_faces.append(faces[0])
+	if die.resolve_face_values(mixed_faces) != [2, 5, 2]:
+		_fail_array("triple l change to lowest", [2, 5, 2], die.resolve_face_values(mixed_faces))
+
+
+func _expect_triple_v_die(catalog) -> void:
+	var die: Resource = catalog.get_dice("dice_triple_v")
+	if die == null:
+		_fail_bool("triple v die exists", true, false)
+		return
+
+	var faces: Array[Resource] = die.get_faces()
+	var trio: Array[Resource] = [faces[3], faces[4], faces[5]]
+	if die.resolve_face_values(trio) != [2, 2, 2]:
+		_fail_array("triple v number faces", [2, 2, 2], die.resolve_face_values(trio))
+
+	var board_faces: Array[Resource] = []
+	board_faces.append(_make_number_face(3))
+	board_faces.append(_make_number_face(4))
+	board_faces.append(faces[0])
+	if die.resolve_face_values(board_faces) != [3, 4, 2]:
+		_fail_array("triple v change to missing", [3, 4, 2], die.resolve_face_values(board_faces))
+
+
 func _expect_roster_preview_faces(catalog) -> void:
 	var basic: Resource = catalog.get_dice("dice_basic")
 	var basic_face: Resource = basic.get_roster_preview_face()
@@ -75,6 +115,16 @@ func _expect_roster_preview_faces(catalog) -> void:
 		_fail_bool("triple h roster preview is special", true, false)
 	if h_face.get_display_text({}) != "H":
 		_fail_string("triple h roster preview display", "H", h_face.get_display_text({}))
+
+	var triple_l: Resource = catalog.get_dice("dice_triple_l")
+	var l_face: Resource = triple_l.get_roster_preview_face()
+	if l_face == null or l_face.is_number() or l_face.get_display_text({}) != "L":
+		_fail_bool("triple l roster preview is L", true, false)
+
+	var triple_v: Resource = catalog.get_dice("dice_triple_v")
+	var v_face: Resource = triple_v.get_roster_preview_face()
+	if v_face == null or v_face.is_number() or v_face.get_display_text({}) != "V":
+		_fail_bool("triple v roster preview is V", true, false)
 
 
 func _expect_starter_loadout(catalog) -> void:

@@ -2,7 +2,6 @@ class_name DiceRoster
 extends RefCounted
 
 const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
-const SHOP_REPLACE_OFFER_ID := "dice_triple_h"
 
 var _owned: Array[Resource] = []
 
@@ -51,7 +50,3 @@ func _copy_catalog_dice(dice_id: String) -> Resource:
 	if template == null:
 		return null
 	return template.duplicate(true)
-
-
-func get_shop_replace_offer_id() -> String:
-	return SHOP_REPLACE_OFFER_ID

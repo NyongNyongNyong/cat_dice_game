@@ -74,6 +74,8 @@
 |----|---------|------|
 | `dice_basic` | 1,2,3,4,5,6 | 기본 |
 | `dice_triple_h` | H,H,H,1,1,1 | `change_to_highest` |
+| `dice_triple_l` | L,L,L,3,3,3 | `change_to_lowest` |
+| `dice_triple_v` | V,V,V,2,2,2 | `change_to_missing` |
 | `dice_bomb` | 1,2,3 + bomb×3 | bomb 효과 **미구현** — 숫자 면 placeholder (추후) |
 | `dice_golden` | 2,2,3,3,4,4 | 효과 미구현 — 숫자만 |
 
