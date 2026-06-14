@@ -12,6 +12,7 @@ func _init() -> void:
 
 	_expect_starting_roster()
 	_expect_replace_with_catalog_id()
+	_expect_swap_indices()
 
 	if _failed > 0:
 		push_error("Dice roster spec tests failed: %d" % _failed)
@@ -59,6 +60,30 @@ func _expect_replace_with_catalog_id() -> void:
 		_fail_bool("replace invalid index", false, true)
 	if roster.replace_at_index(0, "dice_missing"):
 		_fail_bool("replace unknown id", false, true)
+
+
+func _expect_swap_indices() -> void:
+	var roster: RefCounted = DiceRosterScript.new()
+	roster.reset_to_starting()
+
+	if not roster.replace_at_index(1, "dice_triple_h"):
+		_fail_bool("prepare swap custom die", true, false)
+	if not roster.swap_indices(0, 1):
+		_fail_bool("swap valid indices", true, false)
+
+	var first: Resource = roster.get_dice_resource(0)
+	var second: Resource = roster.get_dice_resource(1)
+	if first == null or str(first.id) != "dice_triple_h":
+		_fail_bool("swapped first die is custom die", true, false)
+	if second == null or str(second.id) != "dice_basic":
+		_fail_bool("swapped second die is starting die", true, false)
+
+	if roster.swap_indices(-1, 0):
+		_fail_bool("swap invalid first index", false, true)
+	if roster.swap_indices(0, 99):
+		_fail_bool("swap invalid second index", false, true)
+	if not roster.swap_indices(0, 0):
+		_fail_bool("swap same index succeeds", true, false)
 
 
 func _fail(label: String, expected, actual) -> void:

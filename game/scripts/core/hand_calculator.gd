@@ -83,8 +83,10 @@ static func evaluate(dice_values: Array[int]) -> HandEvaluation:
 	var result := HandEvaluation.new()
 	result.dice_values = dice_values.duplicate()
 	result.number_sum = ScoreCalculator.sum_numbers(dice_values)
-	result.steps = _build_steps(dice_values)
+	result.steps = _pick_highest_step(_build_steps(dice_values))
 	result.hand_value_sum = _sum_step_points(result.steps)
+	if result.hand_value_sum <= 0:
+		result.hand_value_sum = 1
 	result.total_score = result.number_sum * result.hand_value_sum
 	return result
 
@@ -116,6 +118,17 @@ static func _sum_step_points(steps: Array[HandStep]) -> int:
 	for step in steps:
 		total += step.points_added
 	return total
+
+
+static func _pick_highest_step(steps: Array[HandStep]) -> Array[HandStep]:
+	if steps.is_empty():
+		return []
+
+	var best: HandStep = steps[0]
+	for step in steps:
+		if step.points_added > best.points_added:
+			best = step
+	return [best]
 
 
 static func _build_steps(dice_values: Array[int]) -> Array[HandStep]:

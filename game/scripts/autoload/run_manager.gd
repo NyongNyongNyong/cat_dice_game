@@ -8,10 +8,12 @@ const ShopOfferService := preload("res://scripts/core/shop_offer_service.gd")
 const FLOOR_TARGETS: Array[int] = [10, 20, 40, 80, 160]
 const MAX_FLOOR: int = 5
 const DICE_COUNT: int = 10
+const INITIAL_CHIPS: int = 10
 
 var current_floor: int = 1
 var target_score: int = 10
 var current_score: int = 0
+var chips: int = 0
 var gold: int = 0
 var run_finished: bool = false
 var shop_entry_gold_earned: int = 0
@@ -19,6 +21,7 @@ var _dice_roster: RefCounted
 
 signal floor_changed(floor: int, target: int)
 signal score_changed(score: int)
+signal chips_changed(chips: int)
 signal gold_changed(gold: int)
 signal run_completed()
 signal roster_changed()
@@ -28,6 +31,7 @@ func start_run() -> void:
 	run_finished = false
 	current_floor = 1
 	current_score = 0
+	chips = INITIAL_CHIPS
 	gold = 0
 	_dice_roster = DiceRosterScript.new()
 	_dice_roster.reset_to_starting()
@@ -37,12 +41,31 @@ func start_run() -> void:
 
 func reset_floor_round() -> void:
 	current_score = 0
+	chips = INITIAL_CHIPS
 	score_changed.emit(current_score)
+	chips_changed.emit(chips)
 
 
 func set_score(score: int) -> void:
 	current_score = score
 	score_changed.emit(current_score)
+
+
+func add_score(amount: int) -> void:
+	current_score += maxi(amount, 0)
+	score_changed.emit(current_score)
+
+
+func can_spend_chip() -> bool:
+	return not run_finished and chips > 0
+
+
+func try_spend_chip() -> bool:
+	if not can_spend_chip():
+		return false
+	chips -= 1
+	chips_changed.emit(chips)
+	return true
 
 
 func can_advance_floor() -> bool:
@@ -126,6 +149,15 @@ func replace_owned_dice_at(slot_index: int, dice_id: String) -> bool:
 	return true
 
 
+func swap_owned_dice(first_index: int, second_index: int) -> bool:
+	if _dice_roster == null:
+		return false
+	if not _dice_roster.swap_indices(first_index, second_index):
+		return false
+	roster_changed.emit()
+	return true
+
+
 func get_shop_offers() -> Array[Dictionary]:
 	return ShopOfferService.shared().get_offers()
 
@@ -163,3 +195,4 @@ func _apply_floor_target() -> void:
 	target_score = FLOOR_TARGETS[current_floor - 1]
 	floor_changed.emit(current_floor, target_score)
 	score_changed.emit(current_score)
+	chips_changed.emit(chips)

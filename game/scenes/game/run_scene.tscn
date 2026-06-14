@@ -4,8 +4,9 @@
 [ext_resource type="Script" uid="uid://bhkwgtmiaon2n" path="res://scripts/core/round_controller.gd" id="2_round"]
 [ext_resource type="Script" uid="uid://cpq1n7tr7tiu1" path="res://scripts/ui/roll_phase_presenter.gd" id="3_roll"]
 [ext_resource type="Script" uid="uid://fis8x0ebu7il" path="res://scripts/ui/score_phase_presenter.gd" id="4_score"]
-[ext_resource type="Script" path="res://scripts/ui/reroll_preview_presenter.gd" id="5_reroll_preview"]
-[ext_resource type="Script" path="res://scripts/ui/active_hands_presenter.gd" id="6_active_hands"]
+[ext_resource type="Script" uid="uid://bsmg4ugh8eklg" path="res://scripts/ui/reroll_preview_presenter.gd" id="5_reroll_preview"]
+[ext_resource type="Script" uid="uid://c0jafed34d2cj" path="res://scripts/ui/active_hands_presenter.gd" id="6_active_hands"]
+[ext_resource type="PackedScene" path="res://scenes/ui/roll_lever.tscn" id="7_lever"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header_score"]
 content_margin_left = 20.0
@@ -36,22 +37,6 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_roll_slot"]
-content_margin_left = 20.0
-content_margin_top = 20.0
-content_margin_right = 20.0
-content_margin_bottom = 20.0
-bg_color = Color(0.94, 0.92, 0.86, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.72, 0.66, 0.52, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_left"]
 content_margin_left = 24.0
@@ -139,24 +124,38 @@ theme_override_constants/separation = 20
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="FloorLabel" type="Label" parent="MarginContainer/VBox/Header" unique_id=1827107442]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBox/Header" unique_id=1574505071]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+
+[node name="FloorLabel" type="Label" parent="MarginContainer/VBox/Header/VBoxContainer" unique_id=1827107442]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
 theme_override_font_sizes/font_size = 24
 text = "층: 1"
 
-[node name="GoldLabel" type="Label" parent="MarginContainer/VBox/Header"]
+[node name="GoldLabel" type="Label" parent="MarginContainer/VBox/Header/VBoxContainer" unique_id=1860703075]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.55, 0.12, 1)
 theme_override_font_sizes/font_size = 24
 text = "골드: 0"
+
+[node name="NextFloorButton" type="Button" parent="MarginContainer/VBox/Header/VBoxContainer" unique_id=858680710]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_vertical = 4
+disabled = true
+text = "Next Floor"
 
 [node name="ScoreHeaderPanel" type="PanelContainer" parent="MarginContainer/VBox/Header" unique_id=1643073618]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_header_score")
 
-[node name="ScoreHeaderStack" type="VBoxContainer" parent="MarginContainer/VBox/Header/ScoreHeaderPanel"]
+[node name="ScoreHeaderStack" type="VBoxContainer" parent="MarginContainer/VBox/Header/ScoreHeaderPanel" unique_id=421490477]
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -165,82 +164,62 @@ layout_mode = 2
 theme_override_constants/separation = 40
 
 [node name="TargetScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow" unique_id=1132366468]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_font_sizes/font_size = 36
 text = "목표: 10"
 
 [node name="CurrentScoreLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/ScoreHeaderRow" unique_id=716763979]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_font_sizes/font_size = 36
-text = "칩: 0"
+text = "점수: 0"
 
-[node name="TargetProgressBar" type="ProgressBar" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack"]
-custom_minimum_size = Vector2(0, 14)
+[node name="TargetProgressBar" type="ProgressBar" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack" unique_id=231175627]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 10.0
-show_percentage = false
 theme_override_styles/background = SubResource("StyleBoxFlat_target_progress_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_target_progress_fill")
+max_value = 10.0
+show_percentage = false
 
-[node name="StatusLabel" type="Label" parent="MarginContainer/VBox" unique_id=1293270232]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
-theme_override_font_sizes/font_size = 18
-text = "Roll을 눌러 주사위를 굴리세요."
-
-[node name="RollPhaseSlot" type="PanelContainer" parent="MarginContainer/VBox" unique_id=102679084]
-visible = false
-custom_minimum_size = Vector2(0, 96)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_roll_slot")
-
-[node name="RollPhaseLabel" type="Label" parent="MarginContainer/VBox/RollPhaseSlot" unique_id=256098304]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
-theme_override_font_sizes/font_size = 24
-text = "주사위를 굴리는 중..."
+[node name="ProgressValueLabel" type="Label" parent="MarginContainer/VBox/Header/ScoreHeaderPanel/ScoreHeaderStack/TargetProgressBar" unique_id=1284364319]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.75)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+text = "0/10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DiceRow" type="Control" parent="MarginContainer/VBox" unique_id=1606424428]
-custom_minimum_size = Vector2(0, 80)
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBox" unique_id=1293270232]
+unique_name_in_owner = true
 layout_mode = 2
-
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBox/DiceRow" unique_id=845399645]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="DiceContainer" type="HBoxContainer" parent="MarginContainer/VBox/DiceRow/CenterContainer" unique_id=1249398557]
-layout_mode = 2
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="PopupOverlay" type="Control" parent="MarginContainer/VBox/DiceRow" unique_id=1693290813]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 18
+text = "레버를 아래로 당겨 주사위를 굴리세요."
 
 [node name="ScoreBoard" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=114851745]
 layout_mode = 2
-size_flags_vertical = 10
+size_flags_vertical = 2
 theme_override_constants/separation = 24
 alignment = 1
 
 [node name="LeftPanel" type="PanelContainer" parent="MarginContainer/VBox/ScoreBoard" unique_id=1278224156]
-custom_minimum_size = Vector2(320, 180)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_left")
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer/VBox/ScoreBoard/LeftPanel" unique_id=167407355]
@@ -256,9 +235,10 @@ text = "숫자 합"
 horizontal_alignment = 1
 
 [node name="LeftValue" type="Label" parent="MarginContainer/VBox/ScoreBoard/LeftPanel/VBox" unique_id=870924551]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
-theme_override_font_sizes/font_size = 72
+theme_override_font_sizes/font_size = 36
 text = "0"
 horizontal_alignment = 1
 
@@ -270,9 +250,9 @@ text = "×"
 vertical_alignment = 1
 
 [node name="RightPanel" type="PanelContainer" parent="MarginContainer/VBox/ScoreBoard" unique_id=1641936593]
-custom_minimum_size = Vector2(320, 180)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_right")
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer/VBox/ScoreBoard/RightPanel" unique_id=1168759189]
@@ -288,32 +268,60 @@ text = "족보 합"
 horizontal_alignment = 1
 
 [node name="RightValue" type="Label" parent="MarginContainer/VBox/ScoreBoard/RightPanel/VBox" unique_id=1690460480]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
-theme_override_font_sizes/font_size = 72
+theme_override_font_sizes/font_size = 36
 text = "0"
 horizontal_alignment = 1
 
-[node name="Buttons" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=701743083]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=1477941953]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DiceRow" type="Control" parent="MarginContainer/VBox/HBoxContainer" unique_id=1606424428]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBox/HBoxContainer/DiceRow" unique_id=845399645]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DiceContainer" type="HBoxContainer" parent="MarginContainer/VBox/HBoxContainer/DiceRow/CenterContainer" unique_id=1249398557]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PopupOverlay" type="Control" parent="MarginContainer/VBox/HBoxContainer/DiceRow" unique_id=1693290813]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/VBox/HBoxContainer" unique_id=701743083]
 layout_mode = 2
 theme_override_constants/separation = 16
+alignment = 1
 
-[node name="RollButton" type="Button" parent="MarginContainer/VBox/Buttons" unique_id=667634360]
-custom_minimum_size = Vector2(160, 48)
-layout_mode = 2
-text = "Roll"
+[node name="RollLever" parent="MarginContainer/VBox/HBoxContainer/Buttons" unique_id=1808363831 instance=ExtResource("7_lever")]
+unique_name_in_owner = true
 
-[node name="NextFloorButton" type="Button" parent="MarginContainer/VBox/Buttons" unique_id=858680710]
-custom_minimum_size = Vector2(160, 48)
-layout_mode = 2
-disabled = true
-text = "Next Floor"
-
-[node name="ActiveHandsSidebar" type="PanelContainer" parent="."]
+[node name="ActiveHandsSidebar" type="PanelContainer" parent="." unique_id=1233359594]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
-anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -252.0
@@ -325,28 +333,30 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_active_hands")
 
-[node name="VBox" type="VBoxContainer" parent="ActiveHandsSidebar"]
+[node name="VBox" type="VBoxContainer" parent="ActiveHandsSidebar" unique_id=399589867]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="ActiveHandsSidebar/VBox"]
+[node name="Title" type="Label" parent="ActiveHandsSidebar/VBox" unique_id=1815501495]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.38, 0.34, 0.52, 1)
 theme_override_font_sizes/font_size = 18
-text = "활성 족보"
+text = "히스토리"
 horizontal_alignment = 1
 
-[node name="ActiveHandsScroll" type="ScrollContainer" parent="ActiveHandsSidebar/VBox"]
+[node name="ActiveHandsScroll" type="ScrollContainer" parent="ActiveHandsSidebar/VBox" unique_id=1189073396]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ActiveHandsList" type="VBoxContainer" parent="ActiveHandsSidebar/VBox/ActiveHandsScroll"]
+[node name="ActiveHandsList" type="VBoxContainer" parent="ActiveHandsSidebar/VBox/ActiveHandsScroll" unique_id=1858519219]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="ScoreOverlay" type="Control" parent="."]
+[node name="ScoreOverlay" type="Control" parent="." unique_id=1048995973]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -357,16 +367,21 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="RoundController" type="Node" parent="." unique_id=431023819]
+unique_name_in_owner = true
 script = ExtResource("2_round")
 
 [node name="RollPhasePresenter" type="Node" parent="." unique_id=504113842]
+unique_name_in_owner = true
 script = ExtResource("3_roll")
 
 [node name="ScorePhasePresenter" type="Node" parent="." unique_id=493166879]
+unique_name_in_owner = true
 script = ExtResource("4_score")
 
-[node name="RerollPreviewPresenter" type="Node" parent="."]
+[node name="RerollPreviewPresenter" type="Node" parent="." unique_id=787212061]
+unique_name_in_owner = true
 script = ExtResource("5_reroll_preview")
 
-[node name="ActiveHandsPresenter" type="Node" parent="."]
+[node name="ActiveHandsPresenter" type="Node" parent="." unique_id=1394786315]
+unique_name_in_owner = true
 script = ExtResource("6_active_hands")

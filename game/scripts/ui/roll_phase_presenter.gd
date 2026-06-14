@@ -15,6 +15,7 @@ var _roll_slot: Control
 var _dice_row: Control
 var _dice_views: Array[Control] = []
 var _rng := RandomNumberGenerator.new()
+var _speed_multiplier := 1.0
 
 
 func setup(roll_slot: Control, dice_row: Control) -> void:
@@ -27,11 +28,15 @@ func set_dice_views(dice_views: Array[Control]) -> void:
 	_dice_views = dice_views
 
 
+func set_speed_multiplier(multiplier: float) -> void:
+	_speed_multiplier = maxf(multiplier, 1.0)
+
+
 func play(_values: Array[int]) -> void:
 	_roll_slot.visible = true
 	_dice_row.visible = false
 
-	await get_tree().create_timer(ROLL_DURATION).timeout
+	await get_tree().create_timer(_scaled_duration(ROLL_DURATION)).timeout
 
 	_roll_slot.visible = false
 	presentation_finished.emit()
@@ -45,7 +50,7 @@ func play_roll(
 	var dice_indices: Array[int] = []
 	for i in _dice_views.size():
 		dice_indices.append(i)
-	await _play_face_cycle(dice_indices, final_faces, final_values, candidate_faces_by_die, ROLL_DURATION)
+	await _play_face_cycle(dice_indices, final_faces, final_values, candidate_faces_by_die, _scaled_duration(ROLL_DURATION))
 	presentation_finished.emit()
 
 
@@ -63,7 +68,7 @@ func play_reroll(
 		final_faces,
 		final_values,
 		candidate_faces_by_die,
-		REROLL_DURATION
+		_scaled_duration(REROLL_DURATION)
 	)
 	presentation_finished.emit()
 
@@ -75,7 +80,6 @@ func _play_face_cycle(
 	candidate_faces_by_die: Array,
 	duration: float,
 ) -> void:
-	_roll_slot.visible = false
 	_dice_row.visible = true
 	if dice_indices.is_empty():
 		return
@@ -84,8 +88,9 @@ func _play_face_cycle(
 	while elapsed < duration:
 		for dice_index in dice_indices:
 			_apply_random_candidate_face(dice_index, final_values, candidate_faces_by_die)
-		await get_tree().create_timer(FACE_STEP_INTERVAL).timeout
-		elapsed += FACE_STEP_INTERVAL
+		var step_interval := _scaled_duration(FACE_STEP_INTERVAL)
+		await get_tree().create_timer(step_interval).timeout
+		elapsed += step_interval
 
 	_apply_final_faces(dice_indices, final_faces, final_values)
 	await _play_settle(dice_indices)
@@ -146,13 +151,18 @@ func _play_settle(dice_indices: Array[int]) -> void:
 			continue
 		var dice := _dice_views[dice_index]
 		dice.pivot_offset = dice.size * 0.5
-		tween.tween_property(dice, "scale", ROLL_SETTLE_SCALE, ROLL_SETTLE_DURATION)\
+		var settle_duration := _scaled_duration(ROLL_SETTLE_DURATION)
+		tween.tween_property(dice, "scale", ROLL_SETTLE_SCALE, settle_duration)\
 			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(dice, "scale", Vector2.ONE, ROLL_SETTLE_DURATION)\
-			.set_delay(ROLL_SETTLE_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(dice, "scale", Vector2.ONE, settle_duration)\
+			.set_delay(settle_duration).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	await tween.finished
 
 	for dice_index in dice_indices:
 		if dice_index >= 0 and dice_index < _dice_views.size():
 			_dice_views[dice_index].scale = Vector2.ONE
 			_dice_views[dice_index].pivot_offset = Vector2.ZERO
+
+
+func _scaled_duration(duration: float) -> float:
+	return maxf(duration / _speed_multiplier, 0.01)
