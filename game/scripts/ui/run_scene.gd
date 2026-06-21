@@ -3,6 +3,12 @@ extends Control
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 const DICE_SLOT_SCENE := preload("res://scenes/ui/dice_slot.tscn")
 const GoldCalculator := preload("res://scripts/core/gold_calculator.gd")
+const RollLever := preload("res://scripts/ui/roll_lever.gd")
+const RoundController := preload("res://scripts/core/round_controller.gd")
+const RollPhasePresenter := preload("res://scripts/ui/roll_phase_presenter.gd")
+const ScorePhasePresenter := preload("res://scripts/ui/score_phase_presenter.gd")
+const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
+const RoundPhase := preload("res://scripts/core/round_phase.gd")
 const TARGET_PROGRESS_COLORS: Array[Color] = [
 	Color(0.26, 0.63, 0.52, 1.0),
 	Color(0.95, 0.55, 0.18, 1.0),

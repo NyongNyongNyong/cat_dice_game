@@ -2,6 +2,7 @@ class_name RerollPreviewCalculator
 
 const PreviewResult := preload("res://scripts/core/reroll_preview_result.gd")
 const DefaultDiceResource := preload("res://resources/dice/basic_d6.tres")
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
 const DEFAULT_FACE_VALUES: Array[int] = [1, 2, 3, 4, 5, 6]
 
 

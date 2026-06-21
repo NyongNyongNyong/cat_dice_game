@@ -2,6 +2,9 @@ class_name ScorePhasePresenter
 extends Node
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
+const HandStep := preload("res://scripts/core/hand_step.gd")
+const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
 
 const NUMBER_STEP_DELAY := 0.04
 const NUMBER_POPUP_DURATION := 0.28

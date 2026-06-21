@@ -1,5 +1,7 @@
 class_name ScoreCalculator
 
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
+
 
 static func sum_numbers(dice_values: Array) -> int:
 	var total := 0

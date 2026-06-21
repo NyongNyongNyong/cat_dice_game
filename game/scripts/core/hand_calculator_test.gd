@@ -1,5 +1,8 @@
 extends SceneTree
 
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
+
+
 func _init() -> void:
 	_test([1, 1, 2, 2], "1122")
 	_test([1, 1, 1, 1, 1], "11111")

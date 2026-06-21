@@ -1,6 +1,7 @@
 extends SceneTree
 
 const PreviewCalculator := preload("res://scripts/core/reroll_preview_calculator.gd")
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
 const NumberFaceScript := preload("res://scripts/core/number_face.gd")
 const SpecialFaceScript := preload("res://scripts/core/special_face.gd")
 const ChangeToHighestPropertyScript := preload("res://scripts/core/face_properties/change_to_highest_property.gd")

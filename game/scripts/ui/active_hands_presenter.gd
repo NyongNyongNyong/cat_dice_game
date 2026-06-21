@@ -1,5 +1,8 @@
 extends Node
 
+const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
+const HandStep := preload("res://scripts/core/hand_step.gd")
+
 const ROW_TEXT_COLOR := Color(0.18, 0.15, 0.12, 1)
 const SCORE_TEXT_COLOR := Color(0.72, 0.42, 0.08, 1.0)
 const ROW_FONT_SIZE := 15
