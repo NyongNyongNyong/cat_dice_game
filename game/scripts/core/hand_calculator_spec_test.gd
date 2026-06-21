@@ -1,5 +1,7 @@
 extends SceneTree
 
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
+
 var _failed := 0
 
 

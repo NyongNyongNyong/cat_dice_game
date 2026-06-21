@@ -1,5 +1,9 @@
 class_name HandCalculator
 
+const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
+const HandStep := preload("res://scripts/core/hand_step.gd")
+const ScoreCalculator := preload("res://scripts/core/score_calculator.gd")
+
 const PAIR_TIERS: Array[Dictionary] = [
 	{"id": "pair", "display_ko": "페어", "divisor": 1, "value": 1},
 	{"id": "two_pair", "display_ko": "투페어", "divisor": 2, "value": 2},

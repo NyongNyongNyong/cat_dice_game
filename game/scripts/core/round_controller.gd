@@ -3,6 +3,10 @@ extends Node
 
 const DEFAULT_DICE_RESOURCE := preload("res://resources/dice/basic_d6.tres")
 const RerollPreviewCalculator := preload("res://scripts/core/reroll_preview_calculator.gd")
+const RoundPhase := preload("res://scripts/core/round_phase.gd")
+const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
+const RunManagerScript := preload("res://scripts/autoload/run_manager.gd")
 
 signal phase_changed(phase: RoundPhase.Phase)
 signal dice_rolled(values: Array[int])
@@ -40,7 +44,10 @@ func reset_round() -> void:
 
 func can_roll() -> bool:
 	if phase == RoundPhase.Phase.IDLE or phase == RoundPhase.Phase.REROLL_READY:
-		return RunManager.can_spend_chip()
+		var run_manager := _get_run_manager()
+		if run_manager == null:
+			return true
+		return run_manager.can_spend_chip()
 	return false
 
 
@@ -85,7 +92,7 @@ func get_dice_count() -> int:
 			return loadout_count
 	if not dice_resources.is_empty():
 		return dice_resources.size()
-	return RunManager.DICE_COUNT
+	return RunManagerScript.DICE_COUNT
 
 
 func get_reroll_face_values(dice_index: int) -> Array[int]:
@@ -149,7 +156,8 @@ func complete_score_presentation() -> void:
 
 
 func _roll_all_dice() -> void:
-	if not RunManager.try_spend_chip():
+	var run_manager := _get_run_manager()
+	if run_manager != null and not run_manager.try_spend_chip():
 		return
 	_set_phase(RoundPhase.Phase.ROLLING)
 	selected_die_index = -1
@@ -162,7 +170,8 @@ func _roll_all_dice() -> void:
 func _reroll_selected_die() -> void:
 	if selected_die_index < 0 or selected_die_index >= dice_values.size():
 		return
-	if not RunManager.try_spend_reroll_gold():
+	var run_manager := _get_run_manager()
+	if run_manager != null and not run_manager.try_spend_reroll_gold():
 		return
 
 	last_rerolled_die_index = selected_die_index
@@ -211,3 +220,9 @@ func _resolve_face_value(face: Resource, context_faces: Array[Resource] = []) ->
 func _set_phase(next_phase: RoundPhase.Phase) -> void:
 	phase = next_phase
 	phase_changed.emit(phase)
+
+
+func _get_run_manager() -> Node:
+	if not is_inside_tree():
+		return null
+	return get_tree().root.get_node_or_null("RunManager")

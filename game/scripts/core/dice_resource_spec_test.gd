@@ -6,6 +6,8 @@ const SpecialFaceScript := preload("res://scripts/core/special_face.gd")
 const ChangeToHighestPropertyScript := preload("res://scripts/core/face_properties/change_to_highest_property.gd")
 const DiceLoadoutResourceScript := preload("res://scripts/core/dice_loadout_resource.gd")
 const RoundControllerScript := preload("res://scripts/core/round_controller.gd")
+const RunManagerScript := preload("res://scripts/autoload/run_manager.gd")
+const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
 
 
 class PrioritySetValueProperty:
@@ -148,8 +150,8 @@ func _expect_controller_uses_default_resource() -> void:
 
 	if controller.get_face_values(0) != [9]:
 		_fail_array("controller default face values", [9], controller.get_face_values(0))
-	if controller.get_dice_count() != RunManager.DICE_COUNT:
-		_fail("controller default dice count", RunManager.DICE_COUNT, controller.get_dice_count())
+	if controller.get_dice_count() != RunManagerScript.DICE_COUNT:
+		_fail("controller default dice count", RunManagerScript.DICE_COUNT, controller.get_dice_count())
 	if controller._roll_die_value(0) != 9:
 		_fail("controller default roll", 9, controller._roll_die_value(0))
 	controller.free()
