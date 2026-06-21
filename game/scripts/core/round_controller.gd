@@ -7,6 +7,9 @@ const RoundPhase := preload("res://scripts/core/round_phase.gd")
 const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
 const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
 const RunManagerScript := preload("res://scripts/autoload/run_manager.gd")
+const LuckResolver := preload("res://scripts/core/luck_resolver.gd")
+
+var _rng := RandomNumberGenerator.new()
 
 signal phase_changed(phase: RoundPhase.Phase)
 signal dice_rolled(values: Array[int])
@@ -25,6 +28,10 @@ var dice_faces: Array[Resource] = []
 var hand_evaluation: HandEvaluation
 var selected_die_index: int = -1
 var last_rerolled_die_index: int = -1
+
+
+func _ready() -> void:
+	_rng.randomize()
 
 
 func begin_round() -> void:
@@ -60,6 +67,8 @@ func can_advance_floor() -> bool:
 
 
 func roll() -> void:
+	if dice_resources.is_empty() and dice_loadout == null:
+		return
 	if phase == RoundPhase.Phase.IDLE or phase == RoundPhase.Phase.REROLL_READY:
 		_roll_all_dice()
 
@@ -162,24 +171,14 @@ func _roll_all_dice() -> void:
 	_set_phase(RoundPhase.Phase.ROLLING)
 	selected_die_index = -1
 	last_rerolled_die_index = -1
-	dice_faces = _roll_dice_faces()
+	var luck := 0.0
+	if run_manager != null:
+		luck = run_manager.luck
+	dice_faces = LuckResolver.resolve(
+		dice_resources, luck, Callable(self, "resolve_faces"), _rng
+	)
 	dice_values = resolve_faces(dice_faces)
 	dice_rolled.emit(dice_values)
-
-
-func _reroll_selected_die() -> void:
-	if selected_die_index < 0 or selected_die_index >= dice_values.size():
-		return
-	var run_manager := _get_run_manager()
-	if run_manager != null and not run_manager.try_spend_reroll_gold():
-		return
-
-	last_rerolled_die_index = selected_die_index
-	dice_faces[selected_die_index] = _roll_die_face(selected_die_index)
-	dice_values = resolve_faces(dice_faces)
-	selected_die_index = -1
-	die_rerolled.emit(dice_values)
-	_begin_scoring()
 
 
 func _begin_scoring() -> void:

@@ -275,6 +275,26 @@ theme_override_font_sizes/font_size = 36
 text = "0"
 horizontal_alignment = 1
 
+[node name="TrayPanel" type="PanelContainer" parent="MarginContainer/VBox" unique_id=900000001]
+layout_mode = 2
+
+[node name="TrayBox" type="VBoxContainer" parent="MarginContainer/VBox/TrayPanel" unique_id=900000002]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TrayTitle" type="Label" parent="MarginContainer/VBox/TrayPanel/TrayBox" unique_id=900000003]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 16
+text = "보유 주사위 — 클릭 후 보드 칸을 눌러 배치"
+
+[node name="RosterTray" type="HBoxContainer" parent="MarginContainer/VBox/TrayPanel/TrayBox" unique_id=900000004]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=1477941953]
 layout_mode = 2
 size_flags_vertical = 3
@@ -294,11 +314,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DiceContainer" type="HBoxContainer" parent="MarginContainer/VBox/HBoxContainer/DiceRow/CenterContainer" unique_id=1249398557]
+[node name="BoardGrid" type="GridContainer" parent="MarginContainer/VBox/HBoxContainer/DiceRow/CenterContainer" unique_id=1249398557]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
-alignment = 1
+columns = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
 
 [node name="PopupOverlay" type="Control" parent="MarginContainer/VBox/HBoxContainer/DiceRow" unique_id=1693290813]
 unique_name_in_owner = true
