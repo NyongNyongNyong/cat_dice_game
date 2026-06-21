@@ -10,6 +10,13 @@ const MAX_FLOOR: int = 5
 const DICE_COUNT: int = 10
 const INITIAL_CHIPS: int = 10
 
+# v0.2 board (GDD §4.1)
+const BOARD_COLS: int = 3
+const BOARD_ROWS: int = 4
+const BOARD_CELLS: int = BOARD_COLS * BOARD_ROWS
+const STARTING_UNLOCKED_SLOTS: int = 4
+const MAX_OWNED_DICE: int = 8
+
 var current_floor: int = 1
 var target_score: int = 10
 var current_score: int = 0
@@ -19,12 +26,18 @@ var run_finished: bool = false
 var shop_entry_gold_earned: int = 0
 var _dice_roster: RefCounted
 
+var unlocked_slots: int = STARTING_UNLOCKED_SLOTS
+var board_placement: Array[int] = []
+# 행운 (GDD §4.3). 주사위·유물로 변동 예정; 현재 소스 없어 기본 0.
+var luck: float = 0.0
+
 signal floor_changed(floor: int, target: int)
 signal score_changed(score: int)
 signal chips_changed(chips: int)
 signal gold_changed(gold: int)
 signal run_completed()
 signal roster_changed()
+signal board_changed()
 
 
 func start_run() -> void:
@@ -35,8 +48,93 @@ func start_run() -> void:
 	gold = 0
 	_dice_roster = DiceRosterScript.new()
 	_dice_roster.reset_to_starting()
+	unlocked_slots = STARTING_UNLOCKED_SLOTS
+	_reset_board_placement()
 	roster_changed.emit()
+	board_changed.emit()
 	_apply_floor_target()
+
+
+func _reset_board_placement() -> void:
+	board_placement.clear()
+	for _i in BOARD_CELLS:
+		board_placement.append(-1)
+
+
+func get_unlocked_slot_count() -> int:
+	return unlocked_slots
+
+
+func is_slot_unlocked(cell: int) -> bool:
+	return cell >= 0 and cell < unlocked_slots
+
+
+# 슬롯 해금 비용·상점 연동은 GDD §11 미정. 구조만 제공.
+func unlock_next_slot() -> bool:
+	if unlocked_slots >= BOARD_CELLS:
+		return false
+	unlocked_slots += 1
+	board_changed.emit()
+	return true
+
+
+func place_die(owned_index: int, cell: int) -> bool:
+	if not is_slot_unlocked(cell):
+		return false
+	if owned_index < 0 or owned_index >= get_owned_dice_count():
+		return false
+	# 이미 다른 칸에 있으면 그 칸에서 회수 (이동)
+	var existing_cell := _cell_of_owned(owned_index)
+	if existing_cell == cell:
+		return true
+	if existing_cell >= 0:
+		board_placement[existing_cell] = -1
+	board_placement[cell] = owned_index
+	board_changed.emit()
+	return true
+
+
+func clear_cell(cell: int) -> bool:
+	if cell < 0 or cell >= board_placement.size():
+		return false
+	if board_placement[cell] < 0:
+		return false
+	board_placement[cell] = -1
+	board_changed.emit()
+	return true
+
+
+func get_owned_index_at(cell: int) -> int:
+	if cell < 0 or cell >= board_placement.size():
+		return -1
+	return board_placement[cell]
+
+
+func get_placed_owned_indices() -> Array[int]:
+	var indices: Array[int] = []
+	for cell in board_placement:
+		if cell >= 0:
+			indices.append(cell)
+	return indices
+
+
+func get_placed_dice() -> Array[Resource]:
+	var dice: Array[Resource] = []
+	if _dice_roster == null:
+		return dice
+	for owned_index in get_placed_owned_indices():
+		var die: Resource = _dice_roster.get_dice_resource(owned_index)
+		if die != null:
+			dice.append(die)
+	return dice
+
+
+func get_placed_count() -> int:
+	return get_placed_owned_indices().size()
+
+
+func _cell_of_owned(owned_index: int) -> int:
+	return board_placement.find(owned_index)
 
 
 func reset_floor_round() -> void:
@@ -74,22 +172,6 @@ func can_advance_floor() -> bool:
 
 func has_met_chip_target() -> bool:
 	return current_score >= target_score
-
-
-func can_afford_reroll() -> bool:
-	if not has_met_chip_target():
-		return true
-	return gold >= GoldCalculator.REROLL_GOLD_COST
-
-
-func try_spend_reroll_gold() -> bool:
-	if not has_met_chip_target():
-		return true
-	if gold < GoldCalculator.REROLL_GOLD_COST:
-		return false
-	gold -= GoldCalculator.REROLL_GOLD_COST
-	gold_changed.emit(gold)
-	return true
 
 
 func is_run_started() -> bool:

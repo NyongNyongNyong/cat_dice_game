@@ -14,6 +14,8 @@ const SELECTED_BG := Color(0.86, 0.9, 0.98, 1.0)
 const SELECTED_BORDER := Color(0.22, 0.48, 0.86, 1.0)
 const DROP_BG := Color(0.96, 0.91, 0.75, 1.0)
 const DROP_BORDER := Color(0.88, 0.58, 0.14, 1.0)
+const LOCKED_BG := Color(0.82, 0.79, 0.72, 0.4)
+const LOCKED_BORDER := Color(0.6, 0.56, 0.48, 0.45)
 const DRAG_SOURCE_ALPHA := 0.28
 
 @export var slot_index := -1
@@ -25,6 +27,7 @@ var _selected := false
 var _drop_hovered := false
 var _dragging := false
 var _drag_enabled := true
+var _locked := false
 
 
 func _ready() -> void:
@@ -54,6 +57,12 @@ func get_dice_view() -> Control:
 	return _dice_view
 
 
+func clear_dice_view() -> void:
+	if _dice_view != null:
+		_dice_view.queue_free()
+		_dice_view = null
+
+
 func set_selected(on: bool) -> void:
 	_selected = on
 	_apply_style()
@@ -71,7 +80,15 @@ func set_drag_enabled(on: bool) -> void:
 		set_drop_hovered(false)
 
 
+func set_locked(on: bool) -> void:
+	_locked = on
+	mouse_filter = Control.MOUSE_FILTER_IGNORE if _locked else Control.MOUSE_FILTER_STOP
+	_apply_style()
+
+
 func _gui_input(event: InputEvent) -> void:
+	if _locked:
+		return
 	if not event is InputEventMouseButton:
 		return
 	var mouse_event := event as InputEventMouseButton
@@ -158,7 +175,10 @@ func _apply_style() -> void:
 	style.content_margin_right = 6
 	style.content_margin_bottom = 6
 
-	if _selected:
+	if _locked:
+		style.bg_color = LOCKED_BG
+		style.border_color = LOCKED_BORDER
+	elif _selected:
 		style.bg_color = SELECTED_BG
 		style.border_color = SELECTED_BORDER
 		style.set_border_width_all(3)
