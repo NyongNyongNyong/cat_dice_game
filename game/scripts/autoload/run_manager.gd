@@ -11,11 +11,16 @@ const DICE_COUNT: int = 10
 const INITIAL_CHIPS: int = 10
 
 # v0.2 board (GDD §4.1)
-const BOARD_COLS: int = 3
-const BOARD_ROWS: int = 4
+const BOARD_COLS: int = 4
+const BOARD_ROWS: int = 3
 const BOARD_CELLS: int = BOARD_COLS * BOARD_ROWS
 const STARTING_UNLOCKED_SLOTS: int = 4
 const MAX_OWNED_DICE: int = 8
+const BOARD_UNLOCK_ORDER: Array[int] = [
+	4, 5, 6, 7,
+	8, 9, 10, 11,
+	0, 1, 2, 3,
+]
 
 var current_floor: int = 1
 var target_score: int = 10
@@ -66,7 +71,8 @@ func get_unlocked_slot_count() -> int:
 
 
 func is_slot_unlocked(cell: int) -> bool:
-	return cell >= 0 and cell < unlocked_slots
+	var order_index := BOARD_UNLOCK_ORDER.find(cell)
+	return order_index >= 0 and order_index < unlocked_slots
 
 
 # 슬롯 해금 비용·상점 연동은 GDD §11 미정. 구조만 제공.

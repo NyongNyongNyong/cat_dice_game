@@ -103,6 +103,7 @@ func _build_board() -> void:
 	for child in _board_grid.get_children():
 		child.queue_free()
 	_board_cells.clear()
+	_board_grid.columns = RunManager.BOARD_COLS
 
 	for cell in RunManager.BOARD_CELLS:
 		var slot = DICE_SLOT_SCENE.instantiate()
