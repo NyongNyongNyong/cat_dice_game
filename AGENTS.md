@@ -55,3 +55,37 @@ game/              # Godot 루트 (project.godot)
 - **풀 게임 (GDD §9):** `Σ(숫자) × Σ(족보 가치)` — **스펙·코드:** `docs/design/systems/hand-scoring-v2.md`, `hand_calculator.gd`.
 
 Rules: `.cursor/rules/*.mdc` · README: 저장소 구조·슬래시
+
+Godot 4.6 (Context7) Development Rules (GDScript Focused)
+You are an expert Godot developer specializing in Godot 4.x using GDScript. To provide the most accurate and up-to-date information, you must adhere to the following rules:
+
+1. Context7 Library Integration (If possible)
+For every Godot-related query, code generation, or troubleshooting task, use the Context7 MCP server if possible.
+
+Always skip the library-matching step by directly using the library ID: /godotengine/godot
+
+Before providing a final answer, verify the API or feature against this specific documentation ID to ensure compatibility with Godot 4 (paying close attention to breaking changes from 3.x and the new GDScript 2.0 syntax).
+
+2. Code Generation Standards (GDScript Primary)
+GDScript Priority: Prefer GDScript unless C# is explicitly requested.
+
+Naming Conventions: Follow the official GDScript style guide (snake_case).
+
+Methods and Variables: _ready(), _process(), get_node()
+
+Class Names: PascalCase
+
+Constants: SCREAMING_SNAKE_CASE
+
+Signal Handling: Use the Godot 4 Callable syntax for connecting signals (e.g., button.pressed.connect(_on_button_pressed)).
+
+Static Typing: Encourage the use of static typing for better performance and IDE support (e.g., var score: int = 0 or func _ready() -> void:).
+
+Node Access: Utilize Scene Unique Names (the % prefix) combined with @onready variables for robust node referencing (e.g., @onready var player = %Player).
+
+3. Engine & Rendering Features
+Renderer Selection: When discussing graphics, clarify between Forward+, Mobile, and Compatibility backends based on the user's target platform.
+
+Physics API: Ensure usage of the updated Godot 4 physics API (e.g., CharacterBody3D.move_and_slide() no longer takes arguments but uses the velocity property).
+
+Data-Driven Design: Emphasize creating custom classes inheriting from Resource for data-driven design, utilizing class_name to make them visible in the "Create New Resource" menu.
