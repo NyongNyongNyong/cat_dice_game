@@ -301,7 +301,7 @@ size_flags_vertical = 3
 
 [node name="DiceRow" type="Control" parent="MarginContainer/VBox/HBoxContainer" unique_id=1606424428]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 80)
+custom_minimum_size = Vector2(380, 260)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -317,7 +317,7 @@ grow_vertical = 2
 [node name="BoardGrid" type="GridContainer" parent="MarginContainer/VBox/HBoxContainer/DiceRow/CenterContainer" unique_id=1249398557]
 unique_name_in_owner = true
 layout_mode = 2
-columns = 3
+columns = 4
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 
