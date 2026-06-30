@@ -42,11 +42,12 @@ game/              # Godot 루트 (project.godot)
 
 ## Godot
 
-- **4.6.3 stable** 고정 (`game/project.godot`). 4.7 beta·다른 마이너 사용 금지.
+- **4.7 stable** 고정 (`game/project.godot`, `game/GODOT_VERSION`). 다른 마이너 사용 금지.
+- **Context7 (Godot API):** `.cursor/rules/context7-godot.mdc` — library ID `/websites/godotengine_en_4_7`
 - 같은 `.tscn` 동시 수정 금지
 - **Headless 테스트 실행:** Godot는 기본 로그를 `user://logs`에 쓰므로 샌드박스 에이전트에서 `Failed to open 'user://logs/...'` 후 크래시할 수 있다. 항상 repo 내부 로그 파일을 지정한다.
-  - 권장 형식: `..\Godot_v4.6-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
-  - 씬 로딩 확인: `..\Godot_v4.6-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --quit-after 1`
+  - 권장 형식: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
+  - 씬 로딩 확인: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --quit-after 1`
   - 실패 원인이 권한이 아니라 스크립트 오류인지 보기 위해, `--log-file` 없이 먼저 실행하지 않는다.
 
 ## 점수
@@ -55,37 +56,3 @@ game/              # Godot 루트 (project.godot)
 - **풀 게임 (GDD §9):** `Σ(숫자) × Σ(족보 가치)` — **스펙·코드:** `docs/design/systems/hand-scoring-v2.md`, `hand_calculator.gd`.
 
 Rules: `.cursor/rules/*.mdc` · README: 저장소 구조·슬래시
-
-Godot 4.6 (Context7) Development Rules (GDScript Focused)
-You are an expert Godot developer specializing in Godot 4.x using GDScript. To provide the most accurate and up-to-date information, you must adhere to the following rules:
-
-1. Context7 Library Integration (If possible)
-For every Godot-related query, code generation, or troubleshooting task, use the Context7 MCP server if possible.
-
-Always skip the library-matching step by directly using the library ID: /godotengine/godot
-
-Before providing a final answer, verify the API or feature against this specific documentation ID to ensure compatibility with Godot 4 (paying close attention to breaking changes from 3.x and the new GDScript 2.0 syntax).
-
-2. Code Generation Standards (GDScript Primary)
-GDScript Priority: Prefer GDScript unless C# is explicitly requested.
-
-Naming Conventions: Follow the official GDScript style guide (snake_case).
-
-Methods and Variables: _ready(), _process(), get_node()
-
-Class Names: PascalCase
-
-Constants: SCREAMING_SNAKE_CASE
-
-Signal Handling: Use the Godot 4 Callable syntax for connecting signals (e.g., button.pressed.connect(_on_button_pressed)).
-
-Static Typing: Encourage the use of static typing for better performance and IDE support (e.g., var score: int = 0 or func _ready() -> void:).
-
-Node Access: Utilize Scene Unique Names (the % prefix) combined with @onready variables for robust node referencing (e.g., @onready var player = %Player).
-
-3. Engine & Rendering Features
-Renderer Selection: When discussing graphics, clarify between Forward+, Mobile, and Compatibility backends based on the user's target platform.
-
-Physics API: Ensure usage of the updated Godot 4 physics API (e.g., CharacterBody3D.move_and_slide() no longer takes arguments but uses the velocity property).
-
-Data-Driven Design: Emphasize creating custom classes inheriting from Resource for data-driven design, utilizing class_name to make them visible in the "Create New Resource" menu.

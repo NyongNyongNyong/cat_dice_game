@@ -47,9 +47,9 @@ Dice/                          # Git 루트 — Cursor에서 이 폴더를 연�
 
 ## Godot 실행
 
-**엔진 버전: [4.6.3 stable](https://godotengine.org/download/archive/4.6.3-stable/)** (팀 고정 — 다른 버전 사용 금지)
+**엔진 버전: [4.7 stable](https://godotengine.org/download/archive/4.7-stable/)** (팀 고정 — 다른 마이너 사용 금지)
 
-1. Godot **4.6.3** 설치
+1. Godot **4.7** 설치
 2. **Import** → `game/project.godot` 열기
 3. **Run Project** (F5) — 메인 씬: `scenes/game/main.tscn`
 
