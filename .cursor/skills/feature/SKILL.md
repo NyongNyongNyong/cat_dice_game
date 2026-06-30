@@ -307,7 +307,7 @@ git branch --show-current   # feature/<slug> 여야 함
 
 Task 순서대로 구현한다. 스펙과 충돌하면 코드를 임의로 바꾸지 말고 문서에 TODO를 남긴다.
 
-Godot 4.6.3 stable, `game/` 레이아웃, 기존 컨벤션을 따른다.
+Godot 4.7 stable, `game/` 레이아웃, 기존 컨벤션을 따른다. Godot API 확인은 `.cursor/rules/context7-godot.mdc`.
 
 ### Step 7. 자체 Audit
 

@@ -2,26 +2,34 @@
 
 > **정본** — 앞으로 할 일·아이디어. feature로 뽑을 때 `/feature` → `docs/design/systems/<slug>.md` + `tasks/<slug>-tasks.md`.  
 > Obsidian `Obsidian/Dice Cat Tower/TODO.md`는 개인 메모; **갱신은 이 파일 기준.**  
-> **기획 방향:** [gdd-cat-tower-casino.md](gdd-cat-tower-casino.md) §4 (2026-06-21)
+> **기획 방향:** [gdd-cat-tower-casino.md](gdd-cat-tower-casino.md) §4 (2026-06-21)  
+> **v0.2 구현 현황:** [design/systems/v0.2-board-luck.md](design/systems/v0.2-board-luck.md) · [design/tasks/v0.2-board-luck-tasks.md](design/tasks/v0.2-board-luck-tasks.md)
 
 ---
 
-## v0.2 방향 (기획 확정 — 구현 전)
+## v0.2 (진행 중)
 
-### 보드 (3×4)
+### 보드 (3×4) — Phase A **완료**
 
-- [ ] 3×4 그리드, 시작 4슬롯·4주사위
-- [ ] 슬롯 해금 (최대 12칸) — 비용·상점 연동 **미정**
-- [ ] 최대 보유 8주사위 — 빈칸 전략
-- [ ] **배치 → 굴림 → 효과 → 족보 → 점수** 플로우
+- [x] 3행×4열 그리드(12칸), 시작 4칸 해금·4주사위 — `run_scene` + `RunManager`
+- [x] 클릭 배치(트레이→보드), 배치된 주사위만 굴림·족보·점수
+- [x] 최대 보유 8주사위 (`MAX_OWNED_DICE`)
+- [x] `unlock_next_slot()` API — `board_spec_test` PASS
+- [ ] 슬롯 해금 **상점·비용** 연동 (GDD §11 미정)
+- [ ] 드래그 앤 드롭 배치 (클릭 배치는 됨)
+- [ ] 빈칸 위치 효과 (GDD §4.1 추후)
 
-### 행운 (Luck)
+### 행운 (Luck) — Phase B **핵심 완료**
 
-- [ ] 결과 분포 컷 알고리즘 (로그 스케일 행운)
-- [ ] v0.1 **리롤·칩 소비** 제거/대체 이행 계획
-- [ ] UI: 행운 수치만 노출 (내부 로직 비공개)
+- [x] `LuckResolver` — `6^k` 전수 + 로그 스케일 행운 컷
+- [x] 굴림 플로우 통합, 행운 수치 UI 노출
+- [x] 골드 리롤 경제 제거
+- [ ] `luck` 변동 소스 (주사위·유물 등) — 현재 기본 0
+- [ ] 칩 제거 + 배치 후 **단발 굴림** 재구성 (굴림 횟수 대체안 미정)
+- [ ] `REROLL_READY`·칩 등 v0.1 잔재 정리
+- [ ] `reroll_preview_*` 스크립트·노드 완전 제거
 
-### 주사위 성장
+### 주사위 성장 (미착수)
 
 - [ ] 강화 키트: 숫자 +1 / −1 / 진화(특수면)
 - [ ] 교체 시 기존 주사위 처리 — 판매·폐기·재활용 **미정**
@@ -62,13 +70,8 @@
 
 ## 장기
 
-### v0.1 → v0.2 마이그레이션
-
-- [ ] 보드 UI·`RoundController` 배치 단계
-- [ ] `RunManager` 8주사위·슬롯 해금
-- [ ] 행운 스탯·`LuckResolver` (가칭)
-- [ ] 리롤·reroll preview 코드 제거
-- [ ] 강화 키트 상점·적용 UI
+- [ ] 강화 키트 상점·적용 UI (v0.2 Phase C)
+- [ ] 카지노 규칙·유물·직원 등 GDD §11 확정 항목
 
 ---
 
@@ -76,6 +79,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-06-30 | v0.2 보드·행운 Phase A/B 완료 반영, 중복 마이그레이션 섹션 제거 |
 | 2026-06-21 | GDD §4 반영 — v0.2 백로그 섹션 추가, 리롤 항목을 행운·이행으로 정리 |
 | 2026-06-09 | 주사위 30종·아이템 30종·H/L/V·리롤 논의 |
 | 2026-06-09 | Obsidian TODO 이관 |
