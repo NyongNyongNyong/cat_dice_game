@@ -42,7 +42,7 @@ const TARGET_REWARD_FLOAT_DURATION := 0.62
 @onready var _round: RoundController = %RoundController
 @onready var _roll_presenter: RollPhasePresenter = %RollPhasePresenter
 @onready var _score_presenter: ScorePhasePresenter = %ScorePhasePresenter
-@onready var _reroll_preview_presenter: Node = %RerollPreviewPresenter
+@onready var _face_preview_presenter: Node = %FacePreviewPresenter
 @onready var _active_hands_list: VBoxContainer = %ActiveHandsList
 @onready var _active_hands_presenter: Node = %ActiveHandsPresenter
 
@@ -77,8 +77,8 @@ func _setup_round_flow() -> void:
 	_score_presenter.setup(
 		_dice_row, _popup_overlay, _left_value, _right_value, _status_label
 	)
-	_reroll_preview_presenter.setup(_dice_popup_layer)
-	_reroll_preview_presenter.set_active(false)
+	_face_preview_presenter.setup(_dice_popup_layer)
+	_face_preview_presenter.set_active(true)
 
 	_round.phase_changed.connect(_on_round_phase_changed)
 	_round.dice_rolled.connect(_on_dice_rolled)
@@ -111,6 +111,8 @@ func _build_board() -> void:
 		_board_grid.add_child(slot)
 		slot.set_drag_enabled(false)
 		slot.clicked.connect(_on_board_cell_clicked)
+		slot.mouse_entered.connect(_on_board_cell_hovered.bind(cell))
+		slot.mouse_exited.connect(_on_dice_hover_exited)
 		_board_cells.append(slot)
 
 
@@ -145,6 +147,8 @@ func _refresh_tray() -> void:
 		chip.set_drag_enabled(false)
 		chip.set_selected(owned_index == _selected_owned_index)
 		chip.clicked.connect(_on_tray_chip_clicked)
+		chip.mouse_entered.connect(_on_tray_chip_hovered.bind(owned_index))
+		chip.mouse_exited.connect(_on_dice_hover_exited)
 
 		var dice: Control = DICE_SCENE.instantiate()
 		chip.set_dice_view(dice)
@@ -204,6 +208,57 @@ func _on_tray_chip_clicked(owned_index: int) -> void:
 		_selected_owned_index = owned_index
 	for chip in _tray_chips:
 		chip.set_selected(chip.slot_index == _selected_owned_index)
+
+
+func _can_hover_dice_faces() -> bool:
+	return (
+		not RunManager.run_finished
+		and _is_lever_stopped()
+		and (_round.phase == RoundPhase.Phase.IDLE or _round.phase == RoundPhase.Phase.REROLL_READY)
+	)
+
+
+func _on_board_cell_hovered(cell: int) -> void:
+	if not _can_hover_dice_faces():
+		return
+	var owned_index := RunManager.get_owned_index_at(cell)
+	if owned_index < 0:
+		return
+	if cell < 0 or cell >= _board_cells.size():
+		return
+	_show_dice_face_preview(_board_cells[cell].get_dice_view(), owned_index)
+
+
+func _on_tray_chip_hovered(owned_index: int) -> void:
+	if not _can_hover_dice_faces():
+		return
+	var chip := _find_tray_chip(owned_index)
+	if chip == null:
+		return
+	_show_dice_face_preview(chip.get_dice_view(), owned_index)
+
+
+func _find_tray_chip(owned_index: int) -> Control:
+	for chip in _tray_chips:
+		if chip.slot_index == owned_index:
+			return chip
+	return null
+
+
+func _show_dice_face_preview(dice_view: Control, owned_index: int) -> void:
+	if dice_view == null:
+		return
+	var resource := _round_owned_resource(owned_index)
+	if resource == null or not resource.has_method("get_faces"):
+		return
+	var faces: Array[Resource] = resource.get_faces()
+	if faces.is_empty():
+		return
+	_face_preview_presenter.show_die_faces(dice_view, faces, faces, -1)
+
+
+func _on_dice_hover_exited() -> void:
+	_face_preview_presenter.hide_preview()
 
 
 func _on_board_changed() -> void:

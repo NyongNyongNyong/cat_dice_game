@@ -8,7 +8,7 @@ extends Control
 @onready var _continue_button: Button = %ContinueButton
 @onready var _popup_overlay: Control = %PopupOverlay
 @onready var _shop_presenter: Node = %DiceShopPresenter
-@onready var _hover_presenter: Node = %RerollPreviewPresenter
+@onready var _hover_presenter: Node = %FacePreviewPresenter
 
 
 func _ready() -> void:
