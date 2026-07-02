@@ -108,9 +108,12 @@ func _build_board() -> void:
 	for cell in RunManager.BOARD_CELLS:
 		var slot = DICE_SLOT_SCENE.instantiate()
 		slot.set_slot_index(cell)
+		slot.set_slot_kind("board")
 		_board_grid.add_child(slot)
-		slot.set_drag_enabled(false)
+		slot.set_drag_enabled(_can_edit_board())
 		slot.clicked.connect(_on_board_cell_clicked)
+		slot.slot_dropped.connect(_on_slot_dropped)
+		slot.dropped_outside.connect(_on_slot_dropped_outside)
 		slot.mouse_entered.connect(_on_board_cell_hovered.bind(cell))
 		slot.mouse_exited.connect(_on_dice_hover_exited)
 		_board_cells.append(slot)
@@ -143,10 +146,13 @@ func _refresh_tray() -> void:
 			continue
 		var chip = DICE_SLOT_SCENE.instantiate()
 		chip.set_slot_index(owned_index)
+		chip.set_slot_kind("tray")
 		_roster_tray.add_child(chip)
-		chip.set_drag_enabled(false)
+		chip.set_drag_enabled(_can_edit_board())
 		chip.set_selected(owned_index == _selected_owned_index)
 		chip.clicked.connect(_on_tray_chip_clicked)
+		chip.slot_dropped.connect(_on_slot_dropped)
+		chip.dropped_outside.connect(_on_slot_dropped_outside)
 		chip.mouse_entered.connect(_on_tray_chip_hovered.bind(owned_index))
 		chip.mouse_exited.connect(_on_dice_hover_exited)
 
@@ -208,6 +214,38 @@ func _on_tray_chip_clicked(owned_index: int) -> void:
 		_selected_owned_index = owned_index
 	for chip in _tray_chips:
 		chip.set_selected(chip.slot_index == _selected_owned_index)
+
+
+func _on_slot_dropped(
+	source_kind: String,
+	source_index: int,
+	target_kind: String,
+	target_index: int,
+) -> void:
+	if not _can_edit_board():
+		return
+
+	_selected_owned_index = -1
+	if target_kind == "board":
+		if source_kind == "tray":
+			# 트레이 주사위(source_index = 보유 index) → 보드 칸에 배치
+			RunManager.place_die(source_index, target_index)
+		elif source_kind == "board":
+			# 보드 칸 → 보드 칸: 이동(빈칸) 또는 교환(점유칸)
+			RunManager.move_placed(source_index, target_index)
+	elif target_kind == "tray":
+		if source_kind == "board":
+			# 보드 주사위(source_index = 칸) → 트레이로 회수
+			RunManager.clear_cell(source_index)
+
+
+func _on_slot_dropped_outside(slot_kind: String, slot_index: int) -> void:
+	if not _can_edit_board():
+		return
+	# 유효한 슬롯이 아닌 곳에 떨어뜨림 → 보드 주사위면 배치 해제(트레이로 회수).
+	if slot_kind == "board":
+		_selected_owned_index = -1
+		RunManager.clear_cell(slot_index)
 
 
 func _can_hover_dice_faces() -> bool:
@@ -462,7 +500,16 @@ func _sync_ui() -> void:
 		or not RunManager.can_advance_floor()
 		or RunManager.run_finished
 	)
+	_update_drag_enabled()
 	_update_status()
+
+
+func _update_drag_enabled() -> void:
+	var editable := _can_edit_board()
+	for slot in _board_cells:
+		slot.set_drag_enabled(editable)
+	for chip in _tray_chips:
+		chip.set_drag_enabled(editable)
 
 
 func _update_target_progress() -> void:

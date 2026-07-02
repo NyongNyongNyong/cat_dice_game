@@ -100,6 +100,23 @@ func place_die(owned_index: int, cell: int) -> bool:
 	return true
 
 
+func move_placed(from_cell: int, to_cell: int) -> bool:
+	if from_cell < 0 or from_cell >= board_placement.size():
+		return false
+	if not is_slot_unlocked(to_cell):
+		return false
+	if from_cell == to_cell:
+		return true
+	var moving := board_placement[from_cell]
+	if moving < 0:
+		return false
+	# to_cell이 비었으면 이동, 점유돼 있으면 두 칸을 교환.
+	board_placement[from_cell] = board_placement[to_cell]
+	board_placement[to_cell] = moving
+	board_changed.emit()
+	return true
+
+
 func clear_cell(cell: int) -> bool:
 	if cell < 0 or cell >= board_placement.size():
 		return false
