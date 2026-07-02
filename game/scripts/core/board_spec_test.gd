@@ -44,6 +44,16 @@ func _init() -> void:
 	_expect(rm.get_unlocked_slot_count() == 5, "unlocked = 5")
 	_expect(rm.place_die(2, 8) == true, "cell 8 placeable after unlock")
 
+	# move_placed: 빈칸 이동 / 점유칸 교환 (드래그 배치용)
+	# 현재 상태: cell 7 = owned 1, cell 8 = owned 2, cell 6 비어 있고 해금됨
+	_expect(rm.move_placed(7, 6) == true, "move placed cell 7 -> empty cell 6")
+	_expect(rm.get_owned_index_at(6) == 1 and rm.get_owned_index_at(7) == -1, "owned 1 moved to cell 6")
+	_expect(rm.move_placed(6, 8) == true, "move placed cell 6 -> occupied cell 8 (swap)")
+	_expect(rm.get_owned_index_at(8) == 1 and rm.get_owned_index_at(6) == 2, "cells 6 and 8 swapped")
+	_expect(rm.move_placed(8, 0) == false, "cannot move onto locked cell 0")
+	_expect(rm.get_owned_index_at(8) == 1, "locked-target move no-op")
+	_expect(rm.move_placed(2, 6) == false, "cannot move from empty source cell 2")
+
 	rm.free()
 
 	if _failed > 0:
