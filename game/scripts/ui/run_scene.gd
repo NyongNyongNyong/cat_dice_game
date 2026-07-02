@@ -22,6 +22,7 @@ const TARGET_PROGRESS_PARTIAL_MIN_DURATION := 0.16
 const TARGET_PROGRESS_SEGMENT_PAUSE := 0.08
 const TARGET_PROGRESS_MAX_SEGMENTS := 24
 const TARGET_REWARD_FLOAT_DURATION := 0.62
+const FACE_PREVIEW_HOVER_DELAY := 0.32
 
 @onready var _floor_label: Label = %FloorLabel
 @onready var _gold_label: Label = %GoldLabel
@@ -55,6 +56,8 @@ var _lever_loop_running := false
 var _is_animating_target_progress := false
 var _target_progress_tween: Tween
 var _roll_slot: Control
+var _hovered_owned_index := -1
+var _face_preview_request_id := 0
 
 
 func _ready() -> void:
@@ -78,7 +81,6 @@ func _setup_round_flow() -> void:
 		_dice_row, _popup_overlay, _left_value, _right_value, _status_label
 	)
 	_reroll_preview_presenter.setup(_dice_popup_layer)
-	_reroll_preview_presenter.set_active(false)
 
 	_round.phase_changed.connect(_on_round_phase_changed)
 	_round.dice_rolled.connect(_on_dice_rolled)
@@ -128,6 +130,7 @@ func _refresh_board() -> void:
 		var dice: Control = DICE_SCENE.instantiate()
 		slot.set_dice_view(dice)
 		_apply_preview_face(dice, resource)
+		_wire_slot_face_hover(slot, owned_index)
 
 
 func _refresh_tray() -> void:
@@ -149,7 +152,81 @@ func _refresh_tray() -> void:
 		var dice: Control = DICE_SCENE.instantiate()
 		chip.set_dice_view(dice)
 		_apply_preview_face(dice, _round_owned_resource(owned_index))
+		_wire_slot_face_hover(chip, owned_index)
 		_tray_chips.append(chip)
+
+
+func _wire_slot_face_hover(slot: Control, owned_index: int) -> void:
+	if not slot.mouse_entered.is_connected(_on_dice_hover_entered):
+		slot.mouse_entered.connect(_on_dice_hover_entered.bind(owned_index, slot))
+	if not slot.mouse_exited.is_connected(_on_dice_hover_exited):
+		slot.mouse_exited.connect(_on_dice_hover_exited)
+
+
+func _on_dice_hover_entered(owned_index: int, slot: Control) -> void:
+	_hovered_owned_index = owned_index
+	_face_preview_request_id += 1
+	var request_id := _face_preview_request_id
+	await get_tree().create_timer(FACE_PREVIEW_HOVER_DELAY).timeout
+	if request_id != _face_preview_request_id:
+		return
+	if _hovered_owned_index != owned_index:
+		return
+	if not _can_hover_dice_faces():
+		return
+
+	var resource := _round_owned_resource(owned_index)
+	if resource == null:
+		return
+	if not slot.has_method("get_dice_view"):
+		return
+	var dice_view: Control = slot.get_dice_view()
+	if dice_view == null:
+		return
+
+	var roll_index := _roll_index_for_owned(owned_index)
+	_reroll_preview_presenter.show_die_faces(
+		dice_view,
+		resource.get_faces(),
+		_get_face_hover_context(roll_index, resource),
+		roll_index,
+	)
+
+
+func _on_dice_hover_exited() -> void:
+	_hovered_owned_index = -1
+	_face_preview_request_id += 1
+	_reroll_preview_presenter.hide_preview()
+
+
+func _can_hover_dice_faces() -> bool:
+	if RunManager.run_finished:
+		return false
+	match _round.phase:
+		RoundPhase.Phase.IDLE, RoundPhase.Phase.REROLL_READY:
+			return true
+		_:
+			return false
+
+
+func _roll_index_for_owned(owned_index: int) -> int:
+	var roll_idx := 0
+	for cell in RunManager.board_placement.size():
+		var placed_owned: int = RunManager.board_placement[cell]
+		if placed_owned < 0:
+			continue
+		if placed_owned == owned_index:
+			return roll_idx
+		roll_idx += 1
+	return -1
+
+
+func _get_face_hover_context(roll_index: int, resource: Resource) -> Array[Resource]:
+	if roll_index >= 0 and not _round.dice_faces.is_empty() and roll_index < _round.dice_faces.size():
+		return _round.dice_faces
+	if resource != null:
+		return resource.get_faces()
+	return []
 
 
 func _round_owned_resource(owned_index: int) -> Resource:
@@ -270,12 +347,16 @@ func _apply_lever_speed() -> void:
 
 
 func _on_dice_rolled(values: Array[int]) -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
 	await _roll_presenter.play_roll(_round.dice_faces, values, _get_roll_face_candidates())
 	await _play_dice_face_effects(_round.dice_faces, values)
 	_round.complete_roll_presentation()
 
 
 func _on_score_ready(evaluation: HandEvaluation) -> void:
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
 	await _score_presenter.play(evaluation, false, -1, _round.dice_faces)
 	_is_animating_target_progress = true
 	var previous_score := RunManager.current_score
@@ -330,6 +411,8 @@ func _on_next_floor_pressed() -> void:
 
 func _open_shop() -> void:
 	_selected_owned_index = -1
+	_reroll_preview_presenter.set_active(false)
+	_reroll_preview_presenter.hide_preview()
 	RunManager.enter_shop()
 	GameFlow.show_shop()
 
@@ -407,6 +490,7 @@ func _sync_ui() -> void:
 		or not RunManager.can_advance_floor()
 		or RunManager.run_finished
 	)
+	_reroll_preview_presenter.set_active(_can_hover_dice_faces())
 	_update_status()
 
 
