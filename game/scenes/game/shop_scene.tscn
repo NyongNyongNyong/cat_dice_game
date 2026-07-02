@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/shop_scene.gd" id="1_shop"]
 [ext_resource type="Script" path="res://scripts/ui/dice_shop_presenter.gd" id="2_presenter"]
-[ext_resource type="Script" path="res://scripts/ui/reroll_preview_presenter.gd" id="3_hover"]
+[ext_resource type="Script" path="res://scripts/ui/face_preview_presenter.gd" id="3_hover"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_offer"]
 content_margin_left = 10.0
@@ -146,6 +146,6 @@ text = "다음 층"
 unique_name_in_owner = true
 script = ExtResource("2_presenter")
 
-[node name="RerollPreviewPresenter" type="Node" parent="."]
+[node name="FacePreviewPresenter" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("3_hover")

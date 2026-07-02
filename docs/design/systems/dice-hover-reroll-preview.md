@@ -4,8 +4,9 @@
 > **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §4·§9 — Push Your Luck, 리롤  
 > **점수 계산:** [hand-scoring-v2.md](hand-scoring-v2.md) — Preview는 **동일 계산기·동일 입력**을 사용  
 > **면·해석:** [dice-resources.md](dice-resources.md) — `compute_from_faces`, `RoundController.dice_faces`  
-> **상태:** v0.1 구현 완료 — `REROLL_READY` phase, Hover Preview, 선택 후 Roll로 단일 리롤  
-> **구현:** `reroll_preview_calculator.gd` · `reroll_preview_result.gd` · `reroll_preview_presenter.gd` · `round_controller.gd` · `run_scene.gd` · `dice.gd`
+> **상태:** v0.1 구현 완료 — `REROLL_READY` phase, Hover Preview, 선택 후 Roll로 단일 리롤
+> **구현:** `reroll_preview_calculator.gd` · `reroll_preview_result.gd` · `round_controller.gd` · `run_scene.gd` · `dice.gd`
+> **참고:** 면 Hover 툴팁 presenter는 `face_preview_presenter.gd`(구 `reroll_preview_presenter.gd`)로 리네이밍됨. 플레이 화면 배선은 [dice-face-hover-preview.md](dice-face-hover-preview.md) 참조.
 
 ---
 
