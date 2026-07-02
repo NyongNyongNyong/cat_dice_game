@@ -77,7 +77,11 @@ func _rebuild_face_row(
 	context_faces: Array[Resource],
 	dice_index: int,
 ) -> void:
+	# queue_free()만 하면 프레임 끝까지 자식이 트리에 남아, 같은 프레임에 도는
+	# _fit_and_position_tooltip의 get_child_count()가 옛 자식까지 세어 툴팁이
+	# 커진다. 트리에서 즉시 제거한다.
 	for child in _faces_row.get_children():
+		_faces_row.remove_child(child)
 		child.queue_free()
 
 	var board := context_faces.duplicate()
@@ -85,6 +89,8 @@ func _rebuild_face_row(
 		if face == null:
 			continue
 
+		# 주사위 씬 루트는 custom_minimum_size=64가 박혀 있다. 인스턴스에서 32로
+		# 덮어써야 툴팁이 콘텐츠 크기에 맞게 작게 잡힌다.
 		var mini: Control = DICE_SCENE.instantiate()
 		mini.layout_mode = 2
 		mini.custom_minimum_size = Vector2(MINI_DICE_SIZE, MINI_DICE_SIZE)
@@ -107,50 +113,31 @@ func _fit_and_position_tooltip() -> void:
 	if _pending_dice_view == null or not is_instance_valid(_pending_dice_view):
 		return
 
-	_tooltip.custom_minimum_size = Vector2.ZERO
-	_faces_row.custom_minimum_size = Vector2.ZERO
-	_tooltip.reset_size()
-	_faces_row.reset_size()
+	var count := _faces_row.get_child_count()
+	if count <= 0:
+		_tooltip.visible = false
+		return
 
+	# 각 미니 주사위를 32로 고정한다. 주사위 씬 루트의 64px 최소 크기·컨테이너
+	# min-size 전파에 맡기면 첫 칸만 크기가 잡히고 나머지가 접히므로 직접 설정한다.
+	var mini_size := Vector2(MINI_DICE_SIZE, MINI_DICE_SIZE)
 	for child in _faces_row.get_children():
 		if child is Control:
-			var dice: Control = child as Control
-			dice.reset_size()
-			var dice_size := dice.get_combined_minimum_size()
-			if dice_size == Vector2.ZERO:
-				dice_size = Vector2(MINI_DICE_SIZE, MINI_DICE_SIZE)
-			dice.custom_minimum_size = dice_size
-			dice.size = dice_size
+			var mini: Control = child as Control
+			mini.custom_minimum_size = mini_size
+			mini.size = mini_size
 
-	var content_size := _faces_row.get_combined_minimum_size()
-	if content_size == Vector2.ZERO:
-		content_size = _measure_faces_row()
+	# 콘텐츠 크기는 면 개수로 직접 계산한다.
+	var content_width := MINI_DICE_SIZE * count + FACE_SEPARATION * maxi(count - 1, 0)
+	var content_size := Vector2(content_width, MINI_DICE_SIZE)
 
 	_faces_row.custom_minimum_size = content_size
 	_faces_row.size = content_size
 
-	_tooltip.reset_size()
-	var fitted := _tooltip.get_minimum_size()
-	if fitted == Vector2.ZERO:
-		fitted = content_size + _panel_chrome_size()
+	var fitted := content_size + _panel_chrome_size()
 	_tooltip.custom_minimum_size = fitted
 	_tooltip.size = fitted
 	_position_tooltip(_pending_dice_view)
-
-
-func _measure_faces_row() -> Vector2:
-	var width := 0.0
-	var height := 0.0
-	var count := _faces_row.get_child_count()
-	for i in count:
-		var child := _faces_row.get_child(i) as Control
-		if child == null:
-			continue
-		width += child.size.x
-		height = maxf(height, child.size.y)
-	if count > 1:
-		width += FACE_SEPARATION * (count - 1)
-	return Vector2(width, height)
 
 
 func _panel_chrome_size() -> Vector2:
