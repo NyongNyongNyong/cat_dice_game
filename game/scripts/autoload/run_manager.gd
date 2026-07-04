@@ -33,13 +33,14 @@ var _dice_roster: RefCounted
 
 var unlocked_slots: int = STARTING_UNLOCKED_SLOTS
 var board_placement: Array[int] = []
-# 행운 (GDD §4.3). 주사위·유물로 변동 예정; 현재 소스 없어 기본 0.
+# 행운 (GDD §4.3). 주사위·유물로 변동; 행운 주사위(☘ 면)가 굴림 후 +1씩 누적.
 var luck: float = 0.0
 
 signal floor_changed(floor: int, target: int)
 signal score_changed(score: int)
 signal chips_changed(chips: int)
 signal gold_changed(gold: int)
+signal luck_changed(luck: float)
 signal run_completed()
 signal roster_changed()
 signal board_changed()
@@ -51,6 +52,7 @@ func start_run() -> void:
 	current_score = 0
 	chips = INITIAL_CHIPS
 	gold = 0
+	luck = 0.0
 	_dice_roster = DiceRosterScript.new()
 	_dice_roster.reset_to_starting()
 	unlocked_slots = STARTING_UNLOCKED_SLOTS
@@ -187,6 +189,13 @@ func try_spend_chip() -> bool:
 	chips -= 1
 	chips_changed.emit(chips)
 	return true
+
+
+func add_luck(delta: float) -> void:
+	if delta == 0.0:
+		return
+	luck += delta
+	luck_changed.emit(luck)
 
 
 func can_advance_floor() -> bool:

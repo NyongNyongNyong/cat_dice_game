@@ -20,3 +20,7 @@ func has_visual_effect() -> bool:
 
 func play_visual_effect(_dice_view: Control, _face: Resource, _context: Dictionary) -> void:
 	pass
+
+
+func apply_roll_effect(_face: Resource, _context: Dictionary) -> void:
+	pass

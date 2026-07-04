@@ -177,6 +177,7 @@ func _roll_all_dice() -> void:
 	dice_faces = LuckResolver.resolve(
 		dice_resources, luck, Callable(self, "resolve_faces"), _rng
 	)
+	_apply_luck_from_faces(dice_faces)
 	dice_values = resolve_faces(dice_faces)
 	dice_rolled.emit(dice_values)
 
@@ -219,6 +220,19 @@ func _resolve_face_value(face: Resource, context_faces: Array[Resource] = []) ->
 func _set_phase(next_phase: RoundPhase.Phase) -> void:
 	phase = next_phase
 	phase_changed.emit(phase)
+
+
+func _apply_luck_from_faces(faces: Array[Resource]) -> void:
+	var run_manager := _get_run_manager()
+	if run_manager == null:
+		return
+	var context := {"run_manager": run_manager, "faces": faces}
+	for face in faces:
+		if face == null:
+			continue
+		for property in face.properties:
+			if property != null:
+				property.apply_roll_effect(face, context)
 
 
 func _get_run_manager() -> Node:

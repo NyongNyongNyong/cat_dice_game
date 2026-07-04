@@ -2,6 +2,7 @@
   "offers": [
     { "dice_id": "dice_triple_h", "price_gold": 2 },
     { "dice_id": "dice_triple_l", "price_gold": 2 },
-    { "dice_id": "dice_triple_v", "price_gold": 3 }
+    { "dice_id": "dice_triple_v", "price_gold": 3 },
+    { "dice_id": "dice_triple_luck", "price_gold": 2 }
   ]
 }

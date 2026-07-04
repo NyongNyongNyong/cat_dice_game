@@ -76,10 +76,7 @@
 | `dice_triple_h` | H,H,H,1,1,1 | `change_to_highest` |
 | `dice_triple_l` | L,L,L,3,3,3 | `change_to_lowest` |
 | `dice_triple_v` | V,V,V,2,2,2 | `change_to_missing` |
-| `dice_bomb` | 1,2,3 + bomb×3 | bomb 효과 **미구현** — 숫자 면 placeholder (추후) |
-| `dice_golden` | 2,2,3,3,4,4 | 효과 미구현 — 숫자만 |
-
-`dice_bomb` / `dice_golden`은 카탈로그에만 존재; 상점·시작 로드아웃에는 미사용.
+| `dice_triple_luck` | ☘×3,3,3,3 | `luck_bonus` — 굴림 후 행운 +1 (면당), 점수 0 |
 
 ---
 
@@ -131,7 +128,7 @@
 |------|------|
 | 카탈로그 | `game/scripts/autoload/dice_catalog.gd` |
 | 데이터 | `game/data/dice/dice_defs.json`, `starter_loadout.json` |
-| property 맵 | `change_to_highest` → `change_to_highest_property.gd` |
+| property 맵 | `change_to_highest` → `change_to_highest_property.gd`, `luck_bonus` → `luck_bonus_property.gd` |
 
 ---
 
