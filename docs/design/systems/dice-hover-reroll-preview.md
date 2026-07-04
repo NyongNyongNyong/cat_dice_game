@@ -1,12 +1,8 @@
-# 주사위 Hover 리롤 Preview 시스템
+# ~~폐기~~ v0.1 주사위 Hover 리롤 Preview 시스템
 
-> **문서 유형:** 시스템 스펙 (UI·계산 규칙)  
-> **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §4·§9 — Push Your Luck, 리롤  
-> **점수 계산:** [hand-scoring-v2.md](hand-scoring-v2.md) — Preview는 **동일 계산기·동일 입력**을 사용  
-> **면·해석:** [dice-resources.md](dice-resources.md) — `compute_from_faces`, `RoundController.dice_faces`  
-> **상태:** v0.1 구현 완료 — `REROLL_READY` phase, Hover Preview, 선택 후 Roll로 단일 리롤
-> **구현:** `reroll_preview_calculator.gd` · `reroll_preview_result.gd` · `round_controller.gd` · `run_scene.gd` · `dice.gd`
-> **참고:** 면 Hover 툴팁 presenter는 `face_preview_presenter.gd`(구 `reroll_preview_presenter.gd`)로 리네이밍됨. 플레이 화면 배선은 [dice-face-hover-preview.md](dice-face-hover-preview.md) 참조.
+> **문서 상태:** **v0.1 폐기** — 주사위 1개 리롤·점수 델타(▲▼) Preview. **현재 빌드에 해당 기능 없음.**  
+> **현재 정본:** 6면 hover만 — [dice-face-hover-preview.md](dice-face-hover-preview.md) · `face_preview_presenter.gd`  
+> **아래 본문:** v0.1 구현 당시 기록(참고용). 신규 작업 시 따르지 않음.
 
 ---
 
@@ -230,6 +226,7 @@ v0.1 구현 (`RerollPreviewPresenter`):
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-04 | v0.1 **폐기** 표시 — 리롤·델타 Preview 폐기, 6면 hover는 dice-face-hover-preview로 이관 |
 | 2026-06-09 | IDLE Hover·roster preview 슬롯 표시 — §2.1, Phase 표 갱신 |
 | 2026-06-08 | `compute_from_faces`·`DiceResource` 면 후보 반영 — [dice-resources.md](dice-resources.md) 교차 참조 |
 | 2026-06-07 | v0.1 구현 반영 — Next Floor 병행, 상태 문구, 단일 리롤 연출, 캐시·파일 매핑, v0.1 범위 표 |
