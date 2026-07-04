@@ -16,18 +16,17 @@
 - [x] 최대 보유 8주사위 (`MAX_OWNED_DICE`)
 - [x] `unlock_next_slot()` API — `board_spec_test` PASS
 - [ ] 슬롯 해금 **상점·비용** 연동 (GDD §11 미정)
-- [ ] 드래그 앤 드롭 배치 (클릭 배치는 됨)
+- [x] 드래그 앤 드롭 배치 (클릭 배치와 병행)
 - [ ] 빈칸 위치 효과 (GDD §4.1 추후)
 
 ### 행운 (Luck) — Phase B **핵심 완료**
 
 - [x] `LuckResolver` — `6^k` 전수 + 로그 스케일 행운 컷
 - [x] 굴림 플로우 통합, 행운 수치 UI 노출
-- [x] 골드 리롤 경제 제거
+- [x] 골드 리롤 경제 제거 (주사위 1개 리롤 — **폐기**)
+- [x] 플레이 화면 hover 6면 툴팁 — `face_preview_presenter` ([dice-face-hover-preview.md](design/systems/dice-face-hover-preview.md))
 - [ ] `luck` 변동 소스 (주사위·유물 등) — 현재 기본 0
-- [ ] 칩 제거 + 배치 후 **단발 굴림** 재구성 (굴림 횟수 대체안 미정)
-- [ ] `REROLL_READY`·칩 등 v0.1 잔재 정리
-- [ ] `reroll_preview_*` 스크립트·노드 완전 제거
+- [ ] `REROLL_READY` phase 리네이밍 + 죽은 reroll 코드 정리 (`reroll_preview_calculator*` 등)
 
 ### 주사위 성장 (미착수)
 
@@ -79,6 +78,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-04 | 칩=굴림 재화 확정 — 단발굴림·칩제거 가설 삭제, 드래그·hover 완료 반영, reroll 잔재 정리 항목 구체화 |
 | 2026-06-30 | v0.2 보드·행운 Phase A/B 완료 반영, 중복 마이그레이션 섹션 제거 |
 | 2026-06-21 | GDD §4 반영 — v0.2 백로그 섹션 추가, 리롤 항목을 행운·이행으로 정리 |
 | 2026-06-09 | 주사위 30종·아이템 30종·H/L/V·리롤 논의 |
