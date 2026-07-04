@@ -1,14 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://shop_scene_v01"]
+[gd_scene load_steps=6 format=3 uid="uid://shop_scene_v01"]
 
 [ext_resource type="Script" path="res://scripts/ui/shop_scene.gd" id="1_shop"]
 [ext_resource type="Script" path="res://scripts/ui/dice_shop_presenter.gd" id="2_presenter"]
 [ext_resource type="Script" path="res://scripts/ui/face_preview_presenter.gd" id="3_hover"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_offer"]
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
 bg_color = Color(0.94, 0.92, 0.86, 1)
 border_width_left = 2
 border_width_top = 2
@@ -19,6 +19,22 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_item"]
+content_margin_left = 10.0
+content_margin_top = 14.0
+content_margin_right = 10.0
+content_margin_bottom = 14.0
+bg_color = Color(0.9, 0.88, 0.84, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.64, 0.52, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="ShopScene" type="Control"]
 layout_mode = 3
@@ -53,7 +69,7 @@ theme_override_constants/margin_bottom = 12
 
 [node name="RootVBox" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
 [node name="Header" type="HBoxContainer" parent="MarginContainer/RootVBox"]
 layout_mode = 2
@@ -80,7 +96,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 14
-text = "구매 주사위 클릭 → 보유 슬롯 클릭 (Hover: 6면)"
+text = "상점 주사위를 아래 보유 칸으로 끌어다 놓고 확인을 누르세요."
 autowrap_mode = 3
 
 [node name="Scroll" type="ScrollContainer" parent="MarginContainer/RootVBox"]
@@ -92,40 +108,104 @@ vertical_scroll_mode = 2
 [node name="ScrollContent" type="VBoxContainer" parent="MarginContainer/RootVBox/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
-[node name="OfferPanel" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
+[node name="ItemPanel" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_offer")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="OfferVBox" type="VBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel"]
+[node name="ItemVBox" type="VBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="OfferHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
+[node name="ItemHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 13
-text = "구매 가능"
+text = "아이템 (준비 중)"
 
-[node name="OfferRow" type="HBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/OfferPanel/OfferVBox"]
+[node name="ItemRow" type="HBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ItemA" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox/ItemRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_item")
+
+[node name="Label" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox/ItemRow/ItemA"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.4, 0.35, 1)
+theme_override_font_sizes/font_size = 15
+text = "아이템 A"
+horizontal_alignment = 1
+
+[node name="ItemB" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox/ItemRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_item")
+
+[node name="Label" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox/ItemRow/ItemB"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.4, 0.35, 1)
+theme_override_font_sizes/font_size = 15
+text = "아이템 B"
+horizontal_alignment = 1
+
+[node name="ItemC" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox/ItemRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_item")
+
+[node name="Label" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ItemPanel/ItemVBox/ItemRow/ItemC"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.4, 0.35, 1)
+theme_override_font_sizes/font_size = 15
+text = "아이템 C"
+horizontal_alignment = 1
+
+[node name="ShopPanel" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="ShopVBox" type="VBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ShopPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ShopHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ShopPanel/ShopVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
+theme_override_font_sizes/font_size = 13
+text = "상점 주사위 (끌어서 아래로)"
+
+[node name="ShopDiceRow" type="HBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/ShopPanel/ShopVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
-size_flags_horizontal = 3
 
-[node name="RosterHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
+[node name="PoolPanel" type="PanelContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="PoolVBox" type="VBoxContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/PoolPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PoolHeading" type="Label" parent="MarginContainer/RootVBox/Scroll/ScrollContent/PoolPanel/PoolVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.3, 0.25, 1)
 theme_override_font_sizes/font_size = 13
-text = "보유 주사위"
+text = "보유 주사위 (최대 8)"
 
-[node name="RosterSlots" type="GridContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent"]
+[node name="PoolCenter" type="CenterContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/PoolPanel/PoolVBox"]
+layout_mode = 2
+
+[node name="PoolGrid" type="GridContainer" parent="MarginContainer/RootVBox/Scroll/ScrollContent/PoolPanel/PoolVBox/PoolCenter"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 6
-columns = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 4
 
 [node name="PopupOverlay" type="Control" parent="MarginContainer/RootVBox"]
 unique_name_in_owner = true
@@ -134,11 +214,28 @@ mouse_filter = 2
 
 [node name="Footer" type="HBoxContainer" parent="MarginContainer/RootVBox"]
 layout_mode = 2
+theme_override_constants/separation = 16
 alignment = 1
+
+[node name="PendingLabel" type="Label" parent="MarginContainer/RootVBox/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.36, 0.55, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+vertical_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="MarginContainer/RootVBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+disabled = true
+text = "확인"
 
 [node name="ContinueButton" type="Button" parent="MarginContainer/RootVBox/Footer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 40)
+custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
 text = "다음 층"
 

@@ -16,6 +16,8 @@ const BOARD_ROWS: int = 3
 const BOARD_CELLS: int = BOARD_COLS * BOARD_ROWS
 const STARTING_UNLOCKED_SLOTS: int = 4
 const MAX_OWNED_DICE: int = 8
+# 상점에서 주사위를 풀에 넣을 때 개당 고정 가격(골드).
+const SHOP_DICE_PRICE: int = 3
 const BOARD_UNLOCK_ORDER: Array[int] = [
 	4, 5, 6, 7,
 	8, 9, 10, 11,
@@ -298,6 +300,51 @@ func try_purchase_shop_replace(dice_id: String, slot_index: int) -> bool:
 
 	gold -= price
 	gold_changed.emit(gold)
+	return true
+
+
+func add_owned_dice(dice_id: String) -> bool:
+	if _dice_roster == null:
+		return false
+	if get_owned_dice_count() >= MAX_OWNED_DICE:
+		return false
+	if not _dice_roster.add_dice(dice_id):
+		return false
+	roster_changed.emit()
+	return true
+
+
+# 대기 구매(pending) 일괄 확정. entries: [{ "action": "add"|"replace", "slot": int, "dice_id": String }].
+# 총 비용을 먼저 확인하고, 성공 시 골드를 한 번에 차감한다.
+func purchase_dice_batch(entries: Array) -> bool:
+	if _dice_roster == null or entries.is_empty():
+		return false
+
+	var total_cost: int = SHOP_DICE_PRICE * entries.size()
+	if gold < total_cost:
+		return false
+
+	# 추가 개수가 최대 보유 수를 넘지 않는지 확인.
+	var add_count := 0
+	for entry in entries:
+		if str(entry.get("action", "")) == "add":
+			add_count += 1
+	if get_owned_dice_count() + add_count > MAX_OWNED_DICE:
+		return false
+
+	# 교체를 먼저, 추가를 나중에 적용한다(추가는 뒤에 append되므로 슬롯 인덱스에 영향 없음).
+	for entry in entries:
+		if str(entry.get("action", "")) == "replace":
+			if not _dice_roster.replace_at_index(int(entry.get("slot", -1)), str(entry.get("dice_id", ""))):
+				return false
+	for entry in entries:
+		if str(entry.get("action", "")) == "add":
+			if not _dice_roster.add_dice(str(entry.get("dice_id", ""))):
+				return false
+
+	gold -= total_cost
+	gold_changed.emit(gold)
+	roster_changed.emit()
 	return true
 
 

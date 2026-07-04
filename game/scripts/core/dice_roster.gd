@@ -31,6 +31,14 @@ func get_dice_resource(index: int) -> Resource:
 	return _owned[index]
 
 
+func add_dice(dice_id: String) -> bool:
+	var die: Resource = _copy_catalog_dice(dice_id)
+	if die == null:
+		return false
+	_owned.append(die)
+	return true
+
+
 func replace_at(index: int, replacement: Resource) -> bool:
 	if index < 0 or index >= _owned.size() or replacement == null:
 		return false
