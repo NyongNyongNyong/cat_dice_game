@@ -55,32 +55,17 @@
 	  ]
 	},
 	{
-	  "id": "dice_bomb",
-	  "display_ko": "폭탄 주사위",
-	  "display_name": "Bomb Die",
+	  "id": "dice_triple_luck",
+	  "display_ko": "행운 주사위",
+	  "display_name": "Luck Die",
 	  "faces": [
-		{ "kind": "number", "value": 1 },
-		{ "kind": "number", "value": 2 },
-		{ "kind": "number", "value": 3 },
-		{ "kind": "number", "value": 1 },
-		{ "kind": "number", "value": 2 },
-		{ "kind": "number", "value": 3 }
-	  ],
-	  "note": "bomb 면 효과 미구현. 추후 special+bomb property로 교체 예정."
-	},
-	{
-	  "id": "dice_golden",
-	  "display_ko": "황금 주사위",
-	  "display_name": "Golden Die",
-	  "faces": [
-		{ "kind": "number", "value": 2 },
-		{ "kind": "number", "value": 2 },
 		{ "kind": "number", "value": 3 },
 		{ "kind": "number", "value": 3 },
-		{ "kind": "number", "value": 4 },
-		{ "kind": "number", "value": 4 }
-	  ],
-	  "note": "GDD 예시. 효과 훅 추후."
+		{ "kind": "number", "value": 3 },
+		{ "kind": "special", "property_id": "luck_bonus", "amount": 1 },
+		{ "kind": "special", "property_id": "luck_bonus", "amount": 1 },
+		{ "kind": "special", "property_id": "luck_bonus", "amount": 1 }
+	  ]
 	}
   ]
 }

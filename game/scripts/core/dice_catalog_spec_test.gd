@@ -14,6 +14,7 @@ func _init() -> void:
 	_expect_triple_h_die(catalog)
 	_expect_triple_l_die(catalog)
 	_expect_triple_v_die(catalog)
+	_expect_triple_luck_die(catalog)
 	_expect_roster_preview_faces(catalog)
 	_expect_starter_loadout(catalog)
 	_expect_unknown_id_returns_null(catalog)
@@ -103,6 +104,24 @@ func _expect_triple_v_die(catalog) -> void:
 		_fail_array("triple v change to missing", [3, 4, 2], die.resolve_face_values(board_faces))
 
 
+func _expect_triple_luck_die(catalog) -> void:
+	var die: Resource = catalog.get_dice("dice_triple_luck")
+	if die == null:
+		_fail_bool("triple luck die exists", true, false)
+		return
+
+	var faces: Array[Resource] = die.get_faces()
+	if die.get_face_values() != [3, 3, 3, 0, 0, 0]:
+		_fail_array("triple luck face values", [3, 3, 3, 0, 0, 0], die.get_face_values())
+
+	var trio: Array[Resource] = [faces[3], faces[4], faces[5]]
+	if die.resolve_face_values(trio) != [0, 0, 0]:
+		_fail_array("triple luck bonus faces", [0, 0, 0], die.resolve_face_values(trio))
+
+	if faces[3].get_display_text({}) != "☘":
+		_fail_string("triple luck display", "☘", faces[3].get_display_text({}))
+
+
 func _expect_roster_preview_faces(catalog) -> void:
 	var basic: Resource = catalog.get_dice("dice_basic")
 	var basic_face: Resource = basic.get_roster_preview_face()
@@ -125,6 +144,11 @@ func _expect_roster_preview_faces(catalog) -> void:
 	var v_face: Resource = triple_v.get_roster_preview_face()
 	if v_face == null or v_face.is_number() or v_face.get_display_text({}) != "V":
 		_fail_bool("triple v roster preview is V", true, false)
+
+	var triple_luck: Resource = catalog.get_dice("dice_triple_luck")
+	var luck_face: Resource = triple_luck.get_roster_preview_face()
+	if luck_face == null or luck_face.is_number() or luck_face.get_display_text({}) != "☘":
+		_fail_bool("triple luck roster preview is clover", true, false)
 
 
 func _expect_starter_loadout(catalog) -> void:

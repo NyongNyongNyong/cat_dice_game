@@ -1,68 +1,79 @@
 extends Node
 
-signal continue_pressed
-signal purchase_requested(dice_id: String, slot_index: int)
-signal selection_changed(has_offer: bool)
+signal pending_changed(count: int, cost: int)
 
 const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
-const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
+const ShopOfferDieScene := preload("res://scripts/ui/shop_offer_die.gd")
+const ShopPoolCellScript := preload("res://scripts/ui/shop_pool_cell.gd")
 
-const DICE_VIEW_SIZE := Vector2(44, 44)
-const ROW_SEPARATION := 8
-const OFFER_SEPARATION := 8
-const SHOP_SLOT_TEXT_COLOR := Color(0.18, 0.15, 0.12, 1)
-const SHOP_SLOT_FONT_SIZE := 14
-const SHOP_HEADING_FONT_SIZE := 12
-const OFFER_PRICE_COLOR := Color(0.72, 0.55, 0.12, 1)
-const OFFER_DISABLED_COLOR := Color(0.55, 0.5, 0.45, 1)
+const POOL_CELLS := 8
+const POOL_COLS := 4
 
-var _offer_container: HBoxContainer
-var _roster_container: GridContainer
-var _continue_button: Button
+var _shop_dice_row: HBoxContainer
+var _pool_grid: GridContainer
 var _hover_presenter: Node
 
-var _selected_offer_id: String = ""
-var _offer_dice_views: Array[Control] = []
-var _roster_dice_views: Array[Control] = []
-var _offer_ids: Array[String] = []
+# cell_index -> dice_id (대기 중인 구매). 확인 전까지 로스터를 바꾸지 않는다.
+var _pending: Dictionary = {}
+var _owned_count := 0
+var _pool_cells: Array[Control] = []
 
 
 func setup(
-	offer_container: HBoxContainer,
-	roster_container: GridContainer,
-	continue_button: Button,
+	shop_dice_row: HBoxContainer,
+	pool_grid: GridContainer,
 	hover_presenter: Node = null,
 ) -> void:
-	_offer_container = offer_container
-	_roster_container = roster_container
-	_continue_button = continue_button
+	_shop_dice_row = shop_dice_row
+	_pool_grid = pool_grid
+	_pool_grid.columns = POOL_COLS
 	_hover_presenter = hover_presenter
-	_continue_button.pressed.connect(_on_continue_pressed)
 
 
-func refresh(roster: RefCounted, offers: Array[Dictionary], gold: int) -> void:
-	_rebuild_offers(offers, gold)
-	_rebuild_roster(roster)
-	_apply_offer_selection_visuals()
+func refresh(roster: RefCounted, offers: Array[Dictionary], _gold: int) -> void:
+	_owned_count = roster.get_count()
+	_prune_invalid_pending()
+	_rebuild_shop_dice(offers)
+	_rebuild_pool(roster)
+	_emit_pending_changed()
 
 
-func get_selected_offer_id() -> String:
-	return _selected_offer_id
+func get_pending_count() -> int:
+	return _pending.size()
 
 
-func clear_selection() -> void:
-	if _selected_offer_id.is_empty():
+func get_pending_cost() -> int:
+	return RunManager.SHOP_DICE_PRICE * _pending.size()
+
+
+func get_pending_entries() -> Array:
+	var entries: Array = []
+	for cell in _pending:
+		var action := "replace" if cell < _owned_count else "add"
+		entries.append({
+			"action": action,
+			"slot": cell,
+			"dice_id": str(_pending[cell]),
+		})
+	return entries
+
+
+func clear_pending() -> void:
+	if _pending.is_empty():
 		return
-	_selected_offer_id = ""
-	_apply_offer_selection_visuals()
-	selection_changed.emit(false)
+	_pending.clear()
+	_emit_pending_changed()
 
 
-func _rebuild_offers(offers: Array[Dictionary], gold: int) -> void:
-	for child in _offer_container.get_children():
+func _prune_invalid_pending() -> void:
+	for cell in _pending.keys():
+		if cell < 0 or cell >= POOL_CELLS:
+			_pending.erase(cell)
+
+
+func _rebuild_shop_dice(offers: Array[Dictionary]) -> void:
+	for child in _shop_dice_row.get_children():
 		child.queue_free()
-	_offer_dice_views.clear()
-	_offer_ids.clear()
 
 	var catalog = CatalogService.shared()
 	for offer in offers:
@@ -70,215 +81,93 @@ func _rebuild_offers(offers: Array[Dictionary], gold: int) -> void:
 		if dice_id.is_empty() or not catalog.has_dice(dice_id):
 			continue
 
-		var price: int = int(offer.get("price_gold", 0))
-		var can_afford := gold >= price
-		_offer_ids.append(dice_id)
-
-		var card := _make_offer_card(dice_id, price, can_afford, catalog)
-		_offer_container.add_child(card)
-
-
-func _make_offer_card(dice_id: String, price: int, can_afford: bool, catalog) -> Control:
-	var card := PanelContainer.new()
-	card.layout_mode = 2
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.98, 0.96, 0.92, 1.0)
-	style.border_color = Color(0.72, 0.66, 0.52, 1.0)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	style.content_margin_left = 6.0
-	style.content_margin_top = 6.0
-	style.content_margin_right = 6.0
-	style.content_margin_bottom = 6.0
-	card.add_theme_stylebox_override("panel", style)
-
-	var vbox := VBoxContainer.new()
-	vbox.layout_mode = 2
-	vbox.add_theme_constant_override("separation", 4)
-	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	card.add_child(vbox)
-
-	var dice_view := _make_dice_view(catalog.get_dice(dice_id))
-	dice_view.modulate = Color.WHITE if can_afford else Color(0.72, 0.72, 0.72, 1.0)
-	dice_view.gui_input.connect(_on_offer_gui_input.bind(dice_id, can_afford))
-	dice_view.mouse_entered.connect(_on_offer_mouse_entered.bind(dice_view, dice_id))
-	dice_view.mouse_exited.connect(_on_dice_mouse_exited)
-	vbox.add_child(_wrap_dice_center(dice_view))
-	_offer_dice_views.append(dice_view)
-
-	var name_label := Label.new()
-	name_label.layout_mode = 2
-	name_label.text = catalog.get_display_name(dice_id)
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_color_override("font_color", SHOP_SLOT_TEXT_COLOR)
-	name_label.add_theme_font_size_override("font_size", SHOP_SLOT_FONT_SIZE)
-	vbox.add_child(name_label)
-
-	var price_label := Label.new()
-	price_label.layout_mode = 2
-	price_label.text = "%d 골드" % price
-	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	price_label.add_theme_color_override(
-		"font_color",
-		OFFER_PRICE_COLOR if can_afford else OFFER_DISABLED_COLOR
-	)
-	price_label.add_theme_font_size_override("font_size", SHOP_HEADING_FONT_SIZE)
-	vbox.add_child(price_label)
-
-	card.gui_input.connect(_on_offer_gui_input.bind(dice_id, can_afford))
-	card.mouse_filter = Control.MOUSE_FILTER_STOP
-	return card
+		var card := ShopOfferDieScene.new()
+		_shop_dice_row.add_child(card)
+		card.configure(catalog.get_dice(dice_id), dice_id, true)
+		card.mouse_entered.connect(_on_offer_hovered.bind(card))
+		card.mouse_exited.connect(_on_dice_hover_exited)
 
 
-func _rebuild_roster(roster: RefCounted) -> void:
-	for child in _roster_container.get_children():
+func _rebuild_pool(roster: RefCounted) -> void:
+	for child in _pool_grid.get_children():
 		child.queue_free()
-	_roster_dice_views.clear()
+	_pool_cells.clear()
 
 	var catalog = CatalogService.shared()
-	for i in roster.get_count():
-		var row := HBoxContainer.new()
-		row.layout_mode = 2
-		row.add_theme_constant_override("separation", ROW_SEPARATION)
-		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var owned: Array = roster.get_owned_dice()
 
-		var label := Label.new()
-		label.layout_mode = 2
-		label.text = "%d" % [i + 1]
-		label.custom_minimum_size = Vector2(28, 0)
-		label.add_theme_color_override("font_color", SHOP_SLOT_TEXT_COLOR)
-		label.add_theme_font_size_override("font_size", SHOP_SLOT_FONT_SIZE)
-		row.add_child(label)
+	for cell in POOL_CELLS:
+		var pool_cell := ShopPoolCellScript.new()
+		pool_cell.set_cell_index(cell)
+		_pool_grid.add_child(pool_cell)
+		pool_cell.offer_dropped.connect(_on_offer_dropped)
+		pool_cell.cell_clicked.connect(_on_cell_clicked)
+		pool_cell.cell_hovered.connect(_on_cell_hovered.bind(pool_cell))
+		pool_cell.cell_unhovered.connect(_on_dice_hover_exited)
+		_pool_cells.append(pool_cell)
 
-		var resource: Resource = roster.get_dice_resource(i)
-		var dice_view := _make_dice_view(resource)
-		dice_view.gui_input.connect(_on_roster_gui_input.bind(i))
-		dice_view.mouse_entered.connect(_on_roster_mouse_entered.bind(dice_view, resource))
-		dice_view.mouse_exited.connect(_on_dice_mouse_exited)
-		row.add_child(_wrap_dice_center(dice_view))
-		_roster_dice_views.append(dice_view)
-
-		var name_label := Label.new()
-		name_label.layout_mode = 2
-		name_label.text = _get_die_display_name(resource, catalog)
-		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name_label.clip_text = true
-		name_label.add_theme_color_override("font_color", SHOP_SLOT_TEXT_COLOR)
-		name_label.add_theme_font_size_override("font_size", SHOP_SLOT_FONT_SIZE)
-		row.add_child(name_label)
-
-		_roster_container.add_child(row)
-
-
-func _make_dice_view(resource: Resource) -> Control:
-	var dice_view: Control = DICE_SCENE.instantiate()
-	dice_view.custom_minimum_size = DICE_VIEW_SIZE
-	dice_view.layout_mode = 2
-	dice_view.mouse_filter = Control.MOUSE_FILTER_STOP
-	dice_view.focus_mode = Control.FOCUS_NONE
-
-	if resource == null:
-		dice_view.show_placeholder()
-	else:
-		var preview_face: Resource = resource.get_roster_preview_face()
-		if preview_face == null:
-			dice_view.show_placeholder()
+		if _pending.has(cell):
+			var pending_res: Resource = catalog.get_dice(str(_pending[cell]))
+			pool_cell.show_die(pending_res, pool_cell.State.PENDING)
+		elif cell < owned.size():
+			pool_cell.show_die(owned[cell], pool_cell.State.OWNED)
 		else:
-			dice_view.set_face(preview_face, resource.get_roster_preview_value())
-	return dice_view
+			pool_cell.show_empty()
 
 
-func _wrap_dice_center(dice_view: Control) -> CenterContainer:
-	var center := CenterContainer.new()
-	center.layout_mode = 2
-	center.custom_minimum_size = DICE_VIEW_SIZE
-	center.add_child(dice_view)
-	return center
-
-
-func _get_die_display_name(resource: Resource, catalog) -> String:
-	if resource == null:
-		return "주사위"
-	var dice_id := str(resource.id)
-	if not dice_id.is_empty() and catalog.has_dice(dice_id):
-		return catalog.get_display_name(dice_id)
-	if resource.get("display_name"):
-		return str(resource.display_name)
-	return "주사위"
-
-
-func _on_offer_gui_input(event: InputEvent, dice_id: String, can_afford: bool) -> void:
-	if not can_afford:
+func _on_offer_dropped(cell_index: int, dice_id: String) -> void:
+	if dice_id.is_empty():
 		return
-	if not event is InputEventMouseButton:
+	# 빈 칸에 새로 넣는 경우, 이미 대기 중인 추가분까지 합쳐 최대 보유 수를 넘지 않게 막는다.
+	if cell_index >= _owned_count and not _pending.has(cell_index):
+		if _projected_owned_count() >= POOL_CELLS:
+			return
+	_pending[cell_index] = dice_id
+	_rebuild_pool(RunManager.get_dice_roster())
+	_emit_pending_changed()
+
+
+func _on_cell_clicked(cell_index: int) -> void:
+	if not _pending.has(cell_index):
 		return
-	var mouse_event := event as InputEventMouseButton
-	if not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
-		return
-	_select_offer(dice_id)
+	_pending.erase(cell_index)
+	_rebuild_pool(RunManager.get_dice_roster())
+	_emit_pending_changed()
 
 
-func _select_offer(dice_id: String) -> void:
-	if _selected_offer_id == dice_id:
-		clear_selection()
-		return
-	_selected_offer_id = dice_id
-	_apply_offer_selection_visuals()
-	selection_changed.emit(true)
+func _projected_owned_count() -> int:
+	var adds := 0
+	for cell in _pending:
+		if cell >= _owned_count:
+			adds += 1
+	return _owned_count + adds
 
 
-func _apply_offer_selection_visuals() -> void:
-	for i in _offer_dice_views.size():
-		var dice_view: Control = _offer_dice_views[i]
-		var selected := i < _offer_ids.size() and _offer_ids[i] == _selected_offer_id
-		if dice_view.has_method("set_selected"):
-			dice_view.set_selected(selected)
+func _on_offer_hovered(card: Control) -> void:
+	var resource: Resource = card.get_resource()
+	if resource != null:
+		_show_hover_for_resource(card, resource)
 
 
-func _on_roster_gui_input(event: InputEvent, slot_index: int) -> void:
-	if _selected_offer_id.is_empty():
-		return
-	if not event is InputEventMouseButton:
-		return
-	var mouse_event := event as InputEventMouseButton
-	if not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
-		return
-	purchase_requested.emit(_selected_offer_id, slot_index)
+func _on_cell_hovered(_cell_index: int, resource: Resource, cell: Control) -> void:
+	if resource != null:
+		_show_hover_for_resource(cell, resource)
 
 
-func _on_offer_mouse_entered(dice_view: Control, dice_id: String) -> void:
-	_show_hover_for_catalog_id(dice_view, dice_id)
-
-
-func _on_roster_mouse_entered(dice_view: Control, resource: Resource) -> void:
-	if resource == null:
-		return
-	_show_hover_for_resource(dice_view, resource)
-
-
-func _show_hover_for_catalog_id(dice_view: Control, dice_id: String) -> void:
-	var die: Resource = CatalogService.shared().get_dice(dice_id)
-	if die == null:
-		return
-	_show_hover_for_resource(dice_view, die)
-
-
-func _show_hover_for_resource(dice_view: Control, resource: Resource) -> void:
+func _show_hover_for_resource(anchor: Control, resource: Resource) -> void:
 	if _hover_presenter == null or not _hover_presenter.has_method("show_die_faces"):
 		return
 	var faces: Array[Resource] = resource.get_faces()
 	if faces.is_empty():
 		return
 	_hover_presenter.set_active(true)
-	_hover_presenter.show_die_faces(dice_view, faces, faces, -1)
+	_hover_presenter.show_die_faces(anchor, faces, faces, -1)
 
 
-func _on_dice_mouse_exited() -> void:
+func _on_dice_hover_exited() -> void:
 	if _hover_presenter != null and _hover_presenter.has_method("hide_preview"):
 		_hover_presenter.hide_preview()
 
 
-func _on_continue_pressed() -> void:
-	continue_pressed.emit()
+func _emit_pending_changed() -> void:
+	pending_changed.emit(get_pending_count(), get_pending_cost())

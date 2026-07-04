@@ -89,6 +89,7 @@ func _setup_round_flow() -> void:
 	RunManager.score_changed.connect(_on_score_changed)
 	RunManager.chips_changed.connect(_on_chips_changed)
 	RunManager.gold_changed.connect(_on_gold_changed)
+	RunManager.luck_changed.connect(_on_luck_changed)
 	RunManager.run_completed.connect(_on_run_completed)
 	RunManager.roster_changed.connect(_on_roster_changed)
 	RunManager.board_changed.connect(_on_board_changed)
@@ -471,6 +472,10 @@ func _on_chips_changed(_chips: int) -> void:
 
 func _on_gold_changed(amount: int) -> void:
 	_gold_label.text = _format_currency_label(amount, RunManager.chips, RunManager.luck)
+	_sync_ui()
+
+
+func _on_luck_changed(_luck: float) -> void:
 	_sync_ui()
 
 

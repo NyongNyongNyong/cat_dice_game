@@ -12,7 +12,8 @@ const ENUM_DICE: int = 4
 ## 컷 비율 점근 상한(<1.0): 행운이 아무리 높아도 100% 안전은 불가.
 const CUT_FRACTION_MAX: float = 0.9
 ## 로그 스케일 계수: 클수록 같은 행운에서 더 많이 깎임.
-const CUT_FRACTION_K: float = 0.15
+## v2 튜닝(2026-07): L=30 → f≈0.5, L=10 → f≈0.27 (구 K=0.15는 초반 과급)
+const CUT_FRACTION_K: float = 5.0 / 120.0
 
 
 ## dice_resources: Array[Resource], luck: float, value_resolver: Callable(Array)->Array[int]

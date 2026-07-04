@@ -21,6 +21,9 @@ const ChangeToLowestPropertyScript := preload(
 const ChangeToMissingPropertyScript := preload(
 	"res://scripts/core/face_properties/change_to_missing_property.gd"
 )
+const LuckBonusPropertyScript := preload(
+	"res://scripts/core/face_properties/luck_bonus_property.gd"
+)
 
 static var _shared = null
 
@@ -204,7 +207,7 @@ func _build_face(face_def: Dictionary) -> Resource:
 
 func _build_special_face(face_def: Dictionary) -> Resource:
 	var property_id: String = str(face_def.get("property_id", ""))
-	var property: Resource = _build_property(property_id)
+	var property: Resource = _build_property(property_id, face_def)
 	if property == null:
 		return null
 
@@ -216,7 +219,7 @@ func _build_special_face(face_def: Dictionary) -> Resource:
 	return special_face
 
 
-func _build_property(property_id: String) -> Resource:
+func _build_property(property_id: String, face_def: Dictionary = {}) -> Resource:
 	match property_id:
 		"change_to_highest":
 			return ChangeToHighestPropertyScript.new()
@@ -224,6 +227,10 @@ func _build_property(property_id: String) -> Resource:
 			return ChangeToLowestPropertyScript.new()
 		"change_to_missing":
 			return ChangeToMissingPropertyScript.new()
+		"luck_bonus":
+			var luck_property: Resource = LuckBonusPropertyScript.new()
+			luck_property.amount = float(face_def.get("amount", face_def.get("luck_delta", 1)))
+			return luck_property
 		_:
 			push_error("DiceCatalog: unknown property_id '%s'" % property_id)
 			return null
