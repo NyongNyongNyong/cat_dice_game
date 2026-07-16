@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>캣타워 카지노 · 문서</title>
+  <style>
+    :root {
+      --bg: #1a1714;
+      --ink: #f3ebe0;
+      --muted: #b5a794;
+      --panel: #2c2620;
+      --line: #4a4036;
+      --accent: #d4a04a;
+      --font: "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(900px 500px at 0% 0%, #3a2c1c 0%, transparent 55%),
+        var(--bg);
+      padding: 48px 24px;
+    }
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+    }
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .links {
+      display: grid;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    a.card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    a.card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+    a.card span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>캣타워 카지노</h1>
+    <p>문서·백로그 허브. 작업 현황은 칸반에서 보는 편이 읽기 쉽습니다.</p>
+    <div class="links">
+      <a class="card" href="board/">
+        <strong>백로그 칸반</strong>
+        <span>할 일 / 진행 / 완료 / 나중에 — 드래그로 이동</span>
+      </a>
+      <a class="card" href="https://github.com/NyongNyongNyong/cat_dice_game/blob/main/docs/backlog.md">
+        <strong>backlog.md</strong>
+        <span>GitHub에서 마크다운 원문</span>
+      </a>
+      <a class="card" href="https://github.com/NyongNyongNyong/cat_dice_game/blob/main/docs/gdd-cat-tower-casino.md">
+        <strong>GDD</strong>
+        <span>기획 정본</span>
+      </a>
+      <a class="card" href="https://github.com/NyongNyongNyong/cat_dice_game">
+        <strong>저장소</strong>
+        <span>github.com/NyongNyongNyong/cat_dice_game</span>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

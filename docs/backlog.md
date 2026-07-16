@@ -1,7 +1,8 @@
 # 백로그
 
-> **정본** — 앞으로 할 일·아이디어. feature로 뽑을 때 `/feature` → `docs/design/systems/<slug>.md` + `tasks/<slug>-tasks.md`.  
-> Obsidian `Obsidian/Dice Cat Tower/TODO.md`는 개인 메모; **갱신은 이 파일 기준.**  
+> **읽기 쉬운 칸반:** [board/](board/) (GitHub Pages: `/board/`) — 카드 데이터는 [`board/cards.json`](board/cards.json).  
+> **정본 메모** — 앞으로 할 일·아이디어. feature로 뽑을 때 `/feature` → `docs/design/systems/<slug>.md` + `tasks/<slug>-tasks.md`.  
+> Obsidian `Obsidian/Dice Cat Tower/TODO.md`는 개인 메모; **보드와 어긋나면 cards.json을 맞춘 뒤 이 파일도 갱신.**  
 > **기획 방향:** [gdd-cat-tower-casino.md](gdd-cat-tower-casino.md) §4 (2026-06-21)  
 > **v0.2 구현 현황:** [design/systems/v0.2-board-luck.md](design/systems/v0.2-board-luck.md) · [design/tasks/v0.2-board-luck-tasks.md](design/tasks/v0.2-board-luck-tasks.md)
 
@@ -78,6 +79,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-17 | 웹 칸반(`docs/board/`) 추가 — 가독용 보드, 데이터는 cards.json |
 | 2026-07-04 | 칩=굴림 재화 확정 — 단발굴림·칩제거 가설 삭제, 드래그·hover 완료 반영, reroll 잔재 정리 항목 구체화 |
 | 2026-06-30 | v0.2 보드·행운 Phase A/B 완료 반영, 중복 마이그레이션 섹션 제거 |
 | 2026-06-21 | GDD §4 반영 — v0.2 백로그 섹션 추가, 리롤 항목을 행운·이행으로 정리 |
