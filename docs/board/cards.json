@@ -1,0 +1,187 @@
+{
+  "updated": "2026-07-17",
+  "source": "docs/backlog.md",
+  "columns": [
+    { "id": "todo", "title": "할 일" },
+    { "id": "doing", "title": "진행 중" },
+    { "id": "done", "title": "완료" },
+    { "id": "later", "title": "나중에" }
+  ],
+  "cards": [
+    {
+      "id": "board-unlock-shop",
+      "title": "슬롯 해금 상점·비용 연동",
+      "body": "GDD §11 미정",
+      "column": "todo",
+      "tags": ["v0.2", "보드"]
+    },
+    {
+      "id": "board-empty-cell-effect",
+      "title": "빈칸 위치 효과",
+      "body": "GDD §4.1 추후",
+      "column": "todo",
+      "tags": ["v0.2", "보드"]
+    },
+    {
+      "id": "luck-sources",
+      "title": "행운 변동 소스",
+      "body": "주사위·유물 등. 현재 기본 0 (행운 주사위 ☘는 들어가 있음)",
+      "column": "doing",
+      "tags": ["v0.2", "행운"]
+    },
+    {
+      "id": "reroll-ready-rename",
+      "title": "REROLL_READY 리네이밍 + 죽은 reroll 코드 정리",
+      "body": "reroll_preview_calculator* 등",
+      "column": "todo",
+      "tags": ["v0.2", "행운"]
+    },
+    {
+      "id": "upgrade-kits",
+      "title": "강화 키트: 숫자 +1 / −1 / 진화(특수면)",
+      "body": "",
+      "column": "todo",
+      "tags": ["v0.2", "주사위"]
+    },
+    {
+      "id": "replace-die-fate",
+      "title": "교체 시 기존 주사위 처리",
+      "body": "판매·폐기·재활용 — 미정",
+      "column": "todo",
+      "tags": ["v0.2", "주사위"]
+    },
+    {
+      "id": "hand-balance",
+      "title": "족보 시스템 상세·밸런스",
+      "body": "v2 초안 유지 여부 검토",
+      "column": "todo",
+      "tags": ["v0.2", "족보"]
+    },
+    {
+      "id": "special-faces-expand",
+      "title": "특수면 종류 확장",
+      "body": "H/L/V는 v0.1 과도기",
+      "column": "todo",
+      "tags": ["v0.2", "특수면"]
+    },
+    {
+      "id": "script-preloads",
+      "title": "feature/script-preloads",
+      "body": ".godot 캐시 없이 CLI 파싱",
+      "column": "todo",
+      "tags": ["단기", "플레이"]
+    },
+    {
+      "id": "gold-soft-tune",
+      "title": "골드 soft 감쇠 튜닝",
+      "body": "",
+      "column": "todo",
+      "tags": ["단기", "골드"]
+    },
+    {
+      "id": "content-30",
+      "title": "주사위 30종 · 아이템 30종",
+      "body": "GDD §11 선행",
+      "column": "todo",
+      "tags": ["단기", "콘텐츠"]
+    },
+    {
+      "id": "preview-non6",
+      "title": "비 6면 주사위 preview",
+      "body": "",
+      "column": "todo",
+      "tags": ["단기", "Preview"]
+    },
+    {
+      "id": "board-grid-done",
+      "title": "3×4 보드 · 시작 4칸 · 배치·굴림",
+      "body": "run_scene + RunManager",
+      "column": "done",
+      "tags": ["v0.2", "보드"]
+    },
+    {
+      "id": "max-owned-8",
+      "title": "최대 보유 8주사위",
+      "body": "MAX_OWNED_DICE",
+      "column": "done",
+      "tags": ["v0.2", "보드"]
+    },
+    {
+      "id": "unlock-api",
+      "title": "unlock_next_slot() API",
+      "body": "board_spec_test PASS",
+      "column": "done",
+      "tags": ["v0.2", "보드"]
+    },
+    {
+      "id": "board-dnd",
+      "title": "드래그 앤 드롭 배치",
+      "body": "클릭 배치와 병행",
+      "column": "done",
+      "tags": ["v0.2", "보드"]
+    },
+    {
+      "id": "luck-resolver",
+      "title": "LuckResolver + 굴림 통합 + UI",
+      "body": "6^k 전수 + 로그 스케일 컷",
+      "column": "done",
+      "tags": ["v0.2", "행운"]
+    },
+    {
+      "id": "gold-reroll-removed",
+      "title": "골드 리롤 경제 제거",
+      "body": "주사위 1개 리롤 — 폐기",
+      "column": "done",
+      "tags": ["v0.2", "행운"]
+    },
+    {
+      "id": "face-hover-preview",
+      "title": "플레이 화면 hover 6면 툴팁",
+      "body": "face_preview_presenter",
+      "column": "done",
+      "tags": ["v0.2", "행운"]
+    },
+    {
+      "id": "active-hands",
+      "title": "활성 족보 패널",
+      "body": "active-hands-panel",
+      "column": "done",
+      "tags": ["단기", "플레이"]
+    },
+    {
+      "id": "shop-scene",
+      "title": "상점 독립 씬 · 구매·교체",
+      "body": "드래그 풀 대기 구매(v0.2) 포함",
+      "column": "done",
+      "tags": ["단기", "상점"]
+    },
+    {
+      "id": "gold-overkill",
+      "title": "오버킬 골드 v2",
+      "body": "gold-economy",
+      "column": "done",
+      "tags": ["단기", "골드"]
+    },
+    {
+      "id": "hover-preview-6",
+      "title": "6면 hover · 굴리기 전 미리보기",
+      "body": "",
+      "column": "done",
+      "tags": ["단기", "Preview"]
+    },
+    {
+      "id": "upgrade-kit-shop-ui",
+      "title": "강화 키트 상점·적용 UI",
+      "body": "v0.2 Phase C",
+      "column": "later",
+      "tags": ["장기"]
+    },
+    {
+      "id": "casino-rules-relics",
+      "title": "카지노 규칙·유물·직원 등",
+      "body": "GDD §11 확정 항목",
+      "column": "later",
+      "tags": ["장기"]
+    }
+  ]
+}

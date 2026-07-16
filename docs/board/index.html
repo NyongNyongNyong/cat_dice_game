@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>캣타워 카지노 · 백로그 칸반</title>
+  <link rel="stylesheet" href="board.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>캣타워 카지노</h1>
+      <p class="sub">백로그 칸반 · Issues 없이 JSON으로 관리</p>
+    </div>
+    <div class="actions">
+      <span id="meta" class="meta"></span>
+      <button type="button" id="btn-reset" class="btn ghost" title="브라우저에 임시 저장된 드래그 상태를 지우고 저장소 JSON으로 되돌립니다">저장소 기준으로 되돌리기</button>
+      <button type="button" id="btn-copy" class="btn">JSON 복사</button>
+      <button type="button" id="btn-download" class="btn primary">cards.json 저장</button>
+      <a class="btn ghost" href="../backlog.md">backlog.md</a>
+      <a class="btn ghost" href="../">문서 홈</a>
+    </div>
+  </header>
+
+  <p class="hint">
+    카드를 <strong>드래그</strong>해서 열을 옮기세요. 변경은 브라우저에만 임시 저장됩니다.
+    팀에 반영하려면 <strong>JSON 복사</strong> 또는 <strong>cards.json 저장</strong> 후
+    <code>docs/board/cards.json</code>에 커밋하세요.
+  </p>
+
+  <main id="board" class="board" aria-label="칸반 보드"></main>
+
+  <footer class="foot">
+    <span>데이터: <code>docs/board/cards.json</code></span>
+    <span>·</span>
+    <span>정본 메모: <code>docs/backlog.md</code></span>
+  </footer>
+
+  <script src="board.js"></script>
+</body>
+</html>
