@@ -2,7 +2,7 @@
 
 Issues / Projects 없이 백로그를 칸반으로 봅니다.
 
-## URL (Pages 켜면)
+## URL (Pages)
 
 - 문서 홈: `https://NyongNyongNyong.github.io/cat_dice_game/`
 - 칸반: `https://NyongNyongNyong.github.io/cat_dice_game/board/`
@@ -14,19 +14,42 @@ Issues / Projects 없이 백로그를 칸반으로 봅니다.
 3. **Branch**: `main` / 폴더 **`/docs`**
 4. Save
 
-## 데이터 갱신
+## 열 (v2)
 
-1. 칸반에서 카드 드래그
-2. **JSON 복사** 또는 **cards.json 저장**
-3. 로컬 `docs/board/cards.json` 덮어쓰고 커밋
+1. 아이디어 / 백로그  
+2. 스펙 작성 중  
+3. 구현 대기  
+4. 구현 중  
+5. 검증 대기  
+6. 수정 필요  
+7. 완료  
 
-브라우저 임시 저장(localStorage)은 본인 PC에만 남습니다. 팀 공유는 반드시 `cards.json` 커밋.
-
-## 파일
+## 카드 = MD
 
 | 파일 | 역할 |
 |------|------|
-| `cards.json` | 카드·열 정본 (보드용) |
-| `index.html` / `board.css` / `board.js` | UI |
+| `cards.json` | id, title, description, column, file, tags |
+| `cards/<id>.md` | 상세 본문 (팝업) |
 
-`docs/backlog.md`는 메모·이력용으로 유지. 보드와 어긋나면 `cards.json`을 우선하고 backlog를 맞추면 됩니다.
+새 카드 추가:
+
+1. `cards/my-card.md` 작성  
+2. `cards.json`의 `cards` 배열에 항목 추가 (`file`: `cards/my-card.md`)  
+3. 커밋
+
+## 드래그 반영
+
+1. 칸반에서 드래그  
+2. **JSON 복사** 또는 **cards.json 저장**  
+3. `docs/board/cards.json` 덮어쓰고 커밋  
+
+브라우저 임시 저장은 본인 PC만. 팀 공유는 반드시 커밋.
+
+## 로컬 미리보기
+
+```bash
+cd docs
+python -m http.server 8080
+```
+
+`http://localhost:8080/board/`

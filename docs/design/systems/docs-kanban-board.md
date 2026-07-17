@@ -2,7 +2,7 @@
 
 > **문서 유형:** 문서·웹 도구 스펙  
 > **기획 참조:** [backlog.md](../../backlog.md)  
-> **상태:** v1  
+> **상태:** v1 → **v2는 [kanban-v2.md](kanban-v2.md)** (7열 · 카드↔MD · 팝업)  
 > **구현:** `docs/board/` · `docs/index.html`
 
 ---
@@ -97,4 +97,5 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-17 | v2로 이관 — [kanban-v2.md](kanban-v2.md) |
 | 2026-07-17 | v1 — Pages 칸반, cards.json, Issues 없이 드래그·내보내기 |

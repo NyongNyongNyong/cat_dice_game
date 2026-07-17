@@ -1,11 +1,20 @@
-const STORAGE_KEY = "cat-dice-kanban-v1";
+const STORAGE_KEY = "cat-dice-kanban-v2";
 const CARDS_URL = "cards.json";
 
-/** @type {{ updated?: string, source?: string, columns: Array<{id:string,title:string}>, cards: Array<object> }} */
+/** @type {{ updated?: string, source?: string, columns: Array<object>, cards: Array<object> }} */
 let boardData = null;
 
 const boardEl = document.getElementById("board");
 const metaEl = document.getElementById("meta");
+const modalEl = document.getElementById("modal");
+const modalTitle = document.getElementById("modal-title");
+const modalDesc = document.getElementById("modal-desc");
+const modalFile = document.getElementById("modal-file");
+const modalBody = document.getElementById("modal-body");
+
+let dragId = null;
+let didDrag = false;
+let suppressClick = false;
 
 function toast(message) {
   let el = document.querySelector(".toast");
@@ -36,7 +45,11 @@ function loadLocal() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.columns || !parsed?.cards) return null;
+    // 구버전(4열) localStorage는 무시
+    if (!parsed.columns.some((c) => c.id === "ideas")) return null;
+    return parsed;
   } catch {
     return null;
   }
@@ -45,7 +58,7 @@ function loadLocal() {
 function exportPayload() {
   return {
     updated: new Date().toISOString().slice(0, 10),
-    source: boardData.source || "docs/backlog.md",
+    source: boardData.source || "docs/board/cards/*.md",
     columns: boardData.columns,
     cards: boardData.cards,
   };
@@ -63,6 +76,10 @@ function cardsInColumn(columnId) {
   return boardData.cards.filter((c) => c.column === columnId);
 }
 
+function cardDescription(card) {
+  return card.description || card.body || "";
+}
+
 function render() {
   boardEl.innerHTML = "";
   for (const col of boardData.columns) {
@@ -73,8 +90,11 @@ function render() {
 
     column.innerHTML = `
       <div class="column-head">
-        <div class="column-title"><span class="dot" aria-hidden="true"></span>${escapeHtml(col.title)}</div>
-        <span class="count">${cards.length}</span>
+        <div class="column-title-row">
+          <div class="column-title"><span class="dot" aria-hidden="true"></span>${escapeHtml(col.title)}</div>
+          <span class="count">${cards.length}</span>
+        </div>
+        ${col.hint ? `<p class="column-hint">${escapeHtml(col.hint)}</p>` : ""}
       </div>
       <div class="cards" data-column="${col.id}"></div>
     `;
@@ -96,19 +116,34 @@ function renderCard(card) {
   el.className = "card";
   el.draggable = true;
   el.dataset.id = card.id;
+  el.tabIndex = 0;
 
+  const desc = cardDescription(card);
   const tags = (card.tags || [])
     .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
     .join("");
 
   el.innerHTML = `
     <h3 class="card-title">${escapeHtml(card.title)}</h3>
-    ${card.body ? `<p class="card-body">${escapeHtml(card.body)}</p>` : ""}
+    ${desc ? `<p class="card-desc">${escapeHtml(desc)}</p>` : ""}
     ${tags ? `<div class="tags">${tags}</div>` : ""}
   `;
 
   el.addEventListener("dragstart", onDragStart);
   el.addEventListener("dragend", onDragEnd);
+  el.addEventListener("click", () => {
+    if (suppressClick) {
+      suppressClick = false;
+      return;
+    }
+    openCard(card.id);
+  });
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openCard(card.id);
+    }
+  });
   return el;
 }
 
@@ -120,10 +155,9 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-let dragId = null;
-
 function onDragStart(e) {
   dragId = e.currentTarget.dataset.id;
+  didDrag = false;
   e.currentTarget.classList.add("dragging");
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragId);
@@ -131,7 +165,9 @@ function onDragStart(e) {
 
 function onDragEnd(e) {
   e.currentTarget.classList.remove("dragging");
+  if (didDrag) suppressClick = true;
   dragId = null;
+  didDrag = false;
   document.querySelectorAll(".column.drag-over").forEach((c) => c.classList.remove("drag-over"));
 }
 
@@ -158,6 +194,7 @@ function onDrop(e) {
   const card = boardData.cards.find((c) => c.id === id);
   if (!card || card.column === nextCol) return;
 
+  didDrag = true;
   card.column = nextCol;
   saveLocal();
   updateMeta(true);
@@ -167,6 +204,114 @@ function onDrop(e) {
 
 function columnTitle(id) {
   return boardData.columns.find((c) => c.id === id)?.title || id;
+}
+
+async function openCard(cardId) {
+  const card = boardData.cards.find((c) => c.id === cardId);
+  if (!card) return;
+
+  modalTitle.textContent = card.title;
+  modalDesc.textContent = cardDescription(card);
+  modalFile.textContent = card.file || `(파일 없음: ${card.id}.md)`;
+  modalBody.innerHTML = `<p class="md-error">불러오는 중…</p>`;
+  modalEl.hidden = false;
+  document.body.style.overflow = "hidden";
+
+  if (!card.file) {
+    modalBody.innerHTML = `<p class="md-error">이 카드에 연결된 MD 파일이 없습니다.</p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(card.file, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const md = await res.text();
+    modalBody.innerHTML = renderMarkdown(md);
+  } catch (err) {
+    modalBody.innerHTML = `<p class="md-error">MD를 불러오지 못했습니다 (${escapeHtml(err.message)}).<br/>경로: <code>${escapeHtml(card.file)}</code></p>`;
+  }
+}
+
+function closeModal() {
+  modalEl.hidden = true;
+  document.body.style.overflow = "";
+}
+
+/** 아주 작은 마크다운 서브셋 (제목·인용·목록·인라인 코드·링크·문단). */
+function renderMarkdown(src) {
+  const lines = String(src).replace(/\r\n/g, "\n").split("\n");
+  const html = [];
+  let inUl = false;
+  let inOl = false;
+
+  const closeLists = () => {
+    if (inUl) {
+      html.push("</ul>");
+      inUl = false;
+    }
+    if (inOl) {
+      html.push("</ol>");
+      inOl = false;
+    }
+  };
+
+  const inline = (text) => {
+    let t = escapeHtml(text);
+    t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    return t;
+  };
+
+  for (const raw of lines) {
+    const line = raw;
+    if (/^\s*$/.test(line)) {
+      closeLists();
+      continue;
+    }
+    if (line.startsWith("### ")) {
+      closeLists();
+      html.push(`<h3>${inline(line.slice(4))}</h3>`);
+      continue;
+    }
+    if (line.startsWith("## ")) {
+      closeLists();
+      html.push(`<h2>${inline(line.slice(3))}</h2>`);
+      continue;
+    }
+    if (line.startsWith("# ")) {
+      closeLists();
+      html.push(`<h1>${inline(line.slice(2))}</h1>`);
+      continue;
+    }
+    if (line.startsWith("> ")) {
+      closeLists();
+      html.push(`<blockquote>${inline(line.slice(2))}</blockquote>`);
+      continue;
+    }
+    if (/^[-*] /.test(line)) {
+      if (!inUl) {
+        closeLists();
+        html.push("<ul>");
+        inUl = true;
+      }
+      html.push(`<li>${inline(line.replace(/^[-*] /, ""))}</li>`);
+      continue;
+    }
+    if (/^\d+\. /.test(line)) {
+      if (!inOl) {
+        closeLists();
+        html.push("<ol>");
+        inOl = true;
+      }
+      html.push(`<li>${inline(line.replace(/^\d+\. /, ""))}</li>`);
+      continue;
+    }
+    closeLists();
+    html.push(`<p>${inline(line)}</p>`);
+  }
+  closeLists();
+  return html.join("\n");
 }
 
 async function copyJson() {
@@ -198,8 +343,19 @@ async function boot() {
   const remote = await res.json();
   const local = loadLocal();
 
-  if (local && Array.isArray(local.cards) && Array.isArray(local.columns)) {
+  if (local) {
     boardData = local;
+    // 원격에만 있는 새 카드/파일 메타를 병합(열 위치는 local 유지)
+    const localById = Object.fromEntries(local.cards.map((c) => [c.id, c]));
+    boardData.columns = remote.columns;
+    boardData.cards = remote.cards.map((remoteCard) => {
+      const prev = localById[remoteCard.id];
+      if (!prev) return remoteCard;
+      return {
+        ...remoteCard,
+        column: prev.column || remoteCard.column,
+      };
+    });
     updateMeta(true);
   } else {
     boardData = cloneData(remote);
@@ -218,6 +374,14 @@ document.getElementById("btn-reset").addEventListener("click", async () => {
   updateMeta(false);
   render();
   toast("저장소 JSON으로 되돌렸습니다");
+});
+
+document.getElementById("modal-close").addEventListener("click", closeModal);
+modalEl.addEventListener("click", (e) => {
+  if (e.target?.dataset?.close) closeModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !modalEl.hidden) closeModal();
 });
 
 boot().catch((err) => {

@@ -1,6 +1,6 @@
 # 백로그
 
-> **읽기 쉬운 칸반:** [board/](board/) (GitHub Pages: `/board/`) — 카드 데이터는 [`board/cards.json`](board/cards.json).  
+> **읽기 쉬운 칸반:** [board/](board/) (GitHub Pages: `/board/`) — **7열** · 카드=`cards/<id>.md` · [`board/cards.json`](board/cards.json).  
 > **정본 메모** — 앞으로 할 일·아이디어. feature로 뽑을 때 `/feature` → `docs/design/systems/<slug>.md` + `tasks/<slug>-tasks.md`.  
 > Obsidian `Obsidian/Dice Cat Tower/TODO.md`는 개인 메모; **보드와 어긋나면 cards.json을 맞춘 뒤 이 파일도 갱신.**  
 > **기획 방향:** [gdd-cat-tower-casino.md](gdd-cat-tower-casino.md) §4 (2026-06-21)  
