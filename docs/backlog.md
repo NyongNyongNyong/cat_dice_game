@@ -65,6 +65,7 @@
 
 - [x] 6면 hover · 굴리기 전 미리보기
 - [ ] 비 6면 주사위 preview
+- [ ] Hover 시 특수면 설명도 팝업에 표시 (`hover-special-face-desc`)
 
 ---
 
@@ -79,6 +80,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-17 | Hover 특수면 설명 백로그 (`hover-special-face-desc`) |
 | 2026-07-17 | script-preloads: `.godot` 캐시 비의존 preload 규칙·스펙 |
 | 2026-07-17 | 칸반 링크 README 상단 · REROLL→READY |
 | 2026-07-17 | 웹 칸반(`docs/board/`) 추가 — 가독용 보드, 데이터는 cards.json |
