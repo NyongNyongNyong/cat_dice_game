@@ -3,7 +3,7 @@
 > **문서 유형:** 시스템 스펙 (규칙·알고리즘·밸런스)  
 > **기획 참조:** [gdd-cat-tower-casino.md](../../gdd-cat-tower-casino.md) §9  
 > **이전:** [hand-scoring-v1.md](hand-scoring-v1.md) (가치=1, Straight/Stair 계층 누적)  
-> **구현:** `game/scripts/core/hand_calculator.gd` — **v2 반영 완료.** **정본(밸런스·규칙): 본 문서.**  
+> **구현:** `scripts/core/hand_calculator.gd` — **v2 반영 완료.** **정본(밸런스·규칙): 본 문서.**  
 > **상태:** v2 플레이테스트용 밸런스 초안 · 코드 동기화됨
 
 ---

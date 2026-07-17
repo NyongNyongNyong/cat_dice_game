@@ -80,6 +80,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-17 | Godot 루트=저장소 루트 (`game/` 제거, Git 셸→`tools/`) |
 | 2026-07-17 | Hover 특수면 설명 백로그 (`hover-special-face-desc`) |
 | 2026-07-17 | script-preloads: `.godot` 캐시 비의존 preload 규칙·스펙 |
 | 2026-07-17 | 칸반 링크 README 상단 · REROLL→READY |

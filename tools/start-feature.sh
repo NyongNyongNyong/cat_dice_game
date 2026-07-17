@@ -9,8 +9,8 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
 cd "$ROOT"
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: scripts/start-feature.sh <short-name>"
-  echo "  example: scripts/start-feature.sh dice-roll  →  feature/dice-roll"
+  echo "Usage: tools/start-feature.sh <short-name>"
+  echo "  example: tools/start-feature.sh dice-roll  →  feature/dice-roll"
   exit 1
 fi
 
@@ -38,4 +38,4 @@ fi
 
 git checkout -b "$BRANCH"
 echo "==> on $BRANCH (from main)"
-echo "    work → commit → scripts/merge-feature.sh"
+echo "    work → commit → tools/merge-feature.sh"

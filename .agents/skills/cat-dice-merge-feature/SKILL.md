@@ -1,6 +1,6 @@
 ---
 name: cat-dice-merge-feature
-description: Use when the user asks /merge-feature, merge feature, merge-only, or push an already committed feature branch in the Cat Tower Casino Godot project. Merge a clean, already-committed feature/* branch to main with scripts/merge-feature.sh and stop safely if origin/main changed.
+description: Use when the user asks /merge-feature, merge feature, merge-only, or push an already committed feature branch in the Cat Tower Casino Godot project. Merge a clean, already-committed feature/* branch to main with tools/merge-feature.sh and stop safely if origin/main changed.
 ---
 
 # Merge Feature
@@ -14,8 +14,8 @@ Use this skill only for the exceptional merge-only workflow in the Cat Tower Cas
 3. Run the repository script from the repo root:
 
 ```bash
-chmod +x scripts/merge-feature.sh 2>/dev/null || true
-./scripts/merge-feature.sh [options] [feature/branch]
+chmod +x tools/merge-feature.sh 2>/dev/null || true
+./tools/merge-feature.sh [options] [feature/branch]
 ```
 
 If the user requested branch deletion after merge, pass `-y`.

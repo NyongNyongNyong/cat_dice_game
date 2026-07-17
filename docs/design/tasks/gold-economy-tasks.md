@@ -10,7 +10,7 @@
 - `docs/gdd-cat-tower-casino.md`
 - `docs/design/systems/gold-economy.md`
 - `docs/design/systems/README.md`
-- `game/data/economy/gold_reward.json`
+- `data/economy/gold_reward.json`
 
 **수정 금지:**
 - 족보·점수 공식 본문
@@ -27,8 +27,8 @@
 - 골드 획득 공식 v2 구현 및 예시 검증
 
 **수정 예상 파일:**
-- `game/scripts/core/gold_calculator.gd`
-- `game/scripts/core/gold_calculator_spec_test.gd`
+- `scripts/core/gold_calculator.gd`
+- `scripts/core/gold_calculator_spec_test.gd`
 
 **수정 금지:**
 - `hand_calculator.gd`, `hand-scoring-v2.md`
@@ -45,7 +45,7 @@
 - 골드 잔액·시그널·라운드 정산·리롤 차감 API
 
 **수정 예상 파일:**
-- `game/scripts/autoload/run_manager.gd`
+- `scripts/autoload/run_manager.gd`
 
 **수정 금지:**
 - 족보 계산, `FLOOR_TARGETS` 밸런스 임의 변경
@@ -63,7 +63,7 @@
 - 목표 달성 후 리롤 1골드 차감·부족 시 차단
 
 **수정 예상 파일:**
-- `game/scripts/core/round_controller.gd`
+- `scripts/core/round_controller.gd`
 
 **수정 금지:**
 - 리롤 Preview 계산, 족보 규칙
@@ -80,8 +80,8 @@
 - 헤더 골드 표시, 칩 라벨, 골드 획득·리롤 안내
 
 **수정 예상 파일:**
-- `game/scenes/game/run_scene.tscn`
-- `game/scripts/ui/run_scene.gd`
+- `scenes/game/run_scene.tscn`
+- `scripts/ui/run_scene.gd`
 
 **수정 금지:**
 - 상점 오퍼 가격 (이번 제외), score_phase_presenter 연출

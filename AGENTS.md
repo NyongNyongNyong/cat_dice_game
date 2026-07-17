@@ -9,17 +9,17 @@ docs/              # 기획·설계 — res 밖
   gdd-*.md         # 기획 (비전·방향)
   design/          # 구현 설계 (씬·스크립트·범위)
     systems/       # 시스템 스펙 (족보 계산 등)
-scripts/           # git 셸 (Godot 아님)
-game/              # Godot 루트 (project.godot)
-  data/            # res://data/ JSON 카탈로그
-  scenes/game|ui|dice/
-  scripts/autoload|core|ui|dice/
-  resources/dice|items/
-  assets/images|sounds/
+tools/             # git 셸 (start-feature, push-feature, …)
+project.godot      # Godot 루트 = 저장소 루트
+data/              # res://data/ JSON 카탈로그
+scenes/game|ui|dice/
+scripts/autoload|core|ui|dice/
+resources/dice|items/
+assets/images|sounds/
 ```
 
-- **씬·스크립트·에셋**은 `game/` 안만. `docs/`, repo `scripts/*.sh`는 res 밖.
-- 로직 → `scripts/**/*.gd` · UI 배치 → `scenes/**` · 정의 JSON → `game/data/`
+- **씬·스크립트·에셋**은 저장소 루트(Godot 프로젝트) 안만. `docs/`, `tools/*.sh`는 res 밖.
+- 로직 → `scripts/**/*.gd` · UI 배치 → `scenes/**` · 정의 JSON → `data/`
 
 ## 문서
 
@@ -38,17 +38,17 @@ game/              # Godot 루트 (project.godot)
 
 `feature/<slug>` — 해당 피쳐 파일만. 방향은 GDD, 구현 범위는 설계 문서.
 
-**Agent:** 수정 전에 스스로 `game/...` 경로 목록을 짧게 쓰고, 그 안에서만 작업 (사용자에게 “경로 적어줘” 요구하지 않음).
+**Agent:** 수정 전에 스스로 `scenes/`·`scripts/` 등 경로 목록을 짧게 쓰고, 그 안에서만 작업 (사용자에게 “경로 적어줘” 요구하지 않음).
 
 ## Godot
 
-- **4.7 stable** 고정 (`game/project.godot`, `game/GODOT_VERSION`). 다른 마이너 사용 금지.
+- **4.7 stable** 고정 (`project.godot`, `GODOT_VERSION`). 다른 마이너 사용 금지.
 - **Context7 (Godot API):** `.cursor/rules/context7-godot.mdc` — library ID `/websites/godotengine_en_4_7`
 - 같은 `.tscn` 동시 수정 금지
 - **스크립트 의존성:** 다른 `.gd`는 `preload("res://...")`로 명시. `.godot/` 캐시(gitignore)에만 의존하는 코드 금지. 새 스크립트/씬의 `.uid`는 커밋. 상세: `docs/design/systems/script-preloads.md`
 - **Headless 테스트 실행:** Godot는 기본 로그를 `user://logs`에 쓰므로 샌드박스 에이전트에서 `Failed to open 'user://logs/...'` 후 크래시할 수 있다. 항상 repo 내부 로그 파일을 지정한다.
-  - 권장 형식: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
-  - 씬 로딩 확인: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --quit-after 1`
+  - 권장 형식: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path . --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
+  - 씬 로딩 확인: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path . --log-file .godot/agent-headless.log --quit-after 1`
   - 실패 원인이 권한이 아니라 스크립트 오류인지 보기 위해, `--log-file` 없이 먼저 실행하지 않는다.
 
 ## 점수

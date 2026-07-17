@@ -115,7 +115,7 @@ S ≥ T  →  n = floor(log(S / T) / log(r)) + 1
 
 ### 데이터
 
-- `game/data/economy/gold_reward.json` — `threshold_ratio`, `reroll_cost` (런타임 로드는 추후; 현재는 `gold_calculator.gd` 상수).
+- `data/economy/gold_reward.json` — `threshold_ratio`, `reroll_cost` (런타임 로드는 추후; 현재는 `gold_calculator.gd` 상수).
 
 ---
 

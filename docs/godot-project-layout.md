@@ -2,7 +2,7 @@
 
 **엔진:** Godot **4.7 stable** ([다운로드](https://godotengine.org/download/archive/4.7-stable/))
 
-**정본:** repo의 `game/` 트리. README 저장소 구조와 동일.
+**정본:** 저장소 루트(= Godot 프로젝트). README 저장소 구조와 동일.
 
 ## `res://` 매핑
 
@@ -18,7 +18,7 @@
 | `res://resources/dice/` · `items/` | `.tres` (JSON 이전 후) |
 | `res://assets/images/` · `sounds/` | 아트·오디오 |
 
-Repo 밖: `docs/`, `scripts/*.sh`, `.cursor/`
+Godot res 밖: `docs/`, `tools/*.sh`, `.cursor/`
 
 ## feature → 폴더 (예)
 

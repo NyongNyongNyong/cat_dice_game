@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
     --no-delete) DELETE_BRANCH=0; shift ;;
     -h|--help)
       cat <<'EOF'
-Usage: scripts/push-feature.sh -m "feat: message" [options]
+Usage: tools/push-feature.sh -m "feat: message" [options]
 
   feature/* 브랜치에서: 변경사항 커밋 → main 동기화 검사 → merge & push
 
