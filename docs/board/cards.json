@@ -115,7 +115,7 @@
       "id": "hover-special-face-desc",
       "title": "Hover 특수면 설명",
       "description": "특수면이 있는 주사위 hover 시 6면과 함께 특수면 설명을 팝업에 표시.",
-      "column": "review",
+      "column": "ideas",
       "file": "cards/hover-special-face-desc.md",
       "tags": ["Preview", "특수면", "후보"]
     },
