@@ -45,6 +45,7 @@ game/              # Godot 루트 (project.godot)
 - **4.7 stable** 고정 (`game/project.godot`, `game/GODOT_VERSION`). 다른 마이너 사용 금지.
 - **Context7 (Godot API):** `.cursor/rules/context7-godot.mdc` — library ID `/websites/godotengine_en_4_7`
 - 같은 `.tscn` 동시 수정 금지
+- **스크립트 의존성:** 다른 `.gd`는 `preload("res://...")`로 명시. `.godot/` 캐시(gitignore)에만 의존하는 코드 금지. 새 스크립트/씬의 `.uid`는 커밋. 상세: `docs/design/systems/script-preloads.md`
 - **Headless 테스트 실행:** Godot는 기본 로그를 `user://logs`에 쓰므로 샌드박스 에이전트에서 `Failed to open 'user://logs/...'` 후 크래시할 수 있다. 항상 repo 내부 로그 파일을 지정한다.
   - 권장 형식: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
   - 씬 로딩 확인: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --quit-after 1`

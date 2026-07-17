@@ -46,7 +46,7 @@
 ### 플레이 화면
 
 - [x] 활성 족보 — [active-hands-panel.md](design/systems/active-hands-panel.md)
-- [ ] `feature/script-preloads` — `.godot` 캐시 없이 CLI 파싱
+- [x] `feature/script-preloads` — `.godot` 캐시 비의존 (preload 규칙·스펙)
 
 ### 상점
 
@@ -79,7 +79,8 @@
 
 | 날짜 | 변경 |
 |------|------|
-| 2026-07-17 | 칸반 링크 README 상단 · REROLL→READY · script-preloads는 아이디어로 |
+| 2026-07-17 | script-preloads: `.godot` 캐시 비의존 preload 규칙·스펙 |
+| 2026-07-17 | 칸반 링크 README 상단 · REROLL→READY |
 | 2026-07-17 | 웹 칸반(`docs/board/`) 추가 — 가독용 보드, 데이터는 cards.json |
 | 2026-07-04 | 칩=굴림 재화 확정 — 단발굴림·칩제거 가설 삭제, 드래그·hover 완료 반영, reroll 잔재 정리 항목 구체화 |
 | 2026-06-30 | v0.2 보드·행운 Phase A/B 완료 반영, 중복 마이그레이션 섹션 제거 |

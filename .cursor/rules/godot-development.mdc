@@ -47,6 +47,18 @@ res://assets/images/   res://assets/sounds/
 - 파일: snake_case (`golden_dice.tres`, `run_manager.gd`)
 - 클래스명은 파일명과 일치 (`class_name` 사용 시)
 
+## 스크립트 의존성 (`.godot` 캐시 비의존)
+
+`.godot/` 는 **gitignore** — 다른 PC·클론에는 없다. 에이전트/로컬 캐시에만 의존하는 코드를 만들지 않는다.
+
+- 다른 스크립트를 쓸 때 **항상** `const Foo := preload("res://scripts/.../foo.gd")` (경로 명시).
+- `class_name`만으로 다른 파일의 심볼을 “있다고 가정”하고 쓰지 말 것. preload 후 타입·생성에 사용.
+- `.godot/` 내용을 커밋·수정·참조하지 않음 (headless `--log-file .godot/...` 로 **로그 파일만** 쓰는 것은 OK).
+- 새 `.gd`/`.tscn`/`.tres` 추가 시 짝 `.uid`를 저장소에 포함.
+- 변경 후 headless로 로드·스펙 테스트를 한 번 돌린다 (위 Headless 절).
+
+상세: `docs/design/systems/script-preloads.md`.
+
 ## GDD 연동
 
 - 점수·클리어·칩 구간은 GDD §9–§10과 일치해야 한다. 수식 변경 시 GDD도 같이 수정한다.
