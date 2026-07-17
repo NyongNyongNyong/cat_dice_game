@@ -7,7 +7,7 @@ disable-model-invocation: true
 # Push (feature 완료 → main) — **기본 종료 명령**
 
 **언제:** 피쳐 개발이 **끝났을 때** (거의 항상 이것만 사용).  
-**브랜치 시작:** `./scripts/start-feature.sh <slug>` (또는 `git checkout -b feature/<slug>`).
+**브랜치 시작:** `./tools/start-feature.sh <slug>` (또는 `git checkout -b feature/<slug>`).
 
 `feature/*`에서 **커밋 → origin/main 신규 여부 확인 → 없으면 main merge & push**.  
 `origin/main`에 새 커밋이 pull 되면 **머지하지 않고 중단**(exit 2).
@@ -31,7 +31,7 @@ git diff --staged
 git diff --stat
 ```
 
-- `feature/*`가 아니면 중단하고 `scripts/start-feature.sh` 안내.
+- `feature/*`가 아니면 중단하고 `tools/start-feature.sh` 안내.
 - 변경 없고 이미 커밋만 남은 경우 → `-m` 없이 스크립트 실행 가능.
 - `git diff --stat`이 이번 feature slug·요청과 안 맞으면: **에이전트가** 범위 이탈로 경고하고, 분리·재브랜치 제안 (`feature-scope` rule). 사용자에게 경로 목록 작성을 요구하지 않음.
 
@@ -78,9 +78,9 @@ git diff --stat
 ### 4. 스크립트 실행
 
 ```bash
-chmod +x scripts/push-feature.sh scripts/merge-feature.sh 2>/dev/null || true
-./scripts/push-feature.sh -m "feat: short description"
-# 삭제까지: ./scripts/push-feature.sh -m "..." -y
+chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true
+./tools/push-feature.sh -m "feat: short description"
+# 삭제까지: ./tools/push-feature.sh -m "..." -y
 ```
 
 ### 5. exit 2 (STOP)일 때
@@ -110,5 +110,5 @@ chmod +x scripts/push-feature.sh scripts/merge-feature.sh 2>/dev/null || true
 
 ## 관련
 
-- 브랜치 시작: `./scripts/start-feature.sh <slug>`
-- 이미 커밋됨·머지만: `./scripts/merge-feature.sh` (스크립트 직접 실행)
+- 브랜치 시작: `./tools/start-feature.sh <slug>`
+- 이미 커밋됨·머지만: `./tools/merge-feature.sh` (스크립트 직접 실행)

@@ -17,6 +17,6 @@
 - [ ] 굴림 연출 중(ROLLING/SCORING)·레버 굴림 중에는 툴팁 비표시
 - [ ] 잠금 칸·빈 칸에는 툴팁 비표시
 - [ ] 상점 화면 Hover 기존 동작 유지 (리네이밍 후 회귀 없음)
-- [x] Headless 씬 로드 통과 — `godot --headless --path game --quit-after 2` EXIT 0, 오류 없음 (리네이밍 후 uid 캐시 재임포트로 stale 참조 해소)
+- [x] Headless 씬 로드 통과 — `godot --headless --path . --quit-after 2` EXIT 0, 오류 없음 (리네이밍 후 uid 캐시 재임포트로 stale 참조 해소)
 
 > 나머지 검증(hover 표시 동작)은 에디터 플레이로 확인 필요. lint/참조 정합성·씬 로드는 통과.

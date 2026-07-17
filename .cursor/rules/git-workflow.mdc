@@ -34,7 +34,7 @@ alwaysApply: true
 
 | 명령 / 스크립트 | 때 |
 |-----------------|-----|
-| `./scripts/start-feature.sh <slug>` | 작업 시작 |
+| `./tools/start-feature.sh <slug>` | 작업 시작 |
 | **`/push`** | 피쳐 완료 (커밋+merge, **일반적으로 이것만**) |
 
 `origin/main` 신규 커밋 시 **pull 후 중단** → feature에서 `git merge main` → `/push` 재실행. README 참고.

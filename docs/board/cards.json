@@ -120,6 +120,14 @@
       "tags": ["Preview", "특수면", "후보"]
     },
     {
+      "id": "godot-project-root",
+      "title": "Godot 루트 = 저장소 루트",
+      "description": "game/ 내용을 루트로 이동 · Git 셸은 tools/ · Cursor와 Godot 루트 일치.",
+      "column": "review",
+      "file": "cards/godot-project-root.md",
+      "tags": ["툴링", "레이아웃"]
+    },
+    {
       "id": "board-unlock-shop",
       "title": "슬롯 해금 상점·비용 연동",
       "description": "GDD §11 미정 — 보드 슬롯을 상점에서 골드로 해금.",

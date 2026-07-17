@@ -124,10 +124,10 @@
 
 | 항목 | 경로 |
 |------|------|
-| 로스터 | `game/scripts/core/dice_roster.gd` (`add_dice`) |
+| 로스터 | `scripts/core/dice_roster.gd` (`add_dice`) |
 | 상점 UI | `shop_scene.tscn` · `dice_shop_presenter.gd` |
 | 드래그/드롭 | `shop_offer_die.gd` (소스) · `shop_pool_cell.gd` (대상) |
-| 카탈로그 | `game/data/dice/dice_defs.json` · `dice_catalog_service.gd` |
+| 카탈로그 | `data/dice/dice_defs.json` · `dice_catalog_service.gd` |
 | 테스트 | `dice_roster_spec_test.gd` · `shop_purchase_spec_test.gd` |
 
 `RunManager.DICE_COUNT`(10)는 레거시 fallback; 로스터가 있으면 `dice_resources.size()` 우선.

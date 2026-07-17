@@ -53,7 +53,7 @@ flowchart LR
   S3["3. 문서 탐색\nGDD·systems·v0.1"]
   S4["4. 스펙 작성\nsystems/slug.md"]
   S5["5. Task\n tasks/slug-tasks.md"]
-  S6["6. 구현\ngame/"]
+  S6["6. 구현\nscripts/·scenes/"]
   S7["7. Audit"]
 
   S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
@@ -64,7 +64,7 @@ flowchart LR
 | 2 | Git 브랜치 | `feature/dice-hover-reroll-preview` |
 | 4 | 시스템 스펙 | `docs/design/systems/<slug>.md` |
 | 5 | Task | `docs/design/tasks/<slug>-tasks.md` |
-| 6 | Godot 코드·씬 | `game/scripts/`, `game/scenes/` |
+| 6 | Godot 코드·씬 | `scripts/`, `scenes/` |
 
 **모든 편집(문서·Task·코드)은 Step 2 이후 `feature/<slug>`에서만** 한다.
 
@@ -77,7 +77,7 @@ flowchart TB
   FB["유저 피드백\n평문 OK"]
   SP["1. 스펙 갱신\nsystems/slug.md"]
   TK["2. Task/AC 갱신\ntasks/slug-tasks.md"]
-  CD["3. 코드 수정\ngame/"]
+  CD["3. 코드 수정\nscripts/·scenes/"]
   MA["4. 미니 Audit\n응답 말미 3~5줄"]
   CHK{"완료?"}
 
@@ -137,8 +137,8 @@ flowchart TB
 ```
 
 ```bash
-./scripts/start-feature.sh <slug>    # 시작 (또는 /feature Step 2에서 에이전트 실행)
-./scripts/push-feature.sh -m "feat: ..."   # 완료
+./tools/start-feature.sh <slug>    # 시작 (또는 /feature Step 2에서 에이전트 실행)
+./tools/push-feature.sh -m "feat: ..."   # 완료
 ```
 
 ---

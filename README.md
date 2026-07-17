@@ -19,34 +19,32 @@
 ## 저장소 구조
 
 ```text
-Dice/                          # Git 루트 — Cursor에서 이 폴더를 연다
+Dice/                          # Git·Cursor·Godot 루트 (project.godot)
 ├── docs/                      # 기획·설계 (Godot res 밖)
 │   ├── gdd-*.md               # 기획
 │   └── design/                # 구현 설계
-├── scripts/                   # Git 셸 (start-feature, push-feature, …)
+├── tools/                     # Git 셸 (start-feature, push-feature, …)
 ├── .cursor/                   # Rules, Skills
 ├── AGENTS.md                  # Agent 요약
 ├── README.md
-│
-└── game/                      # Godot 프로젝트 (project.godot)
-    ├── project.godot
-    ├── data/                  # JSON 카탈로그 → res://data/
-    │   └── registry.json
-    ├── scenes/
-    │   ├── game/              # 런·층·라운드·상점
-    │   ├── ui/                # HUD, 메뉴
-    │   └── dice/              # 굴림·결과 연출
-    ├── scripts/
-    │   ├── autoload/          # DataRegistry, RunManager, …
-    │   ├── core/              # 점수·칩·런 로직
-    │   ├── ui/
-    │   └── dice/
-    ├── resources/             # .tres (JSON 이전 후)
-    │   ├── dice/
-    │   └── items/
-    └── assets/
-        ├── images/
-        └── sounds/
+├── project.godot
+├── data/                      # JSON 카탈로그 → res://data/
+│   └── registry.json
+├── scenes/
+│   ├── game/                  # 런·층·라운드·상점
+│   ├── ui/                    # HUD, 메뉴
+│   └── dice/                  # 굴림·결과 연출
+├── scripts/
+│   ├── autoload/              # DataRegistry, RunManager, …
+│   ├── core/                  # 점수·칩·런 로직
+│   ├── ui/
+│   └── dice/
+├── resources/                 # .tres
+│   ├── dice/
+│   └── items/
+└── assets/
+    ├── images/
+    └── sounds/
 ```
 
 ## Godot 실행
@@ -54,12 +52,12 @@ Dice/                          # Git 루트 — Cursor에서 이 폴더를 연�
 **엔진 버전: [4.7 stable](https://godotengine.org/download/archive/4.7-stable/)** (팀 고정 — 다른 마이너 사용 금지)
 
 1. Godot **4.7** 설치
-2. **Import** → `game/project.godot` 열기
+2. **Import** → `project.godot` 열기
 3. **Run Project** (F5) — 메인 씬: `scenes/game/main.tscn`
 
 ## 게임 데이터
 
-정적 정의: [`game/data/`](game/data/) · 진입점 `game/data/registry.json`
+정적 정의: [`data/`](data/) · 진입점 `data/registry.json`
 
 ## Feature 개발 워크플로
 
@@ -84,8 +82,8 @@ flowchart TB
 상세 다이어그램·문서 계층·금지 사항: **[Feature 워크플로](docs/design/feature-workflow.md)**
 
 ```bash
-./scripts/start-feature.sh dice-roll          # 수동 브랜치 시작 (선택)
-./scripts/push-feature.sh -m "feat: ..."      # /push 와 동일
+./tools/start-feature.sh dice-roll          # 수동 브랜치 시작 (선택)
+./tools/push-feature.sh -m "feat: ..."      # /push 와 동일
 ```
 
 `origin/main` 갱신 시 push 스크립트 **중단** → `git merge main` → 재실행.
@@ -93,7 +91,7 @@ flowchart TB
 ### Feature 범위
 
 - 기획: GDD만 · 개발 범위: `feature/<slug>` 브랜치명·합의
-- 예: `feature/shop-ui` → `game/scenes/ui/`, `game/scenes/game/shop*`, `game/scripts/ui/`
+- 예: `feature/shop-ui` → `scenes/ui/`, `scenes/game/shop*`, `scripts/ui/`
 
 ## Git
 

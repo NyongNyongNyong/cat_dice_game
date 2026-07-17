@@ -217,7 +217,7 @@ git status --porcelain
 |-----------|------|
 | 이미 `feature/<slug>` | 그대로 진행 |
 | `feature/<다른-slug>` | 이 feature와 무관하면 중단. 별도 브랜치·stash·커밋 정리 후 재시도 안내 |
-| `main` 등, `feature/<slug>` 없음 | `./scripts/start-feature.sh <slug>` 실행 |
+| `main` 등, `feature/<slug>` 없음 | `./tools/start-feature.sh <slug>` 실행 |
 | `feature/<slug>` 이미 존재, 체크아웃만 필요 | `git checkout feature/<slug>` |
 
 `start-feature.sh` 전제:
@@ -227,7 +227,7 @@ git status --porcelain
 
 브랜치 전환 후 응답 **맨 앞**에 한 줄로 밝힌다:
 
-`브랜치: feature/<slug> · 범위: game/.../ (2~5개 경로)`
+`브랜치: feature/<slug> · 범위: scenes/.../ · scripts/.../ (2~5개 경로)`
 
 ### Step 3. 관련 문서 탐색
 
@@ -303,11 +303,11 @@ Task 형식:
 git branch --show-current   # feature/<slug> 여야 함
 ```
 
-`feature-scope` rule을 따른다. slug + 요청으로 수정할 `game/` 경로 2~5개 안에서만 편집.
+`feature-scope` rule을 따른다. slug + 요청으로 수정할 `scenes/`·`scripts/` 등 경로 2~5개 안에서만 편집.
 
 Task 순서대로 구현한다. 스펙과 충돌하면 코드를 임의로 바꾸지 말고 문서에 TODO를 남긴다.
 
-Godot 4.7 stable, `game/` 레이아웃, 기존 컨벤션을 따른다. Godot API 확인은 `.cursor/rules/context7-godot.mdc`.
+Godot 4.7 stable, 저장소 루트 레이아웃, 기존 컨벤션을 따른다. Godot API 확인은 `.cursor/rules/context7-godot.mdc`.
 
 ### Step 7. 자체 Audit
 
@@ -349,7 +349,7 @@ Godot 4.7 stable, `game/` 레이아웃, 기존 컨벤션을 따른다. Godot API
 
 | 스킬 / 스크립트 | 역할 |
 |-----------------|------|
-| `./scripts/start-feature.sh` | `/feature` Step 2 — `feature/<slug>` 생성 |
+| `./tools/start-feature.sh` | `/feature` Step 2 — `feature/<slug>` 생성 |
 | `/feature` | 브랜치 → 문서 → Task → 구현 → Audit (이 스킬) |
 | `/change` | 단순 변경 (문서 우선 강제 없음) |
 | `/push` | feature 완료 후 main 반영 |

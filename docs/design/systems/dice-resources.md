@@ -44,8 +44,8 @@
 | `get_roster_preview_face()` | **굴리기 전** 슬롯 표시용 면 — 특수면 1개 있으면 그중 첫 특수면, 없으면 **최고 pip** `NumberFace` |
 | `get_roster_preview_value(context_faces?)` | 위 면을 `resolve_face_value`로 해석한 값 (컨텍스트 없으면 `get_faces()` 사용) |
 
-**카탈로그 정본:** [dice-catalog.md](dice-catalog.md) — `game/data/dice/dice_defs.json` (v2, 면 6개 필수).  
-**레거시 fallback:** `game/resources/dice/basic_d6.tres` — `RoundController` 기본 리소스·에디터 참고용.
+**카탈로그 정본:** [dice-catalog.md](dice-catalog.md) — `data/dice/dice_defs.json` (v2, 면 6개 필수).  
+**레거시 fallback:** `resources/dice/basic_d6.tres` — `RoundController` 기본 리소스·에디터 참고용.
 
 ### 2.2 `DiceLoadoutResource`
 
@@ -203,11 +203,11 @@ compute_from_faces(dice_faces, dice_index, candidate_faces)
 
 | 항목 | 경로 |
 |------|------|
-| 계산·해석 | `game/scripts/core/dice_resource.gd` |
+| 계산·해석 | `scripts/core/dice_resource.gd` |
 | 면 타입 | `number_face.gd`, `special_face.gd`, `dice_face.gd` |
-| 속성 | `game/scripts/core/face_properties/` |
+| 속성 | `scripts/core/face_properties/` |
 | 라운드 | `round_controller.gd` |
-| 뷰 | `game/scripts/dice/dice.gd`, `run_scene.gd` |
+| 뷰 | `scripts/dice/dice.gd`, `run_scene.gd` |
 | Preview | `reroll_preview_calculator.gd` — `compute_from_faces` |
 | 회귀 테스트 | `dice_resource_spec_test.gd` — 해석·loadout·change-to-highest·number face display |
 

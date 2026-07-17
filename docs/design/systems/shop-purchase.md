@@ -19,7 +19,7 @@
 
 ## 2. 구매 가능 주사위 (v0.1 고정)
 
-랜덤 풀은 추후. 현재 `game/data/economy/shop_offers.json`:
+랜덤 풀은 추후. 현재 `data/economy/shop_offers.json`:
 
 | id | 면 | 특수 면 효과 | 가격 |
 |----|-----|-------------|------|

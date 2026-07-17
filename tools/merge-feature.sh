@@ -18,7 +18,7 @@ while [[ $# -gt 0 ]]; do
     --no-delete) DELETE_BRANCH=0; shift ;;
     -h|--help)
       cat <<'EOF'
-Usage: scripts/merge-feature.sh [options] [feature/branch-name]
+Usage: tools/merge-feature.sh [options] [feature/branch-name]
 
   현재 브랜치가 feature/* 이면 인자 생략 가능.
 
@@ -49,7 +49,7 @@ fi
 
 if [[ "$FEATURE" != feature/* ]]; then
   echo "error: branch must be feature/* (got: ${FEATURE:-<none>})"
-  echo "  checkout a feature branch or pass: scripts/merge-feature.sh feature/my-work"
+  echo "  checkout a feature branch or pass: tools/merge-feature.sh feature/my-work"
   exit 1
 fi
 
@@ -94,7 +94,7 @@ if [[ -n "$REMOTE" ]] && git rev-parse --verify "$REMOTE/main" >/dev/null 2>&1; 
       echo "  Next:"
       echo "    git merge main          # on $FEATURE (or: git rebase main)"
       echo "    # resolve conflicts, test"
-      echo "    /push  or  ./scripts/push-feature.sh -m \"...\""
+      echo "    /push  or  ./tools/push-feature.sh -m \"...\""
       exit 2
     fi
   fi

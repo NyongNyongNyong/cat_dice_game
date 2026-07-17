@@ -1,7 +1,7 @@
 # Dice Roll Presentation
 
 > 문서 유형: 구현 설계 메모  
-> 관련 코드: `game/scripts/ui/roll_phase_presenter.gd`, `game/scripts/ui/run_scene.gd`  
+> 관련 코드: `scripts/ui/roll_phase_presenter.gd`, `scripts/ui/run_scene.gd`  
 > 상태: v0.1 구현 메모
 
 ## 목적
@@ -78,8 +78,8 @@ await _roll_presenter.play_reroll(
 예:
 
 ```text
-game/scripts/ui/roll_presenters/physics_roll_presenter.gd
-game/scripts/ui/roll_presenters/three_d_roll_presenter.gd
+scripts/ui/roll_presenters/physics_roll_presenter.gd
+scripts/ui/roll_presenters/three_d_roll_presenter.gd
 ```
 
 새 스크립트가 같은 public method를 제공하면 `run_scene.tscn`의 `RollPhasePresenter` 노드 script만 바꿔도 된다.

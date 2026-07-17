@@ -1,5 +1,15 @@
-# Headless / agent logs (repo root --log-file)
+# Godot 4
 .godot/
+*.translation
 
-# Local editor config
+# Import cache (optional: some teams commit .import)
+# *.import
+
+export_presets.cfg
+export/
+
+# OS
+.DS_Store
+
+# Local editor / notes
 .obsidian/

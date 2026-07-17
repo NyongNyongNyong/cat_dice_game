@@ -20,7 +20,7 @@
 ```bash
 git branch --show-current
 git status --porcelain
-./scripts/start-feature.sh dice-hover-reroll-preview
+./tools/start-feature.sh dice-hover-reroll-preview
 # → feature/dice-hover-reroll-preview 에서 문서·Task·코드 모두 진행
 ```
 
@@ -59,8 +59,8 @@ git status --porcelain
 - 특정 주사위 하나를 각 면으로 바꿨을 때의 최고/최저 점수 변화량 계산
 
 **수정 예상 파일:**
-- `game/scripts/core/reroll_preview_calculator.gd` (신규)
-- `game/scripts/core/hand_calculator.gd` (호출만)
+- `scripts/core/reroll_preview_calculator.gd` (신규)
+- `scripts/core/hand_calculator.gd` (호출만)
 
 **수정 금지:**
 - `hand-scoring-v2.md` 족보 규칙
@@ -78,8 +78,8 @@ git status --porcelain
 - 주사위 Hover 시 best_delta / worst_delta를 팝업으로 표시
 
 **수정 예상 파일:**
-- `game/scripts/ui/reroll_preview_presenter.gd`
-- `game/scenes/dice/dice.gd`
+- `scripts/ui/reroll_preview_presenter.gd`
+- `scenes/dice/dice.gd`
 
 **완료 조건:**
 - Hover 시 `▲ +n`, `▼ -n` 형식으로 표시된다.

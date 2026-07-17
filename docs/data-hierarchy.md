@@ -1,12 +1,12 @@
 # 게임 정의 데이터 계층
 
-구현: [`game/data/`](../game/data/) (`res://data/`).  
+구현: [`data/`](../data/) (`res://data/`).  
 기획: [gdd-cat-tower-casino.md](gdd-cat-tower-casino.md) · 설계: [design/v0.1-initial-playable.md](design/v0.1-initial-playable.md) · 족보: [design/systems/hand-scoring-v2.md](design/systems/hand-scoring-v2.md)
 
 ## 포함 (풀 게임 데이터 — v0.1 미사용)
 
 ```
-game/data/registry.json
+data/registry.json
 core/       symbols, effects
 dice/       dice_defs, starter_loadout
 scoring/    score_rules, hands (가치 — hand-scoring-v2 스펙)

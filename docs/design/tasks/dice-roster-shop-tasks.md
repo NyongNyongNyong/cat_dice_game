@@ -23,9 +23,9 @@
 **목적:** 시작 4기본, 교체 API
 
 **수정 예상 파일:**
-- `game/scripts/core/dice_roster.gd`
-- `game/scripts/autoload/run_manager.gd`
-- `game/scripts/core/dice_roster_spec_test.gd`
+- `scripts/core/dice_roster.gd`
+- `scripts/autoload/run_manager.gd`
+- `scripts/core/dice_roster_spec_test.gd`
 
 **수정 금지:**
 - `hand_calculator.gd`
@@ -42,8 +42,8 @@
 **목적:** 로스터 → `dice_resources`, 동적 슬롯 수
 
 **수정 예상 파일:**
-- `game/scripts/ui/run_scene.gd`
-- `game/scenes/game/run_scene.tscn`
+- `scripts/ui/run_scene.gd`
+- `scenes/game/run_scene.tscn`
 
 **수정 금지:**
 - `score_phase_presenter.gd` 연출 규칙
@@ -59,9 +59,9 @@
 **목적:** Next Floor → 상점 → H 교체 → 다음 층
 
 **수정 예상 파일:**
-- `game/scripts/ui/dice_shop_presenter.gd`
-- `game/scenes/game/run_scene.tscn`
-- `game/scripts/ui/run_scene.gd`
+- `scripts/ui/dice_shop_presenter.gd`
+- `scenes/game/run_scene.tscn`
+- `scripts/ui/run_scene.gd`
 
 **완료 조건:**
 - AC 상점 플로우·교체·다음 층 수동 검증 가능

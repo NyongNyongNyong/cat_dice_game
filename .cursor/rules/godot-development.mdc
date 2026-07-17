@@ -19,13 +19,13 @@ alwaysApply: false
 ## Headless 테스트
 
 - Godot headless 실행은 기본 로그 위치 `user://logs` 때문에 샌드박스 환경에서 크래시할 수 있다. 항상 프로젝트 내부 로그 파일을 지정한다.
-- 권장 형식: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
-- 씬 로딩 확인: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path game --log-file .godot/agent-headless.log --quit-after 1`
+- 권장 형식: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path . --log-file .godot/agent-headless.log --script res://scripts/core/<test>.gd`
+- 씬 로딩 확인: `..\Godot_v4.7-stable_mono_win64_console.exe --headless --path . --log-file .godot/agent-headless.log --quit-after 1`
 - `--log-file` 없이 먼저 실행하지 않는다.
 
 ## 폴더 (생성 후 유지)
 
-Godot 루트: `game/` (`project.godot`). 상세: `docs/godot-project-layout.md`.
+Godot 루트: 저장소 루트 (`project.godot`). 상세: `docs/godot-project-layout.md`.
 
 ```
 res://scenes/game/   res://scenes/ui/   res://scenes/dice/
@@ -34,7 +34,7 @@ res://resources/dice/   res://resources/items/
 res://assets/images/   res://assets/sounds/
 ```
 
-`docs/`, repo `scripts/*.sh`는 res 밖. JSON 정의는 `game/data/` (`res://data/`). 루트·`game/` 밖에 `.tscn` 금지.
+`docs/`, `tools/*.sh`는 res 밖. JSON 정의는 `data/` (`res://data/`). Godot 트리 밖(`.cursor/`, `docs/`, `tools/`)에 `.tscn` 금지.
 
 ## 씬 vs 스크립트
 

@@ -7,8 +7,8 @@
 **수정 예상 파일:**
 - `docs/design/systems/dice-catalog.md`
 - `docs/design/systems/README.md`
-- `game/data/dice/dice_defs.json`
-- `game/data/dice/starter_loadout.json`
+- `data/dice/dice_defs.json`
+- `data/dice/starter_loadout.json`
 
 **수정 금지:** 족보·점수 스펙
 
@@ -21,9 +21,9 @@
 **목적:** JSON → `DiceResource` 빌드·캐시·starter id 목록
 
 **수정 예상 파일:**
-- `game/scripts/autoload/dice_catalog.gd`
-- `game/project.godot`
-- `game/scripts/core/dice_catalog_spec_test.gd`
+- `scripts/autoload/dice_catalog.gd`
+- `project.godot`
+- `scripts/core/dice_catalog_spec_test.gd`
 
 **완료 조건:** id 조회, 6면 검증 테스트 통과
 
@@ -34,9 +34,9 @@
 **목적:** id 기반 보유·교체, H 하드코딩 제거
 
 **수정 예상 파일:**
-- `game/scripts/core/dice_roster.gd`
-- `game/scripts/autoload/run_manager.gd`
-- `game/scripts/core/dice_roster_spec_test.gd`
+- `scripts/core/dice_roster.gd`
+- `scripts/autoload/run_manager.gd`
+- `scripts/core/dice_roster_spec_test.gd`
 
 **완료 조건:** `replace_at_index(slot, dice_id)` 동작
 
@@ -47,8 +47,8 @@
 **목적:** 오퍼 id 기반 교체 버튼
 
 **수정 예상 파일:**
-- `game/scripts/ui/dice_shop_presenter.gd`
-- `game/scripts/ui/run_scene.gd`
+- `scripts/ui/dice_shop_presenter.gd`
+- `scripts/ui/run_scene.gd`
 
 **완료 조건:** `dice_triple_h`로 교체 가능
 

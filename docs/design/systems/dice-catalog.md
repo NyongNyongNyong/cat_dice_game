@@ -5,7 +5,7 @@
 > **면·런타임:** [dice-resources.md](dice-resources.md) — `DiceResource` / `NumberFace` / `SpecialFace`  
 > **로스터·상점:** [dice-roster-shop.md](dice-roster-shop.md)  
 > **상태:** v1 구현  
-> **구현:** `dice_catalog_service.gd` · `dice_catalog.gd` (Autoload) · `game/data/dice/dice_defs.json` · `starter_loadout.json`
+> **구현:** `dice_catalog_service.gd` · `dice_catalog.gd` (Autoload) · `data/dice/dice_defs.json` · `starter_loadout.json`
 
 ---
 
@@ -126,8 +126,8 @@
 
 | 항목 | 경로 |
 |------|------|
-| 카탈로그 | `game/scripts/autoload/dice_catalog.gd` |
-| 데이터 | `game/data/dice/dice_defs.json`, `starter_loadout.json` |
+| 카탈로그 | `scripts/autoload/dice_catalog.gd` |
+| 데이터 | `data/dice/dice_defs.json`, `starter_loadout.json` |
 | property 맵 | `change_to_highest` → `change_to_highest_property.gd`, `luck_bonus` → `luck_bonus_property.gd` |
 
 ---
