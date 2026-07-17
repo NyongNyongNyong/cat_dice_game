@@ -145,11 +145,11 @@
     },
     {
       "id": "script-preloads",
-      "title": "feature/script-preloads",
-      "description": ".godot 캐시 없이 CLI 파싱.",
-      "column": "ready",
+      "title": "script-preloads (.godot 캐시 비의존)",
+      "description": "preload 경로 명시 · .godot 비의존 · .uid 커밋 — 팀 클론에서 실행 가능해야 함.",
+      "column": "review",
       "file": "cards/script-preloads.md",
-      "tags": ["툴링"]
+      "tags": ["툴링", "에이전트"]
     },
     {
       "id": "luck-sources",
