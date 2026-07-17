@@ -20,7 +20,8 @@ chmod +x scripts/start-feature.sh 2>/dev/null || true
 3. If the working tree is not clean, stop and tell the user to commit or stash first.
 4. After the branch is created, report the branch name.
 5. Infer the likely `game/` paths this slug should touch in one or two short sentences. Do not ask the user to write the path list.
-6. For later implementation on this branch, keep edits within the inferred feature scope unless the user explicitly expands it.
+6. **Kanban ticket:** Follow `.cursor/rules/kanban-tickets.mdc`. Find or create `docs/board` card for this slug; set column to `speccing` (docs-first) or `doing` (implementation). Do not ask the user to create the card.
+7. For later implementation on this branch, keep edits within the inferred feature scope unless the user explicitly expands it.
 
 ## Never Do
 

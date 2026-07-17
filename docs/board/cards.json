@@ -40,6 +40,14 @@
   ],
   "cards": [
     {
+      "id": "kanban-ticket-rule",
+      "title": "칸반 티켓 자동 관리 규칙",
+      "description": "/feature·/push 때 docs/board 카드를 에이전트가 자동 갱신.",
+      "column": "review",
+      "file": "cards/kanban-ticket-rule.md",
+      "tags": ["워크플로", "칸반"]
+    },
+    {
       "id": "board-empty-cell-effect",
       "title": "빈칸 위치 효과",
       "description": "GDD §4.1 추후 — 빈 보드 칸이 점수·규칙에 영향.",
@@ -146,10 +154,10 @@
     {
       "id": "luck-sources",
       "title": "행운 변동 소스 확장",
-      "description": "주사위·유물 등으로 luck을 늘리는 소스. 행운 주사위는 일부 반영.",
-      "column": "doing",
+      "description": "유물·아이템·주사위 추가 시 따라오는 행운 소스. 단독 WIP 아님.",
+      "column": "ideas",
       "file": "cards/luck-sources.md",
-      "tags": ["행운"]
+      "tags": ["행운", "후보"]
     },
     {
       "id": "board-grid-done",
