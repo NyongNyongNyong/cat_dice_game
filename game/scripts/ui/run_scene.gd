@@ -185,7 +185,7 @@ func _can_edit_board() -> bool:
 	return (
 		not RunManager.run_finished
 		and _is_lever_stopped()
-		and (_round.phase == RoundPhase.Phase.IDLE or _round.phase == RoundPhase.Phase.REROLL_READY)
+		and (_round.phase == RoundPhase.Phase.IDLE or _round.phase == RoundPhase.Phase.READY)
 	)
 
 
@@ -253,7 +253,7 @@ func _can_hover_dice_faces() -> bool:
 	return (
 		not RunManager.run_finished
 		and _is_lever_stopped()
-		and (_round.phase == RoundPhase.Phase.IDLE or _round.phase == RoundPhase.Phase.REROLL_READY)
+		and (_round.phase == RoundPhase.Phase.IDLE or _round.phase == RoundPhase.Phase.READY)
 	)
 
 
@@ -720,7 +720,7 @@ func _update_status() -> void:
 			_status_label.text = "주사위를 굴리는 중..."
 		RoundPhase.Phase.SCORING:
 			_status_label.text = "점수를 계산하는 중..."
-		RoundPhase.Phase.REROLL_READY:
+		RoundPhase.Phase.READY:
 			if RunManager.can_advance_floor():
 				_status_label.text = "목표 달성! 더 굴리거나 Next Floor(상점)로 이동하세요."
 			elif RunManager.chips > 0:

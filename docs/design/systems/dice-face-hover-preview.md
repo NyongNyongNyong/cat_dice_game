@@ -52,7 +52,7 @@ Hover 툴팁 담당 스크립트·노드를 리롤과 무관한 이름으로 정
 
 | 조건 | Hover 툴팁 |
 |------|-----------|
-| 레버 정지(`_is_lever_stopped()`) + phase `IDLE`/`REROLL_READY` | **활성** |
+| 레버 정지(`_is_lever_stopped()`) + phase `IDLE`/`READY` | **활성** |
 | `ROLLING` / `SCORING` / 레버 굴림 중 | 비표시 |
 | 잠금 칸(`is_slot_unlocked` false) | 비표시 (locked slot은 마우스 입력 무시) |
 | 빈 칸 (주사위 없음) | 비표시 |
