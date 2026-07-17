@@ -84,8 +84,17 @@
 
 ---
 
+## Agent 자동화
+
+- 규칙: `.cursor/rules/kanban-tickets.mdc` (alwaysApply)
+- `/feature` → 카드 생성/열을 `speccing` 또는 `doing`
+- `/push` → 해당 카드 `review` + MD 이력, 커밋에 포함 (`done`은 사람 검증 후)
+
+---
+
 ## 변경 이력
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-17 | Agent `/push`·`/feature` 티켓 자동 갱신 규칙 연결 |
 | 2026-07-17 | v2 — 7열, 카드↔MD, 클릭 팝업 |

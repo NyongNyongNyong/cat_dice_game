@@ -26,6 +26,7 @@ alwaysApply: true
 
 - 범위 밖 요청 → 별도 `feature/*` 제안.
 - `/push` 전 `git diff --stat`으로 목록과 diff 일치 여부 확인; 무관 파일 많으면 경고.
+- 티켓(카드) 열 이동·생성은 `kanban-tickets` rule — `/feature`·`/push` 시 slug 카드를 에이전트가 갱신 (`docs/board/`).
 
 ## 피드백·수정 (별도 스킬 없이)
 

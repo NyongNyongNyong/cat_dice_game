@@ -21,8 +21,9 @@ git diff --stat
 
 2. If the current branch is not `feature/*`, stop and guide the user to start a feature branch with `scripts/start-feature.sh`.
 3. If the diff stat does not match the current feature slug or the user's request, warn about scope drift and suggest splitting or rebranching. Do not ask the user to provide a path list.
-4. If there are uncommitted changes, generate one short English commit message from the diff. Use one of these prefixes: `feat:`, `fix:`, `docs:`, `godot:`.
-5. Run the repository scripts from the repo root:
+4. **Kanban ticket (required before commit):** Follow `.cursor/rules/kanban-tickets.mdc`. Find or create the card for this feature slug in `docs/board/cards.json` + `docs/board/cards/<id>.md`, set `column` to `review` (not `done` unless the user explicitly confirmed verification), add a short implementation note to the MD, bump `updated`, and include those files in the commit. Report `티켓: <id> → review` in the pre-push checklist.
+5. If there are uncommitted changes, generate one short English commit message from the diff. Use one of these prefixes: `feat:`, `fix:`, `docs:`, `godot:`.
+6. Run the repository scripts from the repo root:
 
 ```bash
 chmod +x scripts/push-feature.sh scripts/merge-feature.sh 2>/dev/null || true
@@ -31,7 +32,7 @@ chmod +x scripts/push-feature.sh scripts/merge-feature.sh 2>/dev/null || true
 
 If the user requested branch deletion after merge, pass `-y`.
 
-6. If there are no uncommitted changes and commits are already ready, run `scripts/push-feature.sh` without `-m` if the script supports that flow.
+7. If there are no uncommitted changes and commits are already ready, run `scripts/push-feature.sh` without `-m` if the script supports that flow.
 
 ## Stop Condition
 
