@@ -1,13 +1,17 @@
 # 캣타워 카지노 (가칭)
 
+**[📋 백로그 칸반 보드](https://NyongNyongNyong.github.io/cat_dice_game/board/)** — 할 일·진행·검증을 여기서 봅니다.  
+(로컬: [docs/board/](docs/board/) · Pages 설정: `main` / `/docs`)
+
 고양이들이 운영하는 캣타워 카지노를 등반하며, 특수 주사위를 수집·조합하고 최상층 금고를 노리는 **주사위 로그라이크** 프로젝트.
 
 ## 문서
 
 | 구분 | 링크 |
 |------|------|
+| 칸반 | [웹 보드](https://NyongNyongNyong.github.io/cat_dice_game/board/) · [소스](docs/board/) |
 | 기획 | [게임 기획 문서](docs/gdd-cat-tower-casino.md) |
-| 백로그 | [할 일·아이디어](docs/backlog.md) · [칸반 보드](docs/board/) (Pages: `/board/`) |
+| 백로그 | [할 일·아이디어](docs/backlog.md) |
 | 설계 | [설계 문서](docs/design/README.md) · [v0.1 초기 플레이어블](docs/design/v0.1-initial-playable.md) |
 | 시스템 스펙 | [족보 계산 v2](docs/design/systems/hand-scoring-v2.md) (정본) |
 | 참고 | [데이터 계층](docs/data-hierarchy.md) · [Godot 폴더 상세](docs/godot-project-layout.md) |

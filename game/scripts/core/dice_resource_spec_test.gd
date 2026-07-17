@@ -7,7 +7,6 @@ const ChangeToHighestPropertyScript := preload("res://scripts/core/face_properti
 const DiceLoadoutResourceScript := preload("res://scripts/core/dice_loadout_resource.gd")
 const RoundControllerScript := preload("res://scripts/core/round_controller.gd")
 const RunManagerScript := preload("res://scripts/autoload/run_manager.gd")
-const HandCalculator := preload("res://scripts/core/hand_calculator.gd")
 
 
 class PrioritySetValueProperty:
@@ -48,8 +47,6 @@ func _init() -> void:
 	_expect_controller_uses_per_slot_resource()
 	_expect_controller_uses_loadout_resource()
 	_expect_controller_resolves_rolled_faces()
-	_expect_controller_reports_contextual_reroll_values()
-	_expect_controller_reports_contextual_reroll_preview()
 
 	if _failed > 0:
 		push_error("Dice resource spec tests failed: %d" % _failed)
@@ -218,54 +215,6 @@ func _expect_controller_resolves_rolled_faces() -> void:
 
 	if controller.resolve_faces(faces) != [3, 3]:
 		_fail_array("controller resolved faces", [3, 3], controller.resolve_faces(faces))
-	controller.free()
-
-
-func _expect_controller_reports_contextual_reroll_values() -> void:
-	var controller: Node = RoundControllerScript.new()
-	var die: Resource = DiceResourceScript.new()
-	var two := _number_face(2)
-	var changer: Resource = SpecialFaceScript.new()
-	var property: Resource = ChangeToHighestPropertyScript.new()
-	var properties: Array[Resource] = [property]
-	changer.properties = properties
-	var faces: Array[Resource] = [two, changer]
-	die.faces = faces
-	controller.default_dice_resource = die
-	var rolled_faces: Array[Resource] = [_number_face(5), changer]
-	controller.dice_faces = rolled_faces
-
-	if controller.get_reroll_face_values(1) != [2, 5]:
-		_fail_array(
-			"controller contextual reroll values",
-			[2, 5],
-			controller.get_reroll_face_values(1)
-		)
-	controller.free()
-
-
-func _expect_controller_reports_contextual_reroll_preview() -> void:
-	var controller: Node = RoundControllerScript.new()
-	var die: Resource = DiceResourceScript.new()
-	var one := _number_face(1)
-	var six := _number_face(6)
-	var faces: Array[Resource] = [one, six]
-	die.faces = faces
-	controller.default_dice_resource = die
-	var rolled_faces: Array[Resource] = [_number_face(5), _highest_face()]
-	controller.dice_faces = rolled_faces
-
-	var preview = controller.get_reroll_preview(0)
-	var current := HandCalculator.evaluate([5, 5]).total_score
-	var best := HandCalculator.evaluate([6, 6]).total_score
-	var worst := HandCalculator.evaluate([1, 1]).total_score
-
-	if preview.current_score != current:
-		_fail("controller preview current score", current, preview.current_score)
-	if preview.delta_up != best - current:
-		_fail("controller preview delta_up", best - current, preview.delta_up)
-	if preview.delta_down != worst - current:
-		_fail("controller preview delta_down", worst - current, preview.delta_down)
 	controller.free()
 
 

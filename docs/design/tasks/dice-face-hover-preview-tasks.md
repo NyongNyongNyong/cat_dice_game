@@ -6,7 +6,7 @@
 - [x] 노드 `RerollPreviewPresenter` → `FacePreviewPresenter` (`run_scene.tscn`, `shop_scene.tscn`)
 - [x] `run_scene.gd` presenter 참조 갱신 + `set_active(true)`
 - [x] 보드 칸·트레이 칩 `mouse_entered`/`mouse_exited` 배선
-- [x] `_can_hover_dice_faces()` 가드 (레버 정지 + IDLE/REROLL_READY)
+- [x] `_can_hover_dice_faces()` 가드 (레버 정지 + IDLE/READY)
 - [x] `shop_scene.gd` presenter 참조 이름 갱신
 
 ## 검증 (AC)

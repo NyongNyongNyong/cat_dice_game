@@ -138,8 +138,8 @@
     {
       "id": "reroll-ready-rename",
       "title": "REROLL_READY 리네이밍 + reroll 잔재 정리",
-      "description": "죽은 리롤 코드·페이즈 이름 정리.",
-      "column": "ready",
+      "description": "READY 페이즈 + 죽은 reroll_preview_* 제거.",
+      "column": "review",
       "file": "cards/reroll-ready-rename.md",
       "tags": ["정리"]
     },

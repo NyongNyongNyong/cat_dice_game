@@ -35,7 +35,7 @@
 
 ### 상점 진입
 
-- `REROLL_READY` + `RunManager.can_advance_floor()` (목표 점수 달성).
+- `READY` + `RunManager.can_advance_floor()` (목표 점수 달성).
 - **Next Floor** 클릭 → **상점 씬**으로 전환 (`GameFlow.show_shop()`). 즉시 층 이동하지 않음.
 
 ### 상점 (v0.2 — 드래그 & 대기 구매)

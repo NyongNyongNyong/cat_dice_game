@@ -26,8 +26,8 @@
 - [x] 굴림 플로우 통합, 행운 수치 UI 노출
 - [x] 골드 리롤 경제 제거 (주사위 1개 리롤 — **폐기**)
 - [x] 플레이 화면 hover 6면 툴팁 — `face_preview_presenter` ([dice-face-hover-preview.md](design/systems/dice-face-hover-preview.md))
-- [ ] `luck` 변동 소스 (주사위·유물 등) — 현재 기본 0
-- [ ] `REROLL_READY` phase 리네이밍 + 죽은 reroll 코드 정리 (`reroll_preview_calculator*` 등)
+- [x] `READY` phase 리네이밍 + 죽은 reroll 코드 정리 (`reroll-ready-rename`)
+- [ ] `luck` 변동 소스 (주사위·유물 등) — 콘텐츠 추가 시 연동 (단독 WIP 아님)
 
 ### 주사위 성장 (미착수)
 
@@ -79,6 +79,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-17 | 칸반 링크 README 상단 · REROLL→READY · script-preloads는 아이디어로 |
 | 2026-07-17 | 웹 칸반(`docs/board/`) 추가 — 가독용 보드, 데이터는 cards.json |
 | 2026-07-04 | 칩=굴림 재화 확정 — 단발굴림·칩제거 가설 삭제, 드래그·hover 완료 반영, reroll 잔재 정리 항목 구체화 |
 | 2026-06-30 | v0.2 보드·행운 Phase A/B 완료 반영, 중복 마이그레이션 섹션 제거 |

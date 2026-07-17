@@ -177,7 +177,7 @@ HandCalculator.evaluate(dice_values)
 | `dice_faces` | 현재 보드 면 리소스 10개 |
 | `dice_values` | `resolve_faces(dice_faces)` 캐시 |
 | `get_reroll_preview(i)` | 해당 슬롯 `DiceResource.get_faces()` 후보로 `compute_from_faces` |
-| `get_reroll_face_values(i)` | 후보별 **맥락 해석** 정수 (레거시/디버그용) |
+| `get_face_values(i)` | 슬롯 주사위의 면 숫자 목록 |
 
 슬롯마다 다른 `DiceResource` 가능 (loadout / per-slot 배열).
 

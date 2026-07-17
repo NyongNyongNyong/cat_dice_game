@@ -1,11 +1,15 @@
 # REROLL_READY 리네이밍 + reroll 잔재 정리
 
-> 죽은 리롤 코드·페이즈 이름 정리.
+> `READY` 페이즈로 리네임하고 죽은 단일 리롤 preview 코드를 제거.
 
-## 상세
-- 단일 주사위 리롤은 폐기됨
-- `REROLL_READY` 이름·`reroll_preview_calculator*` 등 정리
+## 구현
+
+- 2026-07-17 `feature/reroll-ready-rename` → main (검증 대기)
+- `RoundPhase.READY` (구 `REROLL_READY`)
+- 삭제: `reroll_preview_calculator*` · `reroll_preview_result*`
+- RoundController에서 리롤 선택/미리보기 API 제거
 
 ## 완료 조건
-- 페이즈 이름 의미에 맞게 변경
-- 미사용 스크립트 제거 또는 문서화
+
+- [x] 페이즈 이름 의미에 맞게 변경
+- [x] 미사용 스크립트 제거
