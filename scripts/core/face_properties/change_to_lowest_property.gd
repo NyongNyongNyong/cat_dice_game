@@ -36,6 +36,10 @@ func get_display_text(_face: Resource, _context: Dictionary, _current_text: Stri
 	return "L"
 
 
+func get_description() -> String:
+	return "보드의 다른 숫자 면 중 가장 작은 값으로 바뀝니다."
+
+
 func has_visual_effect() -> bool:
 	return true
 

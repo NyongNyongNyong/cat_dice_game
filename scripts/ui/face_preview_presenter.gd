@@ -1,15 +1,21 @@
 extends Node
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
-const TOOLTIP_OFFSET := Vector2(0.0, -8.0)
+const TOOLTIP_CURSOR_GAP := Vector2(12.0, 10.0)
 const MINI_DICE_SIZE := 32.0
 const FACE_SEPARATION := 4
+const CONTENT_SEPARATION := 6
+const DESC_LINE_HEIGHT := 16.0
+const DESC_FONT_SIZE := 12
 const PANEL_PADDING := 4.0
 const BORDER_WIDTH := 2.0
+const EDGE_MARGIN := 4.0
 
 var _popup_layer: Control
 var _tooltip: PanelContainer
+var _content: VBoxContainer
 var _faces_row: HBoxContainer
+var _desc_box: VBoxContainer
 var _active := false
 var _pending_dice_view: Control
 
@@ -35,6 +41,7 @@ func show_die_faces(
 		return
 
 	_rebuild_face_row(faces, context_faces, dice_index)
+	_rebuild_descriptions(faces)
 	_pending_dice_view = dice_view
 	_tooltip.visible = true
 	_fit_and_position_tooltip.call_deferred()
@@ -63,12 +70,28 @@ func _build_tooltip() -> void:
 	style.content_margin_bottom = PANEL_PADDING
 	_tooltip.add_theme_stylebox_override("panel", style)
 
+	_content = VBoxContainer.new()
+	_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_content.add_theme_constant_override("separation", CONTENT_SEPARATION)
+	_content.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_content.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+
 	_faces_row = HBoxContainer.new()
 	_faces_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_faces_row.add_theme_constant_override("separation", FACE_SEPARATION)
 	_faces_row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_faces_row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	_tooltip.add_child(_faces_row)
+
+	_desc_box = VBoxContainer.new()
+	_desc_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_desc_box.add_theme_constant_override("separation", 2)
+	_desc_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_desc_box.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_desc_box.visible = false
+
+	_content.add_child(_faces_row)
+	_content.add_child(_desc_box)
+	_tooltip.add_child(_content)
 	_popup_layer.add_child(_tooltip)
 
 
@@ -109,6 +132,47 @@ func _rebuild_face_row(
 		_faces_row.add_child(mini)
 
 
+func _rebuild_descriptions(faces: Array[Resource]) -> void:
+	for child in _desc_box.get_children():
+		_desc_box.remove_child(child)
+		child.queue_free()
+
+	var seen: Dictionary = {}
+	var lines: Array[String] = []
+	for face in faces:
+		if face == null or not face.has_method("is_number") or face.is_number():
+			continue
+		var properties: Array = face.properties if "properties" in face else []
+		for property in properties:
+			if property == null or not property.has_method("get_description"):
+				continue
+			var description := String(property.get_description())
+			if description.is_empty():
+				continue
+			var glyph := ""
+			if property.has_method("get_display_text"):
+				glyph = String(property.get_display_text(face, {}, ""))
+			var key := "%s|%s" % [glyph, description]
+			if seen.has(key):
+				continue
+			seen[key] = true
+			if glyph.is_empty():
+				lines.append(description)
+			else:
+				lines.append("%s — %s" % [glyph, description])
+
+	_desc_box.visible = not lines.is_empty()
+	for line in lines:
+		var label := Label.new()
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.text = line
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_font_size_override("font_size", DESC_FONT_SIZE)
+		label.add_theme_color_override("font_color", Color(0.92, 0.88, 0.78, 1.0))
+		label.custom_minimum_size = Vector2(0.0, DESC_LINE_HEIGHT)
+		_desc_box.add_child(label)
+
+
 func _fit_and_position_tooltip() -> void:
 	if _pending_dice_view == null or not is_instance_valid(_pending_dice_view):
 		return
@@ -127,14 +191,32 @@ func _fit_and_position_tooltip() -> void:
 			mini.custom_minimum_size = mini_size
 			mini.size = mini_size
 
-	# 콘텐츠 크기는 면 개수로 직접 계산한다.
-	var content_width := MINI_DICE_SIZE * count + FACE_SEPARATION * maxi(count - 1, 0)
-	var content_size := Vector2(content_width, MINI_DICE_SIZE)
+	# 콘텐츠 크기는 면 개수·설명 줄로 직접 계산한다.
+	var faces_width := MINI_DICE_SIZE * count + FACE_SEPARATION * maxi(count - 1, 0)
+	var desc_count := _desc_box.get_child_count() if _desc_box.visible else 0
+	var desc_height := 0.0
+	var desc_width := 0.0
+	if desc_count > 0:
+		desc_height = DESC_LINE_HEIGHT * desc_count + 2.0 * maxi(desc_count - 1, 0)
+		# 설명 줄이 길 수 있어 면 행보다 넓게 잡는다.
+		desc_width = maxf(faces_width, 220.0)
+		_desc_box.custom_minimum_size = Vector2(desc_width, desc_height)
+		_desc_box.size = Vector2(desc_width, desc_height)
+	else:
+		_desc_box.custom_minimum_size = Vector2.ZERO
+		_desc_box.size = Vector2.ZERO
 
-	_faces_row.custom_minimum_size = content_size
-	_faces_row.size = content_size
+	var content_width := maxf(faces_width, desc_width)
+	var content_height := MINI_DICE_SIZE
+	if desc_count > 0:
+		content_height += CONTENT_SEPARATION + desc_height
 
-	var fitted := content_size + _panel_chrome_size()
+	_faces_row.custom_minimum_size = Vector2(faces_width, MINI_DICE_SIZE)
+	_faces_row.size = Vector2(faces_width, MINI_DICE_SIZE)
+	_content.custom_minimum_size = Vector2(content_width, content_height)
+	_content.size = Vector2(content_width, content_height)
+
+	var fitted := Vector2(content_width, content_height) + _panel_chrome_size()
 	_tooltip.custom_minimum_size = fitted
 	_tooltip.size = fitted
 	_position_tooltip(_pending_dice_view)
@@ -158,8 +240,30 @@ func _resolve_face_value(face: Resource, context_faces: Array[Resource]) -> int:
 	return 1
 
 
-func _position_tooltip(dice_view: Control) -> void:
-	var dice_rect := dice_view.get_global_rect()
-	var layer_transform := _popup_layer.get_global_transform().affine_inverse()
-	var anchor := layer_transform * dice_rect.get_center()
-	_tooltip.position = anchor + TOOLTIP_OFFSET - Vector2(_tooltip.size.x * 0.5, _tooltip.size.y)
+func _position_tooltip(_dice_view: Control) -> void:
+	# 전역 마우스 기준으로 붙인다. (중첩/축소된 popup layer local 좌표에 의존하지 않음)
+	var mouse := _popup_layer.get_global_mouse_position()
+	var size := _tooltip.size
+	var global_pos := Vector2(
+		mouse.x + TOOLTIP_CURSOR_GAP.x,
+		mouse.y - TOOLTIP_CURSOR_GAP.y - size.y,
+	)
+	var viewport_rect := _popup_layer.get_viewport().get_visible_rect()
+	if global_pos.y < viewport_rect.position.y + EDGE_MARGIN:
+		global_pos.y = mouse.y + TOOLTIP_CURSOR_GAP.y
+	_tooltip.global_position = _clamp_tooltip_to_viewport(global_pos, viewport_rect)
+
+
+func _clamp_tooltip_to_viewport(global_pos: Vector2, viewport_rect: Rect2) -> Vector2:
+	var max_x := maxf(
+		viewport_rect.position.x + EDGE_MARGIN,
+		viewport_rect.end.x - _tooltip.size.x - EDGE_MARGIN,
+	)
+	var max_y := maxf(
+		viewport_rect.position.y + EDGE_MARGIN,
+		viewport_rect.end.y - _tooltip.size.y - EDGE_MARGIN,
+	)
+	return Vector2(
+		clampf(global_pos.x, viewport_rect.position.x + EDGE_MARGIN, max_x),
+		clampf(global_pos.y, viewport_rect.position.y + EDGE_MARGIN, max_y),
+	)

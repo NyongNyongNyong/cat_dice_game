@@ -65,7 +65,7 @@
 
 - [x] 6면 hover · 굴리기 전 미리보기
 - [ ] 비 6면 주사위 preview
-- [ ] Hover 시 특수면 설명도 팝업에 표시 (`hover-special-face-desc`)
+- [x] Hover 시 특수면 설명도 팝업에 표시 (`hover-special-face-desc`) — 플레이·상점
 
 ---
 

@@ -20,3 +20,11 @@ func get_display_text(_face: Resource, _context: Dictionary, _current_text: Stri
 	if amount == floor(amount):
 		return "☘%d" % int(amount)
 	return "☘%s" % str(amount)
+
+
+func get_description() -> String:
+	if is_equal_approx(amount, 1.0):
+		return "점수에 포함되지 않고, 굴림 후 행운이 증가합니다."
+	if amount == floor(amount):
+		return "점수에 포함되지 않고, 굴림 후 행운이 +%d 증가합니다." % int(amount)
+	return "점수에 포함되지 않고, 굴림 후 행운이 +%s 증가합니다." % str(amount)
