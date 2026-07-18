@@ -207,11 +207,6 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 columns = 4
 
-[node name="PopupOverlay" type="Control" parent="MarginContainer/RootVBox"]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 2
-
 [node name="Footer" type="HBoxContainer" parent="MarginContainer/RootVBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
@@ -238,6 +233,17 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
 text = "다음 층"
+
+[node name="PopupOverlay" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+z_index = 20
 
 [node name="DiceShopPresenter" type="Node" parent="."]
 unique_name_in_owner = true

@@ -24,6 +24,10 @@ func get_display_text(_face: Resource, _context: Dictionary, _current_text: Stri
 	return "V"
 
 
+func get_description() -> String:
+	return "보드에 없는 1~6 숫자로 바뀝니다."
+
+
 func has_visual_effect() -> bool:
 	return true
 

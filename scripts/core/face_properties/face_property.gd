@@ -14,6 +14,10 @@ func get_display_text(_face: Resource, _context: Dictionary, current_text: Strin
 	return current_text
 
 
+func get_description() -> String:
+	return ""
+
+
 func has_visual_effect() -> bool:
 	return false
 
