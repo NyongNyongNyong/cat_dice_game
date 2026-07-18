@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-17",
+  "updated": "2026-07-18",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -270,6 +270,30 @@
       "column": "done",
       "file": "cards/luck-die.md",
       "tags": ["행운", "주사위"]
+    },
+    {
+      "id": "shop-roster-persist",
+      "title": "상점 교체 주사위 다음 층 유지",
+      "description": "상점에서 보유 주사위를 바꾸면 다음 층에서 원상복구되는 버그.",
+      "column": "ideas",
+      "file": "cards/shop-roster-persist.md",
+      "tags": ["상점", "버그"]
+    },
+    {
+      "id": "remove-scoreboard-ui",
+      "title": "숫자합 × 족보합 UI 제거",
+      "description": "플레이 화면 좌/우 점수판·× 라벨 제거.",
+      "column": "ideas",
+      "file": "cards/remove-scoreboard-ui.md",
+      "tags": ["플레이", "UI"]
+    },
+    {
+      "id": "face-preview-vertical",
+      "title": "주사위 설명 팝업 세로 리스트 개편",
+      "description": "면을 세로 리스트로 나열하고 각 행 오른쪽에 설명.",
+      "column": "ideas",
+      "file": "cards/face-preview-vertical.md",
+      "tags": ["Preview", "UI"]
     }
   ]
 }

@@ -31,10 +31,26 @@ alwaysApply: true
 | `fix` | 검증에서 문제 → 수정 후 다시 `doing` → `review` |
 | `done` | **사람이 플레이/검증 확인한 뒤만** — 에이전트가 `/push`만으로 `done` 넣지 않음 |
 
+**시작 열은 `ideas`만이 아니다.** 카드를 만들 때 성숙도에 맞는 열로 **바로 넣는다**:
+
+- 미확정 아이디어 → `ideas`
+- **스펙·AC가 이미 확정된** 항목 → `ready` (구현 대기)로 바로
+- 지금 바로 구현에 들어갈 항목 → `doing` (구현 중)으로 바로
+
+`ideas`/`speccing`을 반드시 거칠 필요 없다.
+
+## 카드 추가 (브랜치 불필요)
+
+**단순 카드 추가·열 변경 같은 칸반 전용 편집은 `feature/*` 브랜치 없이 `main`에서 바로** 해도 된다.
+
+- 대상: `docs/board/cards.json` + `docs/board/cards/<id>.md`, 필요 시 `docs/backlog.md`. **이 파일들만** 바뀌는 경우.
+- 커밋은 사용자가 요청할 때만 (`git-workflow` 유지). 브랜치·`/push` 스킬은 불필요.
+- 게임 코드·씬·리소스가 **함께** 바뀌면 이 예외 아님 → `feature/*` + `/push`.
+
 ## Agent — `/feature`·작업 시작 시
 
 1. slug로 카드 검색 (`id` 일치 우선).
-2. 없으면 `cards/<slug>.md` + `cards.json` 항목 생성 (`column`: 스펙부터면 `speccing`, 구현이면 `doing`).
+2. 없으면 `cards/<slug>.md` + `cards.json` 항목 생성 (`column`: 스펙부터면 `speccing`, 스펙 확정돼 있으면 `ready`, 바로 구현이면 `doing`).
 3. 있으면 열을 맞춤: 스펙 작성 → `speccing`, 구현 시작 → `doing`.
 4. MD에 목표·AC 요약을 짧게 갱신 (있으면).
 

@@ -47,10 +47,12 @@
 
 - [x] 활성 족보 — [active-hands-panel.md](design/systems/active-hands-panel.md)
 - [x] `feature/script-preloads` — `.godot` 캐시 비의존 (preload 규칙·스펙)
+- [ ] **숫자합 × 족보합** 점수판 UI 제거 (좌/우 패널·× 라벨 등 `run_scene`)
 
 ### 상점
 
 - [x] 독립 씬 · H/L/V 구매·교체 · compact — 각 스펙 문서
+- [ ] **버그:** 상점에서 보유 주사위를 바꾸면 다음 층에서 원상복구됨 → 교체 결과가 다음 층으로 유지되어야 함 (`advance_floor`/roster 리셋 확인)
 
 ### 골드
 
@@ -66,6 +68,7 @@
 - [x] 6면 hover · 굴리기 전 미리보기
 - [ ] 비 6면 주사위 preview
 - [x] Hover 시 특수면 설명도 팝업에 표시 (`hover-special-face-desc`) — 플레이·상점
+- [ ] 주사위 설명 팝업 **디테일 개편**: 면을 세로 리스트로 나열하고 각 행 오른쪽에 설명을 적는 형태 (현재 가로 미니 주사위 → 세로 리스트+설명)
 
 ---
 
@@ -80,6 +83,8 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-18 | 숫자합×족보합 UI 제거·주사위 설명 팝업 세로 리스트 개편 티켓 추가 |
+| 2026-07-18 | 상점 주사위 교체가 다음 층에 유지 안 되는 버그 티켓 추가 |
 | 2026-07-17 | Godot 루트=저장소 루트 (`game/` 제거, Git 셸→`tools/`) |
 | 2026-07-17 | Hover 특수면 설명 백로그 (`hover-special-face-desc`) |
 | 2026-07-17 | script-preloads: `.godot` 캐시 비의존 preload 규칙·스펙 |
