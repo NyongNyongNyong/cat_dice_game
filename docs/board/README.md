@@ -4,8 +4,8 @@ Issues / Projects 없이 백로그를 칸반으로 봅니다.
 
 ## URL (Pages)
 
-- 문서 홈: `https://NyongNyongNyong.github.io/cat_dice_game/`
-- 칸반: `https://NyongNyongNyong.github.io/cat_dice_game/board/`
+- 문서 홈: `https://team-sema.github.io/cat_dice_game/`
+- 칸반: `https://team-sema.github.io/cat_dice_game/board/`
 
 ## Pages 설정 (한 번만)
 
