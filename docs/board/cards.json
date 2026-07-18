@@ -120,6 +120,14 @@
       "tags": ["Preview", "특수면"]
     },
     {
+      "id": "repo-org-url",
+      "title": "저장소 URL → team-sema",
+      "description": "조직 이전 후 github.com/team-sema/cat_dice_game · Pages 링크 갱신.",
+      "column": "review",
+      "file": "cards/repo-org-url.md",
+      "tags": ["문서", "툴링"]
+    },
+    {
       "id": "godot-project-root",
       "title": "Godot 루트 = 저장소 루트",
       "description": "game/ 내용을 루트로 이동 · Git 셸은 tools/ · Cursor와 Godot 루트 일치.",
