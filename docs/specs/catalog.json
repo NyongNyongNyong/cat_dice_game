@@ -1,0 +1,264 @@
+{
+  "title": "캣타워 카지노 · 시스템 스펙",
+  "updated": "2026-07-22",
+  "intro": "확정·구현 중인 시스템 스펙을 카테고리별로 모았습니다. 카드를 누르면 본문(Markdown)을 바로 읽을 수 있습니다.",
+  "categories": [
+    {
+      "id": "overview",
+      "title": "기획 · 개요",
+      "hint": "방향과 저장소 구조",
+      "items": [
+        {
+          "id": "gdd",
+          "title": "GDD — 게임 기획 문서",
+          "summary": "비전·재미 축·보드·행운·점수 방향. 기획 정본.",
+          "tags": ["정본", "기획"],
+          "path": "../gdd-cat-tower-casino.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/gdd-cat-tower-casino.md"
+        },
+        {
+          "id": "v01",
+          "title": "v0.1 초기 플레이어블",
+          "summary": "구현 범위·씬·페이즈 골격.",
+          "tags": ["설계"],
+          "path": "../design/v0.1-initial-playable.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/v0.1-initial-playable.md"
+        },
+        {
+          "id": "data-hierarchy",
+          "title": "데이터 계층",
+          "summary": "res://data/ JSON 카탈로그 구조.",
+          "tags": ["데이터"],
+          "path": "../data-hierarchy.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/data-hierarchy.md"
+        },
+        {
+          "id": "godot-layout",
+          "title": "Godot 프로젝트 레이아웃",
+          "summary": "scenes / scripts / data 폴더 정본.",
+          "tags": ["Godot"],
+          "path": "../godot-project-layout.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/godot-project-layout.md"
+        }
+      ]
+    },
+    {
+      "id": "scoring",
+      "title": "점수 · 족보 · 경제",
+      "hint": "클리어·밸런스·골드",
+      "items": [
+        {
+          "id": "hand-scoring-v2",
+          "title": "족보 계산 v2",
+          "summary": "밸런스·bundle tier·29종. HandCalculator 정본.",
+          "tags": ["정본", "족보"],
+          "path": "../design/systems/hand-scoring-v2.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/hand-scoring-v2.md"
+        },
+        {
+          "id": "gold-economy",
+          "title": "골드 · 칩 경제",
+          "summary": "오버킬 골드, soft 감쇠, 상점 진입 보상.",
+          "tags": ["경제"],
+          "path": "../design/systems/gold-economy.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/gold-economy.md"
+        },
+        {
+          "id": "hand-scoring-v1",
+          "title": "족보 계산 v1 (레거시)",
+          "summary": "가치=1 시절. 신규 작업은 v2를 따름.",
+          "tags": ["레거시"],
+          "path": "../design/systems/hand-scoring-v1.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/hand-scoring-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "dice",
+      "title": "주사위 · 면 · 카탈로그",
+      "hint": "리소스와 보유",
+      "items": [
+        {
+          "id": "dice-resources",
+          "title": "주사위 리소스 · 면",
+          "summary": "DiceResource, NumberFace / SpecialFace, FaceProperty.",
+          "tags": ["정본", "주사위"],
+          "path": "../design/systems/dice-resources.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/dice-resources.md"
+        },
+        {
+          "id": "dice-catalog",
+          "title": "주사위 카탈로그",
+          "summary": "dice_defs.json 6면 정의, id 기반 로드.",
+          "tags": ["데이터"],
+          "path": "../design/systems/dice-catalog.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/dice-catalog.md"
+        },
+        {
+          "id": "dice-roster-shop",
+          "title": "보유 로스터 · 상점 골격",
+          "summary": "시작 4개, 최대 8, 층 간 교체·확장.",
+          "tags": ["로스터"],
+          "path": "../design/systems/dice-roster-shop.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/dice-roster-shop.md"
+        }
+      ]
+    },
+    {
+      "id": "board-luck",
+      "title": "보드 · 행운",
+      "hint": "v0.2 핵심 루프",
+      "items": [
+        {
+          "id": "v0.2-board-luck",
+          "title": "v0.2 보드 + 행운",
+          "summary": "3×4 보드, 배치 후 굴림, LuckResolver, 리롤 제거.",
+          "tags": ["정본", "v0.2"],
+          "path": "../design/systems/v0.2-board-luck.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/v0.2-board-luck.md"
+        },
+        {
+          "id": "reroll-ready-rename",
+          "title": "READY 페이즈 · reroll 잔재 정리",
+          "summary": "REROLL_READY→READY, 죽은 preview 코드 제거.",
+          "tags": ["정리"],
+          "path": "../design/systems/reroll-ready-rename.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/reroll-ready-rename.md"
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "title": "상점",
+      "hint": "구매 · 레이아웃",
+      "items": [
+        {
+          "id": "shop-scene",
+          "title": "상점 독립 씬",
+          "summary": "런→상점→다음 층 플로우.",
+          "tags": ["상점"],
+          "path": "../design/systems/shop-scene.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/shop-scene.md"
+        },
+        {
+          "id": "shop-purchase",
+          "title": "상점 구매 · 교체",
+          "summary": "오퍼·대기 구매·확인 플로우.",
+          "tags": ["상점"],
+          "path": "../design/systems/shop-purchase.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/shop-purchase.md"
+        },
+        {
+          "id": "shop-layout-compact",
+          "title": "상점 compact 레이아웃",
+          "summary": "드래그 풀·보유 칸 UI 밀도.",
+          "tags": ["UI"],
+          "path": "../design/systems/shop-layout-compact.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/shop-layout-compact.md"
+        }
+      ]
+    },
+    {
+      "id": "play-ui",
+      "title": "플레이 UI",
+      "hint": "연출 · hover · 족보 패널",
+      "items": [
+        {
+          "id": "active-hands-panel",
+          "title": "활성 족보 패널",
+          "summary": "이번 굴림에서 맞은 족보 목록.",
+          "tags": ["UI"],
+          "path": "../design/systems/active-hands-panel.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/active-hands-panel.md"
+        },
+        {
+          "id": "dice-face-hover-preview",
+          "title": "면 Hover 미리보기",
+          "summary": "보드·트레이 hover 시 6면 툴팁.",
+          "tags": ["Preview"],
+          "path": "../design/systems/dice-face-hover-preview.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/dice-face-hover-preview.md"
+        },
+        {
+          "id": "hover-special-face-desc",
+          "title": "Hover 특수면 설명",
+          "summary": "특수면이 있으면 H/L/V/☘ 설명을 함께 표시. 플레이·상점.",
+          "tags": ["Preview"],
+          "path": "../design/systems/hover-special-face-desc.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/hover-special-face-desc.md"
+        },
+        {
+          "id": "dice-roll-presentation",
+          "title": "굴림 연출",
+          "summary": "roll_phase_presenter 연출 메모.",
+          "tags": ["연출"],
+          "path": "../design/systems/dice-roll-presentation.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/dice-roll-presentation.md"
+        },
+        {
+          "id": "dice-hover-reroll-preview",
+          "title": "v0.1 리롤 Preview (폐기)",
+          "summary": "단일 리롤 점수 델타 Preview. 현재 미사용.",
+          "tags": ["레거시"],
+          "path": "../design/systems/dice-hover-reroll-preview.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/dice-hover-reroll-preview.md"
+        }
+      ]
+    },
+    {
+      "id": "workflow",
+      "title": "워크플로 · 툴링",
+      "hint": "칸반 · 에이전트 · 저장소",
+      "items": [
+        {
+          "id": "kanban-v2",
+          "title": "칸반 v2",
+          "summary": "7열 · 카드=MD · 드래그·팝업.",
+          "tags": ["칸반"],
+          "path": "../design/systems/kanban-v2.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/kanban-v2.md"
+        },
+        {
+          "id": "docs-kanban-board",
+          "title": "칸반 보드 (Pages)",
+          "summary": "docs/board GitHub Pages 배포.",
+          "tags": ["칸반"],
+          "path": "../design/systems/docs-kanban-board.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/docs-kanban-board.md"
+        },
+        {
+          "id": "kanban-ticket-rule",
+          "title": "칸반 티켓 자동 관리",
+          "summary": "/feature · /push 때 카드 열 이동.",
+          "tags": ["에이전트"],
+          "path": "../design/systems/kanban-ticket-rule.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/kanban-ticket-rule.md"
+        },
+        {
+          "id": "script-preloads",
+          "title": "script-preloads (.godot 비의존)",
+          "summary": "preload 경로 명시 · .uid 커밋.",
+          "tags": ["에이전트"],
+          "path": "../design/systems/script-preloads.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/script-preloads.md"
+        },
+        {
+          "id": "godot-project-root",
+          "title": "Godot 루트 = 저장소 루트",
+          "summary": "game/ 제거, tools/로 Git 셸 분리.",
+          "tags": ["레이아웃"],
+          "path": "../design/systems/godot-project-root.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/godot-project-root.md"
+        },
+        {
+          "id": "repo-org-url",
+          "title": "저장소 URL → team-sema",
+          "summary": "조직 이전 후 GitHub · Pages 링크.",
+          "tags": ["문서"],
+          "path": "../design/systems/repo-org-url.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/repo-org-url.md"
+        }
+      ]
+    }
+  ]
+}

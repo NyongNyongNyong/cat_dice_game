@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>캣타워 카지노 · 시스템 스펙</title>
+  <link rel="stylesheet" href="specs.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>시스템 스펙</h1>
+      <p class="sub" id="intro">
+        확정·구현 중인 스펙을 카테고리별로 정리했습니다. 카드를 누르면 본문을 바로 읽습니다.
+      </p>
+    </div>
+    <div class="actions">
+      <span id="meta" class="meta"></span>
+      <a class="btn ghost" href="../board/">칸반 보드</a>
+      <a class="btn ghost" href="../">문서 홈</a>
+    </div>
+  </header>
+
+  <nav id="toc" class="toc" aria-label="카테고리"></nav>
+  <main id="catalog" aria-label="스펙 목록"></main>
+
+  <footer class="foot">
+    정본 파일: <code>docs/design/systems/</code> · 인덱스: <code>docs/specs/catalog.json</code>
+  </footer>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-top">
+        <h2 id="modal-title">스펙</h2>
+        <div class="modal-actions">
+          <a id="modal-github" class="btn ghost" href="#" target="_blank" rel="noopener">GitHub</a>
+          <button type="button" id="modal-close" class="btn">닫기</button>
+        </div>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="specs.js"></script>
+</body>
+</html>

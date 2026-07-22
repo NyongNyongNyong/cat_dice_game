@@ -1,7 +1,8 @@
 # 캣타워 카지노 (가칭)
 
 **[📋 백로그 칸반 보드](https://team-sema.github.io/cat_dice_game/board/)** — 할 일·진행·검증을 여기서 봅니다.  
-(로컬: [docs/board/](docs/board/) · Pages 설정: `main` / `/docs`)
+**[📚 시스템 스펙](https://team-sema.github.io/cat_dice_game/specs/)** — 확정 스펙을 카테고리별로 봅니다.  
+(로컬: [docs/board/](docs/board/) · [docs/specs/](docs/specs/) · Pages: `main` / `/docs`)
 
 고양이들이 운영하는 캣타워 카지노를 등반하며, 특수 주사위를 수집·조합하고 최상층 금고를 노리는 **주사위 로그라이크** 프로젝트.
 
@@ -10,6 +11,7 @@
 | 구분 | 링크 |
 |------|------|
 | 칸반 | [웹 보드](https://team-sema.github.io/cat_dice_game/board/) · [소스](docs/board/) |
+| 스펙 | [웹 허브](https://team-sema.github.io/cat_dice_game/specs/) · [systems/](docs/design/systems/) |
 | 기획 | [게임 기획 문서](docs/gdd-cat-tower-casino.md) |
 | 백로그 | [할 일·아이디어](docs/backlog.md) |
 | 설계 | [설계 문서](docs/design/README.md) · [v0.1 초기 플레이어블](docs/design/v0.1-initial-playable.md) |
