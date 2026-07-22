@@ -11,6 +11,7 @@
 | [dice-hover-reroll-preview.md](dice-hover-reroll-preview.md) | Hover 리롤 Preview — 주사위별 최고·최저 점수 변화량 표시 |
 | [gold-economy.md](gold-economy.md) | **골드·칩 경제 v1** — 오버킬 골드 공식, 리롤 비용, UI |
 | [hand-scoring-v1.md](hand-scoring-v1.md) | 족보 v1 — 레거시 (가치=1) |
+| **[웹 허브](../../specs/)** | 카테고리별 열람 (GitHub Pages `/specs/`) |
 
 ## 왜 분리?
 

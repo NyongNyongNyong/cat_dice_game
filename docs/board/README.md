@@ -6,6 +6,7 @@ Issues / Projects 없이 백로그를 칸반으로 봅니다.
 
 - 문서 홈: `https://team-sema.github.io/cat_dice_game/`
 - 칸반: `https://team-sema.github.io/cat_dice_game/board/`
+- 스펙 허브: `https://team-sema.github.io/cat_dice_game/specs/`
 
 ## Pages 설정 (한 번만)
 

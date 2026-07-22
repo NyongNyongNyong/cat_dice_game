@@ -128,6 +128,14 @@
       "tags": ["문서", "툴링"]
     },
     {
+      "id": "specs-hub",
+      "title": "시스템 스펙 웹 허브",
+      "description": "스펙을 카테고리별로 Pages /specs/ 에서 열람. 칸반 아래 링크.",
+      "column": "review",
+      "file": "cards/specs-hub.md",
+      "tags": ["문서", "Pages"]
+    },
+    {
       "id": "godot-project-root",
       "title": "Godot 루트 = 저장소 루트",
       "description": "game/ 내용을 루트로 이동 · Git 셸은 tools/ · Cursor와 Godot 루트 일치.",
