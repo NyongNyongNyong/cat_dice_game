@@ -9,7 +9,13 @@ const RollPhasePresenter := preload("res://scripts/ui/roll_phase_presenter.gd")
 const ScorePhasePresenter := preload("res://scripts/ui/score_phase_presenter.gd")
 const HandEvaluation := preload("res://scripts/core/hand_evaluation.gd")
 const RoundPhase := preload("res://scripts/core/round_phase.gd")
-const TARGET_PROGRESS_COLORS: Array[Color] = [
+const TARGET_PROGRESS_FULL_DURATION := 0.38
+const TARGET_PROGRESS_PARTIAL_MIN_DURATION := 0.16
+const TARGET_PROGRESS_SEGMENT_PAUSE := 0.08
+const TARGET_REWARD_FLOAT_DURATION := 0.62
+
+# 목표를 넘길 때마다 진행 바가 갈아입는 색. 인스펙터에서 편집 가능.
+@export var target_progress_colors: Array[Color] = [
 	Color(0.26, 0.63, 0.52, 1.0),
 	Color(0.95, 0.55, 0.18, 1.0),
 	Color(0.93, 0.78, 0.22, 1.0),
@@ -17,11 +23,6 @@ const TARGET_PROGRESS_COLORS: Array[Color] = [
 	Color(0.55, 0.38, 0.88, 1.0),
 	Color(0.9, 0.28, 0.45, 1.0),
 ]
-const TARGET_PROGRESS_FULL_DURATION := 0.38
-const TARGET_PROGRESS_PARTIAL_MIN_DURATION := 0.16
-const TARGET_PROGRESS_SEGMENT_PAUSE := 0.08
-const TARGET_PROGRESS_MAX_SEGMENTS := 24
-const TARGET_REWARD_FLOAT_DURATION := 0.62
 
 @onready var _floor_label: Label = %FloorLabel
 @onready var _gold_label: Label = %GoldLabel
@@ -44,6 +45,7 @@ const TARGET_REWARD_FLOAT_DURATION := 0.62
 @onready var _score_presenter: ScorePhasePresenter = %ScorePhasePresenter
 @onready var _face_preview_presenter: Node = %FacePreviewPresenter
 @onready var _active_hands_list: VBoxContainer = %ActiveHandsList
+@onready var _active_hands_empty_hint: Label = %ActiveHandsEmptyHint
 @onready var _active_hands_presenter: Node = %ActiveHandsPresenter
 
 var _board_cells: Array = []
@@ -55,9 +57,12 @@ var _lever_loop_running := false
 var _is_animating_target_progress := false
 var _target_progress_tween: Tween
 var _roll_slot: Control
+var _progress_fill_base: StyleBoxFlat
 
 
 func _ready() -> void:
+	# 오버라이드 전에 씬의 fill 스타일을 기억해, 이후 색만 바꿔 끼운다.
+	_progress_fill_base = _target_progress_bar.get_theme_stylebox("fill") as StyleBoxFlat
 	_setup_round_flow()
 	if not RunManager.is_run_started():
 		RunManager.start_run()
@@ -73,7 +78,7 @@ func _ready() -> void:
 func _setup_round_flow() -> void:
 	_roll_slot = _dice_row
 	_roll_presenter.setup(_roll_slot, _dice_row)
-	_active_hands_presenter.setup(_active_hands_list)
+	_active_hands_presenter.setup(_active_hands_list, _active_hands_empty_hint)
 	_score_presenter.setup(
 		_dice_row, _popup_overlay, _left_value, _right_value, _status_label
 	)
@@ -101,8 +106,10 @@ func _setup_round_flow() -> void:
 # --- Board + tray -----------------------------------------------------------
 
 func _build_board() -> void:
-	for child in _board_grid.get_children():
-		child.queue_free()
+	# 코드가 만든 슬롯만 지운다. %BoardGrid에 장식 노드를 넣어도 유지된다.
+	for slot in _board_cells:
+		if is_instance_valid(slot):
+			slot.queue_free()
 	_board_cells.clear()
 	_board_grid.columns = RunManager.BOARD_COLS
 
@@ -137,8 +144,9 @@ func _refresh_board() -> void:
 
 
 func _refresh_tray() -> void:
-	for child in _roster_tray.get_children():
-		child.queue_free()
+	for chip in _tray_chips:
+		if is_instance_valid(chip):
+			chip.queue_free()
 	_tray_chips.clear()
 
 	var placed := RunManager.get_placed_owned_indices()
@@ -455,14 +463,12 @@ func _on_round_phase_changed(_phase: RoundPhase.Phase) -> void:
 	_sync_ui()
 
 
-func _on_floor_changed(floor: int, target: int) -> void:
-	_floor_label.text = "층: %d" % floor
-	_target_label.text = "목표: %d" % target
+# 헤더 라벨은 모두 _sync_ui()가 RunManager 상태에서 다시 읽어 쓴다.
+func _on_floor_changed(_floor: int, _target: int) -> void:
 	_sync_ui()
 
 
-func _on_score_changed(score: int) -> void:
-	_current_label.text = "점수: %d" % score
+func _on_score_changed(_score: int) -> void:
 	_sync_ui()
 
 
@@ -470,8 +476,7 @@ func _on_chips_changed(_chips: int) -> void:
 	_sync_ui()
 
 
-func _on_gold_changed(amount: int) -> void:
-	_gold_label.text = _format_currency_label(amount, RunManager.chips, RunManager.luck)
+func _on_gold_changed(_amount: int) -> void:
 	_sync_ui()
 
 
@@ -518,17 +523,14 @@ func _update_drag_enabled() -> void:
 
 
 func _update_target_progress() -> void:
-	var segments := _build_target_progress_segments(RunManager.current_score)
+	var segments := GoldCalculator.build_threshold_segments(
+		RunManager.current_score, RunManager.target_score
+	)
 	if segments.is_empty():
 		_apply_target_progress_segment(0, maxi(RunManager.target_score, 1), 0)
 		return
 
-	var last_segment: Dictionary = segments.back()
-	_apply_target_progress_segment(
-		int(last_segment["color_index"]),
-		int(last_segment["max_value"]),
-		int(last_segment["value"]),
-	)
+	_apply_target_progress_segment_dict(segments.back())
 
 
 func _animate_target_progress(from_score: int, to_score: int) -> void:
@@ -539,20 +541,17 @@ func _animate_target_progress(from_score: int, to_score: int) -> void:
 		_update_target_progress()
 		return
 
-	var segments := _build_target_progress_segments(to_score)
-	var start_segment := _build_target_progress_segment(from_score)
+	var target := RunManager.target_score
+	var segments := GoldCalculator.build_threshold_segments(to_score, target)
+	var start_segment := GoldCalculator.find_threshold_segment(from_score, target)
 	if start_segment.is_empty():
-		_apply_target_progress_segment(0, maxi(RunManager.target_score, 1), 0)
+		_apply_target_progress_segment(0, maxi(target, 1), 0)
 	else:
-		_apply_target_progress_segment(
-			int(start_segment["color_index"]),
-			int(start_segment["max_value"]),
-			int(start_segment["value"]),
-		)
+		_apply_target_progress_segment_dict(start_segment)
 
 	for i in segments.size():
 		var segment: Dictionary = segments[i]
-		var color_index := int(segment["color_index"])
+		var color_index := int(segment["index"])
 		var max_value := int(segment["max_value"])
 		var lower := int(segment["lower"])
 		var upper := int(segment["upper"])
@@ -580,7 +579,7 @@ func _animate_target_progress(from_score: int, to_score: int) -> void:
 		await _target_progress_tween.finished
 
 		if from_score < upper and to_score >= upper:
-			_show_target_reward_float(color_index + 1)
+			_show_target_reward_float(GoldCalculator.threshold_step_reward(color_index))
 
 		if end_value >= max_value and i < segments.size() - 1:
 			await get_tree().create_timer(
@@ -588,71 +587,32 @@ func _animate_target_progress(from_score: int, to_score: int) -> void:
 			).timeout
 
 
-func _build_target_progress_segments(score: int) -> Array[Dictionary]:
-	var target := maxi(RunManager.target_score, 1)
-	if score <= 0:
-		return []
-
-	var segments: Array[Dictionary] = []
-	var lower := 0
-	var upper := target
-	var color_index := 0
-	while lower < score and segments.size() < TARGET_PROGRESS_MAX_SEGMENTS:
-		var segment_max := maxi(upper - lower, 1)
-		var segment_value := clampi(score - lower, 0, segment_max)
-		segments.append({
-			"color_index": color_index,
-			"lower": lower,
-			"upper": upper,
-			"max_value": segment_max,
-			"value": segment_value,
-		})
-
-		lower = upper
-		upper = int(round(float(upper) * GoldCalculator.DEFAULT_THRESHOLD_RATIO))
-		if upper <= lower:
-			upper = lower + target
-		color_index += 1
-
-	return segments
-
-
-func _build_target_progress_segment(score: int) -> Dictionary:
-	var target := maxi(RunManager.target_score, 1)
-	var lower := 0
-	var upper := target
-	var color_index := 0
-	var clamped_score := maxi(score, 0)
-	while color_index < TARGET_PROGRESS_MAX_SEGMENTS:
-		var segment_max := maxi(upper - lower, 1)
-		var segment_value := clampi(clamped_score - lower, 0, segment_max)
-		if clamped_score <= upper or color_index == TARGET_PROGRESS_MAX_SEGMENTS - 1:
-			return {
-				"color_index": color_index,
-				"lower": lower,
-				"upper": upper,
-				"max_value": segment_max,
-				"value": segment_value,
-			}
-
-		lower = upper
-		upper = int(round(float(upper) * GoldCalculator.DEFAULT_THRESHOLD_RATIO))
-		if upper <= lower:
-			upper = lower + target
-		color_index += 1
-	return {}
+func _apply_target_progress_segment_dict(segment: Dictionary) -> void:
+	_apply_target_progress_segment(
+		int(segment["index"]),
+		int(segment["max_value"]),
+		int(segment["value"]),
+	)
 
 
 func _apply_target_progress_segment(color_index: int, max_value: int, value: int) -> void:
 	_target_progress_bar.max_value = float(maxi(max_value, 1))
 	_set_target_progress_value(float(value))
-	var fill_style := StyleBoxFlat.new()
-	fill_style.bg_color = TARGET_PROGRESS_COLORS[color_index % TARGET_PROGRESS_COLORS.size()]
-	fill_style.corner_radius_top_left = 6
-	fill_style.corner_radius_top_right = 6
-	fill_style.corner_radius_bottom_right = 6
-	fill_style.corner_radius_bottom_left = 6
+	if target_progress_colors.is_empty():
+		return
+	var fill_style := _duplicate_progress_fill_style()
+	fill_style.bg_color = target_progress_colors[color_index % target_progress_colors.size()]
 	_target_progress_bar.add_theme_stylebox_override("fill", fill_style)
+
+
+# 색만 갈아끼우고 모서리·테두리는 씬에서 정한 값을 그대로 쓴다.
+func _duplicate_progress_fill_style() -> StyleBoxFlat:
+	if _progress_fill_base != null:
+		return _progress_fill_base.duplicate() as StyleBoxFlat
+
+	var fallback := StyleBoxFlat.new()
+	fallback.set_corner_radius_all(6)
+	return fallback
 
 
 func _set_target_progress_value(value: float) -> void:

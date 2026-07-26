@@ -31,11 +31,16 @@ var _dragging := false
 var _drag_enabled := true
 var _locked := false
 var _press_pending := false
+var _base_style: StyleBoxFlat
 
 
 func _ready() -> void:
-	custom_minimum_size = SLOT_SIZE
+	if custom_minimum_size == Vector2.ZERO:
+		custom_minimum_size = SLOT_SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	# 오버라이드를 걸기 전에 씬·Theme의 panel 스타일을 기억해 둔다. 상태 색은
+	# 이 사본 위에 얹으므로 에디터에서 바꾼 모서리·여백·테두리 두께가 유지된다.
+	_base_style = get_theme_stylebox("panel") as StyleBoxFlat
 	_apply_style()
 
 
@@ -201,26 +206,50 @@ func _set_dragging(on: bool) -> void:
 
 
 func _apply_style() -> void:
-	var style := StyleBoxFlat.new()
-	style.bg_color = NORMAL_BG
-	style.border_color = NORMAL_BORDER
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	style.content_margin_left = 6
-	style.content_margin_top = 6
-	style.content_margin_right = 6
-	style.content_margin_bottom = 6
+	var accent := _build_accent_style()
+	if accent == null:
+		remove_theme_stylebox_override("panel")
+		return
+	add_theme_stylebox_override("panel", accent)
 
+
+# 기본 상태에서는 null을 돌려줘 씬·Theme 스타일을 그대로 쓰게 한다.
+func _build_accent_style() -> StyleBoxFlat:
+	var bg: Color
+	var border: Color
+	var border_width := 2
 	if _locked:
-		style.bg_color = LOCKED_BG
-		style.border_color = LOCKED_BORDER
+		bg = LOCKED_BG
+		border = LOCKED_BORDER
 	elif _selected:
-		style.bg_color = SELECTED_BG
-		style.border_color = SELECTED_BORDER
-		style.set_border_width_all(3)
+		bg = SELECTED_BG
+		border = SELECTED_BORDER
+		border_width = 3
 	elif _drop_hovered:
-		style.bg_color = DROP_BG
-		style.border_color = DROP_BORDER
-		style.set_border_width_all(3)
+		bg = DROP_BG
+		border = DROP_BORDER
+		border_width = 3
+	else:
+		return null
 
-	add_theme_stylebox_override("panel", style)
+	var style := _duplicate_base_style()
+	style.bg_color = bg
+	style.border_color = border
+	style.set_border_width_all(border_width)
+	return style
+
+
+func _duplicate_base_style() -> StyleBoxFlat:
+	if _base_style != null:
+		return _base_style.duplicate() as StyleBoxFlat
+
+	var fallback := StyleBoxFlat.new()
+	fallback.bg_color = NORMAL_BG
+	fallback.border_color = NORMAL_BORDER
+	fallback.set_border_width_all(2)
+	fallback.set_corner_radius_all(6)
+	fallback.content_margin_left = 6
+	fallback.content_margin_top = 6
+	fallback.content_margin_right = 6
+	fallback.content_margin_bottom = 6
+	return fallback

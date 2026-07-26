@@ -9,16 +9,25 @@ const NOTCHES: Array[Dictionary] = [
 	{"label": "x2", "speed": 2.0},
 	{"label": "x3", "speed": 3.0},
 ]
-const TRACK_COLOR := Color(0.2, 0.17, 0.14, 1.0)
-const TRACK_FILL_COLOR := Color(0.78, 0.62, 0.28, 1.0)
-const KNOB_COLOR := Color(0.93, 0.88, 0.76, 1.0)
-const KNOB_BORDER_COLOR := Color(0.36, 0.28, 0.16, 1.0)
-const LABEL_COLOR := Color(0.18, 0.15, 0.12, 1.0)
-const DISABLED_ALPHA := 0.45
-const TRACK_WIDTH := 14.0
-const KNOB_RADIUS := 22.0
-const TRACK_LEFT := 42.0
-const TRACK_TOP := 18.0
+const DEFAULT_SIZE := Vector2(260, 160)
+
+# 레버는 전부 _draw()로 그리므로 Theme가 먹지 않는다. 대신 색·치수를 인스펙터에
+# 노출해 에디터에서 조정할 수 있게 한다.
+@export_group("Appearance")
+@export var track_color := Color(0.2, 0.17, 0.14, 1.0)
+@export var track_fill_color := Color(0.78, 0.62, 0.28, 1.0)
+@export var knob_color := Color(0.93, 0.88, 0.76, 1.0)
+@export var knob_border_color := Color(0.36, 0.28, 0.16, 1.0)
+@export var label_color := Color(0.18, 0.15, 0.12, 1.0)
+@export var label_font_size := 18
+@export var disabled_alpha := 0.45
+
+@export_group("Layout")
+@export var track_width := 14.0
+@export var track_left := 42.0
+@export var track_top := 18.0
+@export var knob_radius := 22.0
+@export var label_offset_x := 20.0
 
 var _notch_index := 0
 var _dragging := false
@@ -26,14 +35,15 @@ var _disabled := false
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(260, 160)
+	if custom_minimum_size == Vector2.ZERO:
+		custom_minimum_size = DEFAULT_SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_process(true)
 
 
 func set_disabled(disabled: bool) -> void:
 	_disabled = disabled
-	modulate.a = DISABLED_ALPHA if _disabled else 1.0
+	modulate.a = disabled_alpha if _disabled else 1.0
 	if _disabled:
 		_set_notch(0)
 	queue_redraw()
@@ -80,30 +90,29 @@ func _draw() -> void:
 	var track_rect := _track_rect()
 	var knob_center := _knob_center(_notch_index)
 	var font := get_theme_default_font()
-	var font_size := 18
 
-	draw_rect(track_rect, TRACK_COLOR, true)
+	draw_rect(track_rect, track_color, true)
 	var fill_height := maxf(0.0, knob_center.y - track_rect.position.y)
 	if fill_height > 0:
-		draw_rect(Rect2(track_rect.position, Vector2(track_rect.size.x, fill_height)), TRACK_FILL_COLOR, true)
+		draw_rect(Rect2(track_rect.position, Vector2(track_rect.size.x, fill_height)), track_fill_color, true)
 
 	for i in NOTCHES.size():
 		var center := _knob_center(i)
-		draw_circle(Vector2(track_rect.get_center().x, center.y), 3.0, LABEL_COLOR)
+		draw_circle(Vector2(track_rect.get_center().x, center.y), 3.0, label_color)
 		var label := str(NOTCHES[i]["label"])
-		var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+		var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, label_font_size)
 		draw_string(
 			font,
-			Vector2(track_rect.position.x + track_rect.size.x + 20.0, center.y + text_size.y * 0.35),
+			Vector2(track_rect.position.x + track_rect.size.x + label_offset_x, center.y + text_size.y * 0.35),
 			label,
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1,
-			font_size,
-			LABEL_COLOR
+			label_font_size,
+			label_color
 		)
 
-	draw_circle(knob_center, KNOB_RADIUS, KNOB_COLOR)
-	draw_circle(knob_center, KNOB_RADIUS, KNOB_BORDER_COLOR, false, 4.0)
+	draw_circle(knob_center, knob_radius, knob_color)
+	draw_circle(knob_center, knob_radius, knob_border_color, false, 4.0)
 
 
 func _set_notch(next_index: int) -> void:
@@ -129,6 +138,6 @@ func _knob_center(index: int) -> Vector2:
 
 func _track_rect() -> Rect2:
 	return Rect2(
-		Vector2(TRACK_LEFT, TRACK_TOP),
-		Vector2(TRACK_WIDTH, maxf(size.y - TRACK_TOP * 2.0, 1.0))
+		Vector2(track_left, track_top),
+		Vector2(track_width, maxf(size.y - track_top * 2.0, 1.0))
 	)

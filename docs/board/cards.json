@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-18",
+  "updated": "2026-07-26",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -134,6 +134,14 @@
       "column": "review",
       "file": "cards/specs-hub.md",
       "tags": ["문서", "Pages"]
+    },
+    {
+      "id": "ui-editor-friendly",
+      "title": "에디터에서 UI 편집 가능하게",
+      "description": "코드의 스타일·크기 덮어쓰기 제거, 재사용 UI를 .tscn으로 분리, UI에서 규칙 계산 분리.",
+      "column": "review",
+      "file": "cards/ui-editor-friendly.md",
+      "tags": ["UI", "리팩터"]
     },
     {
       "id": "godot-project-root",
@@ -310,6 +318,46 @@
       "column": "ideas",
       "file": "cards/face-preview-vertical.md",
       "tags": ["Preview", "UI"]
+    },
+    {
+      "id": "run-scene-hud-split",
+      "title": "run_scene HUD 분리",
+      "description": "run_scene.gd(~700줄)에서 표시·입력을 HUD/presenter로 분리.",
+      "column": "ideas",
+      "file": "cards/run-scene-hud-split.md",
+      "tags": ["UI", "리팩터"]
+    },
+    {
+      "id": "sidebar-layout-coupling",
+      "title": "사이드바·오버레이 레이아웃 결합 해제",
+      "description": "ScoreOverlay offset / MarginContainer margin 하드코딩 제거.",
+      "column": "ideas",
+      "file": "cards/sidebar-layout-coupling.md",
+      "tags": ["UI", "레이아웃"]
+    },
+    {
+      "id": "run-scene-overlay-rename",
+      "title": "run_scene 오버레이 변수명 정리",
+      "description": "_popup_overlay ↔ ScoreOverlay 이름 엇갈림 수정.",
+      "column": "ideas",
+      "file": "cards/run-scene-overlay-rename.md",
+      "tags": ["UI", "정리"]
+    },
+    {
+      "id": "ui-dead-code-cleanup",
+      "title": "UI presenter 죽은 코드 정리",
+      "description": "미사용 play/play_reroll·presentation_finished·setup 6번째 인자.",
+      "column": "ideas",
+      "file": "cards/ui-dead-code-cleanup.md",
+      "tags": ["UI", "정리"]
+    },
+    {
+      "id": "roll-lever-tool-preview",
+      "title": "RollLever 에디터 미리보기",
+      "description": "@export 색·치수를 @tool로 에디터에서도 보이게.",
+      "column": "ideas",
+      "file": "cards/roll-lever-tool-preview.md",
+      "tags": ["UI", "에디터"]
     }
   ]
 }
