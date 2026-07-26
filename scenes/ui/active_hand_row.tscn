@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://active_hand_row_v01"]
+
+[ext_resource type="Script" path="res://scripts/ui/active_hand_row.gd" id="1_row"]
+
+[node name="ActiveHandRow" type="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+script = ExtResource("1_row")
+
+[node name="HandLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.18, 0.15, 0.12, 1)
+theme_override_font_sizes/font_size = 15
+clip_text = true
+
+[node name="ScoreLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.42, 0.08, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 2

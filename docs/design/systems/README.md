@@ -4,6 +4,7 @@
 
 | 문서 | 요약 |
 |------|------|
+| [ui-editor-friendly.md](ui-editor-friendly.md) | **UI 편집 규칙** — 에디터에서 재배치·꾸미기, 이름 유지할 핵심 노드 |
 | [hand-scoring-v2.md](hand-scoring-v2.md) | **족보 v2 정본** — 밸런스·bundle tier, 29종 · `hand_calculator.gd` |
 | [dice-resources.md](dice-resources.md) | **주사위 리소스·면 정본** — `DiceResource`, `NumberFace`/`SpecialFace`, `FaceProperty`, 해석·UI |
 | [dice-catalog.md](dice-catalog.md) | **주사위 카탈로그** — JSON 6면 정의, id 기반 로스터·상점 |
@@ -33,6 +34,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-26 | `ui-editor-friendly.md` 추가 — UI 편집 규칙·핵심 노드 이름 |
 | 2026-06-09 | `gold-economy.md` 추가 — 칩/골드 이원화·획득 공식 v1 |
 | 2026-06-09 | `dice-catalog.md` 추가 — JSON 카탈로그·DiceCatalogService |
 | 2026-06-08 | `dice-roster-shop.md` 추가 — 보유 주사위·상점 골격 |

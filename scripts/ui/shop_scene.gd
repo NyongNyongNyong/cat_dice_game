@@ -99,6 +99,6 @@ func _on_continue_pressed() -> void:
 	GameFlow.show_run()
 
 
-func _on_gold_changed(amount: int) -> void:
-	_gold_label.text = "골드: %d" % amount
+# 골드 라벨은 _refresh_shop() → _sync_header()가 다시 쓴다.
+func _on_gold_changed(_amount: int) -> void:
 	_refresh_shop()

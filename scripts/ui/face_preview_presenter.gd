@@ -1,10 +1,10 @@
 extends Node
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
+const TOOLTIP_SCENE := preload("res://scenes/ui/face_preview_tooltip.tscn")
+const FacePreviewTooltipScript := preload("res://scripts/ui/face_preview_tooltip.gd")
 const TOOLTIP_CURSOR_GAP := Vector2(12.0, 10.0)
 const MINI_DICE_SIZE := 32.0
-const FACE_SEPARATION := 4
-const CONTENT_SEPARATION := 6
 const DESC_LINE_HEIGHT := 16.0
 const DESC_FONT_SIZE := 12
 const PANEL_PADDING := 4.0
@@ -54,45 +54,12 @@ func hide_preview() -> void:
 
 
 func _build_tooltip() -> void:
-	_tooltip = PanelContainer.new()
-	_tooltip.visible = false
-	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_tooltip.z_index = 12
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.12, 0.11, 0.1, 0.92)
-	style.border_color = Color(0.75, 0.68, 0.5, 1.0)
-	style.set_border_width_all(int(BORDER_WIDTH))
-	style.set_corner_radius_all(4)
-	style.content_margin_left = PANEL_PADDING
-	style.content_margin_top = PANEL_PADDING
-	style.content_margin_right = PANEL_PADDING
-	style.content_margin_bottom = PANEL_PADDING
-	_tooltip.add_theme_stylebox_override("panel", style)
-
-	_content = VBoxContainer.new()
-	_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_content.add_theme_constant_override("separation", CONTENT_SEPARATION)
-	_content.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_content.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-
-	_faces_row = HBoxContainer.new()
-	_faces_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_faces_row.add_theme_constant_override("separation", FACE_SEPARATION)
-	_faces_row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_faces_row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-
-	_desc_box = VBoxContainer.new()
-	_desc_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_desc_box.add_theme_constant_override("separation", 2)
-	_desc_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_desc_box.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	_desc_box.visible = false
-
-	_content.add_child(_faces_row)
-	_content.add_child(_desc_box)
-	_tooltip.add_child(_content)
-	_popup_layer.add_child(_tooltip)
+	var tooltip: FacePreviewTooltipScript = TOOLTIP_SCENE.instantiate()
+	_popup_layer.add_child(tooltip)
+	_tooltip = tooltip
+	_content = tooltip.content
+	_faces_row = tooltip.faces_row
+	_desc_box = tooltip.desc_box
 
 
 func _rebuild_face_row(
@@ -191,13 +158,18 @@ func _fit_and_position_tooltip() -> void:
 			mini.custom_minimum_size = mini_size
 			mini.size = mini_size
 
-	# 콘텐츠 크기는 면 개수·설명 줄로 직접 계산한다.
-	var faces_width := MINI_DICE_SIZE * count + FACE_SEPARATION * maxi(count - 1, 0)
+	# 콘텐츠 크기는 면 개수·설명 줄로 직접 계산한다. 간격은 씬에서 정한 값을
+	# 읽어와, 에디터에서 separation을 바꿔도 계산이 따라간다.
+	var face_separation := float(_faces_row.get_theme_constant("separation"))
+	var content_separation := float(_content.get_theme_constant("separation"))
+	var desc_separation := float(_desc_box.get_theme_constant("separation"))
+
+	var faces_width := MINI_DICE_SIZE * count + face_separation * maxi(count - 1, 0)
 	var desc_count := _desc_box.get_child_count() if _desc_box.visible else 0
 	var desc_height := 0.0
 	var desc_width := 0.0
 	if desc_count > 0:
-		desc_height = DESC_LINE_HEIGHT * desc_count + 2.0 * maxi(desc_count - 1, 0)
+		desc_height = DESC_LINE_HEIGHT * desc_count + desc_separation * maxi(desc_count - 1, 0)
 		# 설명 줄이 길 수 있어 면 행보다 넓게 잡는다.
 		desc_width = maxf(faces_width, 220.0)
 		_desc_box.custom_minimum_size = Vector2(desc_width, desc_height)
@@ -209,7 +181,7 @@ func _fit_and_position_tooltip() -> void:
 	var content_width := maxf(faces_width, desc_width)
 	var content_height := MINI_DICE_SIZE
 	if desc_count > 0:
-		content_height += CONTENT_SEPARATION + desc_height
+		content_height += content_separation + desc_height
 
 	_faces_row.custom_minimum_size = Vector2(faces_width, MINI_DICE_SIZE)
 	_faces_row.size = Vector2(faces_width, MINI_DICE_SIZE)

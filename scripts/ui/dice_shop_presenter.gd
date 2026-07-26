@@ -3,8 +3,8 @@ extends Node
 signal pending_changed(count: int, cost: int)
 
 const CatalogService := preload("res://scripts/core/dice_catalog_service.gd")
-const ShopOfferDieScene := preload("res://scripts/ui/shop_offer_die.gd")
-const ShopPoolCellScript := preload("res://scripts/ui/shop_pool_cell.gd")
+const SHOP_OFFER_DIE_SCENE := preload("res://scenes/ui/shop_offer_die.tscn")
+const SHOP_POOL_CELL_SCENE := preload("res://scenes/ui/shop_pool_cell.tscn")
 
 const POOL_CELLS := 8
 const POOL_COLS := 4
@@ -17,6 +17,7 @@ var _hover_presenter: Node
 var _pending: Dictionary = {}
 var _owned_count := 0
 var _pool_cells: Array[Control] = []
+var _offer_cards: Array[Control] = []
 
 
 func setup(
@@ -72,8 +73,11 @@ func _prune_invalid_pending() -> void:
 
 
 func _rebuild_shop_dice(offers: Array[Dictionary]) -> void:
-	for child in _shop_dice_row.get_children():
-		child.queue_free()
+	# 코드가 만든 카드만 지운다. %ShopDiceRow에 장식 노드를 두어도 유지된다.
+	for card in _offer_cards:
+		if is_instance_valid(card):
+			card.queue_free()
+	_offer_cards.clear()
 
 	var catalog = CatalogService.shared()
 	for offer in offers:
@@ -81,23 +85,26 @@ func _rebuild_shop_dice(offers: Array[Dictionary]) -> void:
 		if dice_id.is_empty() or not catalog.has_dice(dice_id):
 			continue
 
-		var card := ShopOfferDieScene.new()
+		var card: Control = SHOP_OFFER_DIE_SCENE.instantiate()
 		_shop_dice_row.add_child(card)
 		card.configure(catalog.get_dice(dice_id), dice_id, true)
 		card.mouse_entered.connect(_on_offer_hovered.bind(card))
 		card.mouse_exited.connect(_on_dice_hover_exited)
+		_offer_cards.append(card)
 
 
 func _rebuild_pool(roster: RefCounted) -> void:
-	for child in _pool_grid.get_children():
-		child.queue_free()
+	# 코드가 만든 칸만 지운다. %PoolGrid에 장식 노드를 두어도 유지된다.
+	for existing_cell in _pool_cells:
+		if is_instance_valid(existing_cell):
+			existing_cell.queue_free()
 	_pool_cells.clear()
 
 	var catalog = CatalogService.shared()
 	var owned: Array = roster.get_owned_dice()
 
 	for cell in POOL_CELLS:
-		var pool_cell := ShopPoolCellScript.new()
+		var pool_cell: Control = SHOP_POOL_CELL_SCENE.instantiate()
 		pool_cell.set_cell_index(cell)
 		_pool_grid.add_child(pool_cell)
 		pool_cell.offer_dropped.connect(_on_offer_dropped)

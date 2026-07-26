@@ -70,6 +70,16 @@
 - [x] Hover 시 특수면 설명도 팝업에 표시 (`hover-special-face-desc`) — 플레이·상점
 - [ ] 주사위 설명 팝업 **디테일 개편**: 면을 세로 리스트로 나열하고 각 행 오른쪽에 설명을 적는 형태 (현재 가로 미니 주사위 → 세로 리스트+설명)
 
+### UI 편집·잔여 (ui-editor-friendly 이후)
+
+> 스펙: [design/systems/ui-editor-friendly.md](design/systems/ui-editor-friendly.md) · 칸반 `ideas`
+
+- [ ] `run_scene` HUD 분리 (`run-scene-hud-split`) — ~700줄 표시·입력 분리
+- [ ] 사이드바·오버레이 레이아웃 결합 해제 (`sidebar-layout-coupling`) — offset/margin 하드코딩
+- [ ] 오버레이 변수명 정리 (`run-scene-overlay-rename`) — ScoreOverlay / PopupOverlay
+- [ ] UI presenter 죽은 코드 정리 (`ui-dead-code-cleanup`)
+- [ ] RollLever `@tool` 에디터 미리보기 (`roll-lever-tool-preview`)
+
 ---
 
 ## 장기
@@ -83,6 +93,7 @@
 
 | 날짜 | 변경 |
 |------|------|
+| 2026-07-26 | ui-editor-friendly 잔여 5건 ideas 카드 + 백로그 섹션 |
 | 2026-07-18 | 숫자합×족보합 UI 제거·주사위 설명 팝업 세로 리스트 개편 티켓 추가 |
 | 2026-07-18 | 상점 주사위 교체가 다음 층에 유지 안 되는 버그 티켓 추가 |
 | 2026-07-17 | Godot 루트=저장소 루트 (`game/` 제거, Git 셸→`tools/`) |

@@ -3,6 +3,12 @@ extends PanelContainer
 
 const DICE_SCENE := preload("res://scenes/dice/dice.tscn")
 const CELL_SIZE := Vector2(64, 64)
+const OWNED_BG := Color(0.9, 0.87, 0.78, 1.0)
+const OWNED_BORDER := Color(0.68, 0.61, 0.48, 1.0)
+const PENDING_BG := Color(0.86, 0.95, 0.84, 1.0)
+const PENDING_BORDER := Color(0.36, 0.68, 0.32, 1.0)
+const DROP_BG := Color(0.96, 0.91, 0.75, 1.0)
+const DROP_BORDER := Color(0.88, 0.58, 0.14, 1.0)
 
 signal offer_dropped(cell_index: int, dice_id: String)
 signal cell_clicked(cell_index: int)
@@ -11,23 +17,24 @@ signal cell_unhovered
 
 enum State { EMPTY, OWNED, PENDING }
 
+@onready var _holder: CenterContainer = %DiceHolder
+
 var cell_index: int = -1
 
 var _state: int = State.EMPTY
 var _drop_hovered := false
 var _dice_view: Control
-var _holder: CenterContainer
 var _resource: Resource
 var _press_pending := false
+var _base_style: StyleBoxFlat
 
 
 func _ready() -> void:
-	custom_minimum_size = CELL_SIZE
+	if custom_minimum_size == Vector2.ZERO:
+		custom_minimum_size = CELL_SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_holder = CenterContainer.new()
-	_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_holder.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(_holder)
+	# 빈 칸 스타일은 씬에서 온다. 상태 색은 그 사본 위에 얹는다.
+	_base_style = get_theme_stylebox("panel") as StyleBoxFlat
 	_apply_style()
 
 
@@ -117,25 +124,47 @@ func _set_drop_hovered(on: bool) -> void:
 
 
 func _apply_style() -> void:
-	var style := StyleBoxFlat.new()
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
+	var accent := _build_accent_style()
+	if accent == null:
+		remove_theme_stylebox_override("panel")
+		return
+	add_theme_stylebox_override("panel", accent)
 
-	match _state:
-		State.OWNED:
-			style.bg_color = Color(0.9, 0.87, 0.78, 1.0)
-			style.border_color = Color(0.68, 0.61, 0.48, 1.0)
-		State.PENDING:
-			style.bg_color = Color(0.86, 0.95, 0.84, 1.0)
-			style.border_color = Color(0.36, 0.68, 0.32, 1.0)
-			style.set_border_width_all(3)
-		_:
-			style.bg_color = Color(0.86, 0.84, 0.78, 0.5)
-			style.border_color = Color(0.66, 0.62, 0.54, 0.7)
+
+# 빈 칸(기본 상태)에서는 null을 돌려줘 씬·Theme 스타일을 그대로 쓰게 한다.
+func _build_accent_style() -> StyleBoxFlat:
+	var bg: Color
+	var border: Color
+	var border_width := 2
 
 	if _drop_hovered:
-		style.bg_color = Color(0.96, 0.91, 0.75, 1.0)
-		style.border_color = Color(0.88, 0.58, 0.14, 1.0)
-		style.set_border_width_all(3)
+		bg = DROP_BG
+		border = DROP_BORDER
+		border_width = 3
+	else:
+		match _state:
+			State.OWNED:
+				bg = OWNED_BG
+				border = OWNED_BORDER
+			State.PENDING:
+				bg = PENDING_BG
+				border = PENDING_BORDER
+				border_width = 3
+			_:
+				return null
 
-	add_theme_stylebox_override("panel", style)
+	var style := _duplicate_base_style()
+	style.bg_color = bg
+	style.border_color = border
+	style.set_border_width_all(border_width)
+	return style
+
+
+func _duplicate_base_style() -> StyleBoxFlat:
+	if _base_style != null:
+		return _base_style.duplicate() as StyleBoxFlat
+
+	var fallback := StyleBoxFlat.new()
+	fallback.set_border_width_all(2)
+	fallback.set_corner_radius_all(6)
+	return fallback

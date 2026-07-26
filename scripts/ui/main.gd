@@ -5,6 +5,8 @@ const SHOP_SCENE := preload("res://scenes/game/shop_scene.tscn")
 
 @onready var _ui: Control = %UI
 
+var _current_scene: Control
+
 
 func _ready() -> void:
 	GameFlow.run_requested.connect(_show_run)
@@ -21,10 +23,12 @@ func _show_shop() -> void:
 
 
 func _swap_scene(packed: PackedScene) -> void:
-	for child in _ui.get_children():
-		child.queue_free()
+	# 직전에 띄운 씬만 정리한다. %UI에 배경·장식 노드를 같이 두어도 살아남는다.
+	if _current_scene != null and is_instance_valid(_current_scene):
+		_current_scene.queue_free()
 
 	var scene: Control = packed.instantiate()
+	_current_scene = scene
 	_ui.add_child(scene)
 	scene.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scene.set_offsets_preset(Control.PRESET_FULL_RECT)

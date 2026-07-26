@@ -39,6 +39,7 @@ var _active_hands_presenter: Node
 var _dice_values: Array[int] = []
 var _dice_faces: Array = []
 var _hand_steps_seen: Array[HandStep] = []
+var _spawned_popups: Array[Node] = []
 
 
 func setup(
@@ -266,7 +267,7 @@ func _play_focus_dice(indices: Array[int]) -> void:
 		_apply_face_to_dice(clone, idx)
 		clone.set_dimmed(false)
 		clone.set_highlighted(false)
-		_popup_layer.add_child(clone)
+		_add_popup(clone)
 
 		focus_items.append({
 			"index": idx,
@@ -293,9 +294,7 @@ func _play_focus_dice(indices: Array[int]) -> void:
 
 	for item in focus_items:
 		_show_dice_after_focus(item["original"], item["index"])
-		var clone: Control = item["clone"]
-		if is_instance_valid(clone):
-			clone.queue_free()
+		_remove_popup(item["clone"])
 
 
 func _hide_dice_for_focus(dice: Control) -> void:
@@ -402,7 +401,7 @@ func _show_points_popup(text: String, highlight_indices: Array[int], duration: f
 
 func _animate_popup(popup: Control, highlight_indices: Array[int], duration: float) -> void:
 	popup.modulate.a = 0.0
-	_popup_layer.add_child(popup)
+	_add_popup(popup)
 	await popup.get_tree().process_frame
 
 	var anchor := _anchor_above_dice(highlight_indices)
@@ -417,8 +416,7 @@ func _animate_popup(popup: Control, highlight_indices: Array[int], duration: flo
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(popup, "modulate:a", 0.0, duration).set_delay(duration * 0.25)
 	await tween.finished
-	if is_instance_valid(popup):
-		popup.queue_free()
+	_remove_popup(popup)
 
 
 func _scaled_duration(duration: float) -> float:
@@ -445,10 +443,24 @@ func _anchor_above_dice(indices: Array[int]) -> Vector2:
 	return _popup_layer.get_global_transform().affine_inverse() * center_top_global
 
 
+# 연출이 중간에 끊겼을 때의 뒷정리. 이 프리젠터가 띄운 노드만 지우므로
+# %ScoreOverlay 아래에 장식 노드나 AnimationPlayer를 두어도 살아남는다.
 func _clear_popups() -> void:
-	for child in _popup_layer.get_children():
-		if is_instance_valid(child):
-			child.queue_free()
+	for popup in _spawned_popups:
+		if is_instance_valid(popup):
+			popup.queue_free()
+	_spawned_popups.clear()
+
+
+func _add_popup(popup: Node) -> void:
+	_spawned_popups.append(popup)
+	_popup_layer.add_child(popup)
+
+
+func _remove_popup(popup: Node) -> void:
+	_spawned_popups.erase(popup)
+	if is_instance_valid(popup):
+		popup.queue_free()
 
 
 func _reset_score_board() -> void:

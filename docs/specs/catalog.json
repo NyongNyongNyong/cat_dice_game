@@ -251,6 +251,14 @@
           "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/godot-project-root.md"
         },
         {
+          "id": "ui-editor-friendly",
+          "title": "UI 편집 규칙",
+          "summary": "에디터에서 재배치·꾸미기 · 이름 유지할 핵심 노드.",
+          "tags": ["UI", "Godot"],
+          "path": "../design/systems/ui-editor-friendly.md",
+          "github": "https://github.com/team-sema/cat_dice_game/blob/main/docs/design/systems/ui-editor-friendly.md"
+        },
+        {
           "id": "repo-org-url",
           "title": "저장소 URL → team-sema",
           "summary": "조직 이전 후 GitHub · Pages 링크.",
