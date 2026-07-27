@@ -15,8 +15,9 @@
 현재 구현은 각 주사위 슬롯이 자신의 후보 면들을 짧은 간격으로 랜덤 표시하다가 최종 면으로 멈추는 방식이다.
 
 - 전체 굴림: 모든 주사위 슬롯을 동시에 순환 표시한다.
-- 단일 리롤: 선택된 주사위 슬롯만 순환 표시한다.
 - 마지막에는 반드시 확정된 `final_faces[index]`와 `final_values[index]`를 `Dice.set_face()`로 표시한다.
+
+단일 슬롯 리롤 연출 API(`play_reroll`)는 호출처가 없어 제거했다. 다시 필요하면 같은 `_play_face_cycle` 패턴으로 추가하면 된다.
 
 ## 교체 계약
 
@@ -26,13 +27,6 @@
 func set_dice_views(dice_views: Array[Control]) -> void
 
 func play_roll(
-	final_faces: Array,
-	final_values: Array[int],
-	candidate_faces_by_die: Array,
-) -> void
-
-func play_reroll(
-	dice_index: int,
 	final_faces: Array,
 	final_values: Array[int],
 	candidate_faces_by_die: Array,
@@ -49,20 +43,13 @@ await _roll_presenter.play_roll(
 	values,
 	_get_roll_face_candidates()
 )
-
-await _roll_presenter.play_reroll(
-	_round.last_rerolled_die_index,
-	_round.dice_faces,
-	values,
-	_get_roll_face_candidates()
-)
 ```
 
 ## 교체 방법
 
 ### 1. 기존 presenter 내부 구현 교체
 
-가장 단순한 방법이다. `roll_phase_presenter.gd` 안의 `play_roll()` / `play_reroll()` 내부만 바꾼다.
+가장 단순한 방법이다. `roll_phase_presenter.gd` 안의 `play_roll()` 내부만 바꾼다.
 
 적합한 예:
 
@@ -92,10 +79,11 @@ scripts/ui/roll_presenters/three_d_roll_presenter.gd
 
 - 최종 결과는 presenter가 새로 계산하지 않는다.
 - presenter는 전달받은 `final_faces`, `final_values`를 최종 표시한다.
-- `await play_roll()` / `await play_reroll()`이 끝난 뒤에는 특수면 이펙트와 점수 연출이 이어질 수 있어야 한다.
+- `await play_roll()`이 끝난 뒤에는 특수면 이펙트와 점수 연출이 이어질 수 있어야 한다.
 
 ## 변경 이력
 
 | 날짜 | 변경 |
 |------|------|
 | 2026-06-14 | 굴림 연출 교체 계약과 v0.1 랜덤 면 순환 방식 기록 |
+| 2026-07-27 | 미사용 `play` / `play_reroll` / `presentation_finished` 제거, 계약은 `play_roll`만 |

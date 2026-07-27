@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-26",
+  "updated": "2026-07-27",
   "source": "docs/board/cards/*.md",
   "columns": [
     {
@@ -347,7 +347,7 @@
       "id": "ui-dead-code-cleanup",
       "title": "UI presenter 죽은 코드 정리",
       "description": "미사용 play/play_reroll·presentation_finished·setup 6번째 인자.",
-      "column": "ideas",
+      "column": "review",
       "file": "cards/ui-dead-code-cleanup.md",
       "tags": ["UI", "정리"]
     },
