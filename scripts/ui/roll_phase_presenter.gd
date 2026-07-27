@@ -4,22 +4,17 @@ extends Node
 ## Roll phase presenter. v0.1 cycles visible faces; replace this node for richer dice motion later.
 
 const ROLL_DURATION := 0.6
-const REROLL_DURATION := 0.36
 const FACE_STEP_INTERVAL := 0.055
 const ROLL_SETTLE_SCALE := Vector2(1.08, 1.08)
 const ROLL_SETTLE_DURATION := 0.08
 
-signal presentation_finished()
-
-var _roll_slot: Control
 var _dice_row: Control
 var _dice_views: Array[Control] = []
 var _rng := RandomNumberGenerator.new()
 var _speed_multiplier := 1.0
 
 
-func setup(roll_slot: Control, dice_row: Control) -> void:
-	_roll_slot = roll_slot
+func setup(dice_row: Control) -> void:
 	_dice_row = dice_row
 	_rng.randomize()
 
@@ -32,16 +27,6 @@ func set_speed_multiplier(multiplier: float) -> void:
 	_speed_multiplier = maxf(multiplier, 1.0)
 
 
-func play(_values: Array[int]) -> void:
-	_roll_slot.visible = true
-	_dice_row.visible = false
-
-	await get_tree().create_timer(_scaled_duration(ROLL_DURATION)).timeout
-
-	_roll_slot.visible = false
-	presentation_finished.emit()
-
-
 func play_roll(
 	final_faces: Array,
 	final_values: Array[int],
@@ -51,26 +36,6 @@ func play_roll(
 	for i in _dice_views.size():
 		dice_indices.append(i)
 	await _play_face_cycle(dice_indices, final_faces, final_values, candidate_faces_by_die, _scaled_duration(ROLL_DURATION))
-	presentation_finished.emit()
-
-
-func play_reroll(
-	dice_index: int,
-	final_faces: Array,
-	final_values: Array[int],
-	candidate_faces_by_die: Array,
-) -> void:
-	if dice_index < 0 or dice_index >= _dice_views.size():
-		return
-	var dice_indices: Array[int] = [dice_index]
-	await _play_face_cycle(
-		dice_indices,
-		final_faces,
-		final_values,
-		candidate_faces_by_die,
-		_scaled_duration(REROLL_DURATION)
-	)
-	presentation_finished.emit()
 
 
 func _play_face_cycle(

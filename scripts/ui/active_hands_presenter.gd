@@ -36,10 +36,6 @@ func add_roll(evaluation: HandEvaluation) -> void:
 	_add_roll_row(_entry_count, _get_hand_label(evaluation), evaluation.total_score)
 
 
-func show_summaries(_summaries: Array[Dictionary]) -> void:
-	pass
-
-
 # 코드가 만든 행만 지운다. %ActiveHandsList에 장식 노드를 두어도 유지된다.
 func _clear_rows() -> void:
 	for row in _rows:

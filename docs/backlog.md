@@ -77,7 +77,7 @@
 - [ ] `run_scene` HUD 분리 (`run-scene-hud-split`) — ~700줄 표시·입력 분리
 - [ ] 사이드바·오버레이 레이아웃 결합 해제 (`sidebar-layout-coupling`) — offset/margin 하드코딩
 - [ ] 오버레이 변수명 정리 (`run-scene-overlay-rename`) — ScoreOverlay / PopupOverlay
-- [ ] UI presenter 죽은 코드 정리 (`ui-dead-code-cleanup`)
+- [ ] UI presenter 죽은 코드 정리 (`ui-dead-code-cleanup`) — review 대기
 - [ ] RollLever `@tool` 에디터 미리보기 (`roll-lever-tool-preview`)
 
 ---

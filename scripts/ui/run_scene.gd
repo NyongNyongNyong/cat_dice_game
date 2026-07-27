@@ -56,7 +56,6 @@ var _lever_speed_multiplier := 0.0
 var _lever_loop_running := false
 var _is_animating_target_progress := false
 var _target_progress_tween: Tween
-var _roll_slot: Control
 var _progress_fill_base: StyleBoxFlat
 
 
@@ -76,8 +75,7 @@ func _ready() -> void:
 
 
 func _setup_round_flow() -> void:
-	_roll_slot = _dice_row
-	_roll_presenter.setup(_roll_slot, _dice_row)
+	_roll_presenter.setup(_dice_row)
 	_active_hands_presenter.setup(_active_hands_list, _active_hands_empty_hint)
 	_score_presenter.setup(
 		_dice_row, _popup_overlay, _left_value, _right_value, _status_label
@@ -454,7 +452,6 @@ func _on_round_reset() -> void:
 	_left_value.text = "0"
 	_right_value.text = "0"
 	_left_value.scale = Vector2.ONE
-	_score_presenter.clear_active_hands()
 	_active_hands_presenter.clear()
 	_sync_ui()
 
