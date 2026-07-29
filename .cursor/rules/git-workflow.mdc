@@ -9,7 +9,7 @@ alwaysApply: true
 
 - **`main`**: 항상 실행·플레이 가능한 상태. 장기간 “반쯤 된 기능”만 두지 않는다.
 - **`develop` / `staging`**: 사용하지 않는다.
-- 작업: `feature/짧은-영문` (예: `feature/dice-roll`, `feature/shop-ui`) → 검증 후 `main`에 merge → 브랜치 삭제.
+- 작업: `feature/짧은-영문` (예: `feature/dice-roll`, `feature/shop-ui`) → 검증 후 `main`에 merge → **브랜치 삭제** (`push-feature` / `merge-feature` 기본). 유지할 때만 `--no-delete`.
 - **feature 범위**: 해당 slug 작업만 수정. 상세는 `feature-scope` rule.
 
 ## 커밋
