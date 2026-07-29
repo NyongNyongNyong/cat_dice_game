@@ -8,7 +8,7 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
 }
 cd "$ROOT"
 
-DELETE_BRANCH=0
+DELETE_BRANCH=1
 MSG=""
 FEATURE=""
 
@@ -25,10 +25,12 @@ while [[ $# -gt 0 ]]; do
 Usage: tools/push-feature.sh -m "feat: message" [options]
 
   feature/* 브랜치에서: 변경사항 커밋 → main 동기화 검사 → merge & push
+  머지 후 feature 브랜치는 기본 삭제. 유지하려면 --no-delete.
 
 Options:
   -m "message"     필수 (미커밋 변경이 있을 때). 이미 깨끗하면 생략 가능
-  -y, --yes        머지 후 feature 브랜치 삭제
+  -y, --yes        머지 후 feature 브랜치 삭제 (기본, 호환용)
+  --no-delete      머지 후 feature 브랜치 유지
   -h, --help
 
 Exit codes:
@@ -70,7 +72,7 @@ if [[ -n "$(git status --porcelain)" ]]; then
 fi
 
 MERGE_ARGS=()
-[[ "$DELETE_BRANCH" -eq 1 ]] && MERGE_ARGS+=(-y)
+[[ "$DELETE_BRANCH" -eq 0 ]] && MERGE_ARGS+=(--no-delete)
 MERGE_ARGS+=("$FEATURE")
 
 exec "$(dirname "$0")/merge-feature.sh" "${MERGE_ARGS[@]}"

@@ -30,7 +30,7 @@ chmod +x tools/push-feature.sh tools/merge-feature.sh 2>/dev/null || true
 ./tools/push-feature.sh -m "feat: short description"
 ```
 
-If the user requested branch deletion after merge, pass `-y`.
+머지 후 feature 브랜치는 **기본 삭제**된다. 유지하려면 `--no-delete`.
 
 7. If there are no uncommitted changes and commits are already ready, run `tools/push-feature.sh` without `-m` if the script supports that flow.
 

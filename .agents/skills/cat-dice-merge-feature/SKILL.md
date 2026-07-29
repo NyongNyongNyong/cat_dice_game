@@ -18,7 +18,7 @@ chmod +x tools/merge-feature.sh 2>/dev/null || true
 ./tools/merge-feature.sh [options] [feature/branch]
 ```
 
-If the user requested branch deletion after merge, pass `-y`.
+머지 후 feature 브랜치는 **기본 삭제**된다. 유지하려면 `--no-delete`.
 
 ## Stop Condition
 
